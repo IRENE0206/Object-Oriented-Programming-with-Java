@@ -1,4 +1,6 @@
 package edu.uob;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OXOController {
     OXOModel gameModel;
@@ -16,10 +18,18 @@ public class OXOController {
             gameModel.setCurrentPlayerNumber(1 - gameModel.getCurrentPlayerNumber());
         }
     }
-    public void addRow() {}
-    public void removeRow() {}
-    public void addColumn() {}
-    public void removeColumn() {}
+    public void addRow() {
+        gameModel.addRow();
+    }
+    public void removeRow() {
+        gameModel.removeRow();
+    }
+    public void addColumn() {
+        gameModel.addColumn();
+    }
+    public void removeColumn() {
+        gameModel.removeColumn();
+    }
     public void increaseWinThreshold() {}
     public void decreaseWinThreshold() {}
     public void reset() {
