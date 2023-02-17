@@ -85,6 +85,10 @@ public class OXOModel {
         gameDrawn = true;
     }
 
+    public void cancelGameDrawn() {
+        gameDrawn = false;
+    }
+
     public boolean isGameDrawn() {
         return gameDrawn;
     }
@@ -93,6 +97,7 @@ public class OXOModel {
         for (int i = 0; i < getNumberOfRows(); i++) {
             cells.get(i).add(null);
         }
+        cancelGameDrawn();
     }
 
     public void addRow() {
@@ -102,6 +107,7 @@ public class OXOModel {
             row.add(null);
         }
         cells.add(row);
+        cancelGameDrawn();
     }
 
     public void removeColumn() {
