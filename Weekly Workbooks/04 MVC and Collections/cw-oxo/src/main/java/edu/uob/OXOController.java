@@ -39,11 +39,16 @@ public class OXOController {
     public void removeColumn() {
         gameModel.removeColumn();
     }
-    public void increaseWinThreshold() {}
-    public void decreaseWinThreshold() {}
+    public void increaseWinThreshold() {
+        gameModel.setWinThreshold(gameModel.getWinThreshold() + 1);
+    }
+    public void decreaseWinThreshold() {
+        gameModel.setWinThreshold(gameModel.getWinThreshold() - 1);
+    }
     public void reset() {
         gameModel.setWinner(null);
         gameModel.cancelGameDrawn();
+        gameModel.setCurrentPlayerNumber(0);
         winDetected = false;
         for (int i = 0; i < gameModel.getNumberOfRows(); i++) {
             for (int j = 0; j < gameModel.getNumberOfColumns(); j++) {
@@ -53,16 +58,22 @@ public class OXOController {
     }
 
     private boolean winDetected() {
-        int rows = gameModel.getNumberOfRows();
-        int cols = gameModel.getNumberOfColumns();
+        int rowTotal = gameModel.getNumberOfRows();
+        int colTotal = gameModel.getNumberOfColumns();
         boolean allFilled = true;
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                if (gameModel.getCellOwner(i, j) == null) {
+        for (int i = 0; i < rowTotal; i++) {
+            for (int j = 0; j < colTotal; j++) {
+                OXOPlayer player = gameModel.getCellOwner(i, j);
+                if (player != null) {
+                    boolean horizontal = checkHorizontal(i, j, rowTotal, colTotal);
+                    boolean vertical = checkVertical(i, j, rowTotal, colTotal);
+                    boolean diagonal = checkDiagonal(i, j, rowTotal, colTotal);
+                    if (horizontal || vertical || diagonal) {
+                        gameModel.setWinner(player);
+                        return true;
+                    }
+                } else {
                     allFilled = false;
-                }
-                if (checkHorizontal(i, j, cols) || checkVertical(i, j, rows) || checkDiagonal(i, j, rows, cols)) {
-                    return true;
                 }
             }
         }
@@ -72,49 +83,46 @@ public class OXOController {
         return false;
     }
 
-    private boolean checkHorizontal(int rowIndex, int colIndex, int colTotal) {
-        if (colIndex + 3 > colTotal) {
-            return false;
-        }
-        return sameOwner(rowIndex, colIndex, rowIndex, colIndex + 1, rowIndex, colIndex + 2);
+    private boolean checkHorizontal(int row0, int col0, int rowTotal, int colTotal) {
+        return checkDir(row0, col0, 0, 1, rowTotal, colTotal);
     }
 
-    private boolean checkVertical(int rowIndex, int colIndex, int rowTotal) {
-        if (rowIndex + 3 > rowTotal) {
-            return false;
-        }
-        return sameOwner(rowIndex, colIndex, rowIndex + 1, colIndex, rowIndex + 2, colIndex);
+    private boolean checkVertical(int row0, int col0, int rowTotal, int colTotal) {
+        return checkDir(row0, col0, 1, 0, rowTotal, colTotal);
     }
 
-    private boolean checkDiagonal(int rowIndex, int colIndex, int rowTotal, int colTotal) {
-        if (rowIndex + 3 > rowTotal) {
-            return false;
-        }
-        boolean goLeft = false;
-        boolean goRight = false;
-        if (colIndex - 2 >= 0) {
-            goLeft = sameOwner(rowIndex, colIndex, rowIndex + 1, colIndex - 1, rowIndex + 2, colIndex - 2);
-        }
-        if (colIndex + 3 <= colTotal) {
-            goRight = sameOwner(rowIndex, colIndex, rowIndex + 1, colIndex + 1, rowIndex + 2, colIndex + 2);
-        }
-        return goLeft || goRight;
+    private boolean checkDiagonal(int row0, int col0, int rowTotal, int colTotal) {
+        return checkDiagonalGoDownLeft(row0, col0, rowTotal, colTotal) || checkDiagonalGoDownRight(row0, col0, rowTotal, colTotal);
+    }
+    private boolean checkDiagonalGoDownLeft(int row0, int col0, int rowTotal, int colTotal) {
+        return checkDir(row0, col0, 1, -1, rowTotal, colTotal);
     }
 
-    private boolean sameOwner(int row0, int col0, int row1, int col1, int row2, int col2) {
-        OXOPlayer p0 = gameModel.getCellOwner(row0, col0);
-        OXOPlayer p1 = gameModel.getCellOwner(row1, col1);
-        OXOPlayer p2 = gameModel.getCellOwner(row2, col2);
-        if (p0 == null || p1 == null || p2 == null) {
+    private boolean checkDiagonalGoDownRight(int row0, int col0, int rowTotal, int colTotal) {
+        return checkDir(row0, col0, 1, 1, rowTotal, colTotal);
+    }
+
+    private boolean checkDir(int row0, int col0, int rowFactor, int colFactor, int rowTotal, int colTotal) {
+        OXOPlayer player0 = gameModel.getCellOwner(row0, col0);
+        assert player0 != null;
+        int threshold = gameModel.getWinThreshold();
+        if (outOfRange(row0, rowTotal - 1, rowFactor, threshold) || outOfRange(col0, colTotal - 1, colFactor, threshold)) {
             return false;
         }
-        char c0 = p0.getPlayingLetter();
-        char c1 = p1.getPlayingLetter();
-        char c2 = p2.getPlayingLetter();
-        if (c0 == c1 && c1 == c2) {
-            gameModel.setWinner(p0);
-            return true;
+        char letter0 = player0.getPlayingLetter();
+        for (int i = 1; i < threshold; i++) {
+            int rowI = row0 + i * rowFactor;
+            int colI = col0 + i * colFactor;
+            OXOPlayer currOwner = gameModel.getCellOwner(rowI, colI);
+            if (currOwner == null || currOwner.getPlayingLetter() != letter0) {
+                return false;
+            }
         }
-        return false;
+        return true;
+    }
+
+    private boolean outOfRange(int startIndex, int maxIndex, int factor, int threshold) {
+        int endIndex = startIndex + factor * (threshold - 1);
+        return endIndex < 0 || endIndex > maxIndex;
     }
 }
