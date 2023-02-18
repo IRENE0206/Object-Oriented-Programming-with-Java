@@ -9,11 +9,12 @@ public class OXOModel {
     private int currentPlayerNumber;
     private OXOPlayer winner;
     private boolean gameDrawn;
+    private boolean winDetected;
     private int winThreshold;
 
     public OXOModel(int numberOfRows, int numberOfColumns, int winThresh) {
-        winThreshold = winThresh;
-        cells = new ArrayList<>(numberOfRows);
+        this.winThreshold = winThresh;
+        this.cells = new ArrayList<>(numberOfRows);
         for (int i = 0; i < numberOfRows; i++) {
             List<OXOPlayer> row = new ArrayList<>(numberOfColumns);
             for (int j = 0; j < numberOfColumns; j++) {
@@ -94,6 +95,9 @@ public class OXOModel {
     }
 
     public void addColumn() {
+        if (getNumberOfColumns() >= 9) {
+            return;
+        }
         for (int i = 0; i < getNumberOfRows(); i++) {
             cells.get(i).add(null);
         }
@@ -101,6 +105,9 @@ public class OXOModel {
     }
 
     public void addRow() {
+        if (getNumberOfRows() >= 9) {
+            return;
+        }
         int col = getNumberOfColumns();
         List<OXOPlayer> row = new ArrayList<>(col);
         for (int i = 0; i < col; i++) {
@@ -112,23 +119,41 @@ public class OXOModel {
 
     public void removeColumn() {
         int colIndex = getNumberOfColumns() - 1;
+        if (colIndex <= 0) {
+            return;
+        }
         for (int i = 0; i < getNumberOfRows(); i++) {
             if (cells.get(i).get(colIndex) != null) {
                 return;
             }
         }
         for (int i = 0; i < getNumberOfRows(); i++) {
-            cells.get(i).remove( colIndex);
+            cells.get(i).remove(colIndex);
         }
     }
 
     public void removeRow() {
         int rowIndex = getNumberOfRows() - 1;
+        if (rowIndex <= 0) {
+            return;
+        }
         for (int i = 0; i < getNumberOfColumns(); i++) {
             if (cells.get(rowIndex).get(i) != null) {
                 return;
             }
         }
         cells.remove(rowIndex);
+    }
+
+    public void setWinDetected() {
+        winDetected = true;
+    }
+
+    public boolean isWinDetected() {
+        return winDetected;
+    }
+
+    public void cancelWinDetected() {
+        winDetected = true;
     }
 }
