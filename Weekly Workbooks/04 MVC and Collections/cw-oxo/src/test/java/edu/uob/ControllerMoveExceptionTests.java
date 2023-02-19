@@ -67,4 +67,14 @@ class ControllerMoveExceptionTests {
         assertThrows(CellAlreadyTakenException.class, ()-> sendCommandToController("d1"), failedTestComment + "'d1'");
     }
 
+    @Test
+    void testCaseInsensitive() throws OXOMoveException {
+        String failedTestComment = "Cell identifier failed to be case-insensitive for command ";
+        sendCommandToController("a1");
+        assertThrows(CellAlreadyTakenException.class, ()-> sendCommandToController("A1"), failedTestComment + "'A1'");
+        sendCommandToController("D4");
+        assertThrows(CellAlreadyTakenException.class, ()-> sendCommandToController("d4"), failedTestComment + "'d4'");
+        sendCommandToController("A4");
+        assertThrows(CellAlreadyTakenException.class, ()-> sendCommandToController("A4"), failedTestComment + "'A4'");
+    }
 }
