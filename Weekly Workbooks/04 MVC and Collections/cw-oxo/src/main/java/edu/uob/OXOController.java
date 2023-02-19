@@ -32,7 +32,7 @@ public class OXOController {
             throw new InvalidIdentifierCharacterException(RowOrColumn.COLUMN, colChar);
         }
         int row = Character.toLowerCase(rowChar) - 'a';
-        if (row < 0 || row > gameModel.getNumberOfRows()) {
+        if (row < 0 || row >= gameModel.getNumberOfRows()) {
             throw new OutsideCellRangeException(RowOrColumn.ROW, row);
         }
         int col = Character.getNumericValue(colChar);
@@ -94,7 +94,7 @@ public class OXOController {
     public void decreaseWinThreshold() {
         if (!gameModel.isWinDetected()) {
             int threshold = gameModel.getWinThreshold();
-            if (threshold > 1) {
+            if (threshold > 3) {
                 gameModel.setWinThreshold(gameModel.getWinThreshold() - 1);
             }
         }
