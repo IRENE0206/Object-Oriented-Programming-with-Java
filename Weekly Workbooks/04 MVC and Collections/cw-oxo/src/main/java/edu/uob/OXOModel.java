@@ -22,7 +22,11 @@ public class OXOModel {
             }
             cells.add(row);
         }
-        players = new OXOPlayer[2];
+        this.currentPlayerNumber = 0;
+        this.players = new OXOPlayer[2];
+        this.gameDrawn = false;
+        this.winner = null;
+        this.winDetected = false;
     }
 
     public int getNumberOfPlayers() {
