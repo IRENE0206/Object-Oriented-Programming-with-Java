@@ -50,6 +50,22 @@ public class OXOController {
         gameModel.setCurrentPlayerNumber(gameModel.getNumberOfPlayers() - 1 - gameModel.getCurrentPlayerNumber());
     }
 
+    public void addPlayer(char letter) {
+        if (isUniqueLetter(letter)) {
+            OXOPlayer player = new OXOPlayer(letter);
+            gameModel.addPlayer(player);
+        }
+    }
+
+    private boolean isUniqueLetter(char letter) {
+        for (int i = 0; i < gameModel.getNumberOfPlayers(); i++) {
+            if (gameModel.getPlayerByNumber(i).getPlayingLetter() == letter) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public void addRow() {
         if (!gameModel.isWinDetected()) {
             gameModel.addRow();
@@ -77,7 +93,10 @@ public class OXOController {
     }
     public void decreaseWinThreshold() {
         if (!gameModel.isWinDetected()) {
-            gameModel.setWinThreshold(gameModel.getWinThreshold() - 1);
+            int threshold = gameModel.getWinThreshold();
+            if (threshold > 1) {
+                gameModel.setWinThreshold(gameModel.getWinThreshold() - 1);
+            }
         }
     }
     public void reset() {
