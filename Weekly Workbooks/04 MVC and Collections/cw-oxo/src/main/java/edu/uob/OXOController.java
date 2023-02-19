@@ -1,4 +1,5 @@
 package edu.uob;
+import edu.uob.OXOMoveException.*;
 
 public class OXOController {
     OXOModel gameModel;
@@ -11,17 +12,44 @@ public class OXOController {
         if (gameModel.isWinDetected()) {
             return;
         }
-        String com = command.toLowerCase();
-        int row = com.charAt(0) - 'a';
-        int col = Character.getNumericValue(com.charAt(1)) - 1;
-        if (gameModel.getCellOwner(row, col) == null) {
-            gameModel.setCellOwner(row, col, gameModel.getPlayerByNumber(gameModel.getCurrentPlayerNumber()));
-            gameModel.setCurrentPlayerNumber(gameModel.getNumberOfPlayers() - 1 - gameModel.getCurrentPlayerNumber());
-            if (winDetected()) {
-                gameModel.setWinDetected();
-            }
+        validateMove(command);
+        if (winDetected()) {
+            gameModel.setWinDetected();
         }
     }
+
+    private void validateMove(String command) throws OXOMoveException {
+        int length = command.length();
+        if (length != 2) {
+            throw new InvalidIdentifierLengthException(length);
+        }
+        char rowChar = command.charAt(0);
+        if (!Character.isLetter(rowChar)) {
+            throw new InvalidIdentifierCharacterException(RowOrColumn.ROW, rowChar);
+        }
+        char colChar = command.charAt(1);
+        if (!Character.isDigit(colChar)) {
+            throw new InvalidIdentifierCharacterException(RowOrColumn.COLUMN, colChar);
+        }
+        int row = Character.toLowerCase(rowChar) - 'a';
+        if (row < 0 || row > gameModel.getNumberOfRows()) {
+            throw new OutsideCellRangeException(RowOrColumn.ROW, row);
+        }
+        int col = Character.getNumericValue(colChar);
+        if (col <= 0 || col > gameModel.getNumberOfColumns()) {
+            throw new OutsideCellRangeException(RowOrColumn.COLUMN, col);
+        }
+        if (gameModel.getCellOwner(row, col - 1) != null) {
+            throw new CellAlreadyTakenException(row, col);
+        }
+        markCell(row, col - 1);
+    }
+
+    private void markCell(int row, int col) {
+        gameModel.setCellOwner(row, col, gameModel.getPlayerByNumber(gameModel.getCurrentPlayerNumber()));
+        gameModel.setCurrentPlayerNumber(gameModel.getNumberOfPlayers() - 1 - gameModel.getCurrentPlayerNumber());
+    }
+
     public void addRow() {
         if (!gameModel.isWinDetected()) {
             gameModel.addRow();
