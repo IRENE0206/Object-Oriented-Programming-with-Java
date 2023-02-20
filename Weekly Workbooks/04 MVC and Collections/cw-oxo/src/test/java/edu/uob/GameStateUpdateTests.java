@@ -39,6 +39,7 @@ class GameStateUpdateTests {
         assertEquals(5, threshold, "The threshold should be 4 but got " + threshold);
         char playerLetter = model.getPlayerByNumber(0).getPlayingLetter();
         assertEquals('X', playerLetter, "The first player should be X but got " + playerLetter);
+        assertNull(model.getWinner(), "There shouldn't be any winners yet");
     }
 
     @Test
@@ -56,7 +57,7 @@ class GameStateUpdateTests {
         sendCommandToController("c1");
         int p4 = model.getCurrentPlayerNumber();
         assertEquals(0, p4, failedTestComment + "0" + " not " + p4);
-
+        testReset();
     }
 
     @Test
@@ -82,6 +83,7 @@ class GameStateUpdateTests {
         OXOPlayer currWinner = model.getWinner();
         char currWinnerLetter = currWinner.getPlayingLetter();
         assertEquals(winnerLetter, currWinnerLetter, "Winner should stay the same");
+        testReset();
     }
 
     @Test
@@ -107,31 +109,76 @@ class GameStateUpdateTests {
         OXOPlayer currWinner = model.getWinner();
         char currWinnerLetter = currWinner.getPlayingLetter();
         assertEquals(winnerLetter, currWinnerLetter, "Winner should stay the same");
+        testReset();
     }
 
     @Test
-    // TODO
-    void testWinDetection() {
+    void testDiagonalOneDirectionWinDetection() {
         String failedTestComment = "Winner should be player ";
-        sendCommandToController("a4");
+        sendCommandToController("a5");
         sendCommandToController("a1");
-        sendCommandToController("b4");
         sendCommandToController("b1");
-        sendCommandToController("c4");
-        sendCommandToController("c1");
+        sendCommandToController("b2");
+        sendCommandToController("c5");
+        sendCommandToController("c3");
+        sendCommandToController("d2");
         sendCommandToController("d4");
-        sendCommandToController("d1");
-        sendCommandToController("e4");
+        sendCommandToController("e1");
+        sendCommandToController("e5");
         OXOPlayer winner = model.getWinner();
         char winnerLetter = winner.getPlayingLetter();
         int currPlayer = model.getCurrentPlayerNumber();
-        assertEquals('X', winnerLetter, failedTestComment + "X not " + winnerLetter);
-        assertEquals(1, currPlayer, "The next player should be player 1 not " + currPlayer);
-        sendCommandToController("e1");
+        assertEquals('O', winnerLetter, failedTestComment + "O not " + winnerLetter);
+        assertEquals(0, currPlayer, "The next player should be player 0 not " + currPlayer);
+        sendCommandToController("e3");
         int nextPlayer = model.getCurrentPlayerNumber();
         assertEquals(currPlayer, nextPlayer, "After a winner is detected, game doesn't exit but stops");
         OXOPlayer currWinner = model.getWinner();
         char currWinnerLetter = currWinner.getPlayingLetter();
         assertEquals(winnerLetter, currWinnerLetter, "Winner should stay the same");
+        testReset();
     }
+
+    @Test
+    void testDiagonalOppositeDirectionWinDetection() {
+        String failedTestComment = "Winner should be player ";
+        sendCommandToController("a2");
+        sendCommandToController("a5");
+        sendCommandToController("b1");
+        sendCommandToController("b4");
+        sendCommandToController("c5");
+        sendCommandToController("c3");
+        sendCommandToController("d1");
+        sendCommandToController("d2");
+        sendCommandToController("e5");
+        sendCommandToController("e1");
+        OXOPlayer winner = model.getWinner();
+        char winnerLetter = winner.getPlayingLetter();
+        int currPlayer = model.getCurrentPlayerNumber();
+        assertEquals('O', winnerLetter, failedTestComment + "O not " + winnerLetter);
+        assertEquals(0, currPlayer, "The next player should be player 0 not " + currPlayer);
+        sendCommandToController("e3");
+        int nextPlayer = model.getCurrentPlayerNumber();
+        assertEquals(currPlayer, nextPlayer, "After a winner is detected, game doesn't exit but stops");
+        OXOPlayer currWinner = model.getWinner();
+        char currWinnerLetter = currWinner.getPlayingLetter();
+        assertEquals(winnerLetter, currWinnerLetter, "Winner should stay the same");
+        testReset();
+    }
+    @Test
+    void testReset() {
+        controller.reset();
+        assertNull(model.getWinner(), "The winner should be null");
+        assertFalse(model.isGameDrawn());
+        int currPlayer = model.getCurrentPlayerNumber();
+        assertEquals(0, currPlayer, "Player 0 should be the first player, not" + currPlayer);
+        int rowNum = model.getNumberOfRows();
+        int colNum = model.getNumberOfColumns();
+        for (int i = 0; i < rowNum; i++) {
+            for (int j = 0; j < colNum; j++) {
+                assertNull(model.getCellOwner(i, j), "Cell " + i + j +"isn't empty");
+            }
+        }
+    }
+
 }
