@@ -24,7 +24,7 @@ class ExampleControllerTests {
 
   // This next method is a utility function that can be used by any of the test methods to _safely_ send a command to the controller
   void sendCommandToController(String command) {
-      // Try to send a command to the server - call will timeout if it takes too long (in case the server enters an infinite loop)
+      // Try to send a command to the server - call will time out if it takes too long (in case the server enters an infinite loop)
       // Note: this is ugly code and includes syntax that you haven't encountered yet
       String timeoutComment = "Controller took too long to respond (probably stuck in an infinite loop)";
       assertTimeoutPreemptively(Duration.ofMillis(1000), ()-> controller.handleIncomingCommand(command), timeoutComment);
@@ -65,7 +65,7 @@ class ExampleControllerTests {
   void testInvalidIdentifierException() throws OXOMoveException {
     // Check that the controller throws a suitable exception when it gets an invalid command
     String failedTestComment = "Controller failed to throw an InvalidIdentifierLengthException for command `abc123`";
-    // The next lins is a bit ugly, but it is the easiest way to test exceptions (soz)
+    // The next line is a bit ugly, but it is the easiest way to test exceptions (soz)
     assertThrows(InvalidIdentifierLengthException.class, ()-> sendCommandToController("abc123"), failedTestComment);
   }
 }

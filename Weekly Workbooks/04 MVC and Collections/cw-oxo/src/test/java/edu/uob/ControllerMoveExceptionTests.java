@@ -1,12 +1,11 @@
 package edu.uob;
+
 import edu.uob.OXOMoveException.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.time.Duration;
-
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
+import java.time.Duration;
 
 class ControllerMoveExceptionTests {
     private OXOModel model;
@@ -26,7 +25,7 @@ class ControllerMoveExceptionTests {
     }
 
     @Test
-    void testOutsideCellRangeException() throws OXOMoveException {
+    void testOutsideCellRangeException() {
         String failedTestComment = "Controller failed to throw an OutsideCellRangeException for command ";
         assertThrows(OutsideCellRangeException.class, () -> sendCommandToController("a0"), failedTestComment + "'a0'");
         assertThrows(OutsideCellRangeException.class, () -> sendCommandToController("a5"), failedTestComment + "'a5'");
@@ -34,7 +33,7 @@ class ControllerMoveExceptionTests {
     }
 
     @Test
-    void testInvalidIdentifierLengthException() throws OXOMoveException {
+    void testInvalidIdentifierLengthException() {
         String comment = "Controller failed to throw an InvalidIdentifierLengthException for command ";
         assertThrows(InvalidIdentifierLengthException.class, () -> sendCommandToController("a10"), comment + "'a10'");
         assertThrows(InvalidIdentifierLengthException.class, () -> sendCommandToController("d-1"), comment + "'d-1'");
@@ -45,7 +44,7 @@ class ControllerMoveExceptionTests {
     }
 
     @Test
-    void testInvalidIdentifierCharacterException() throws OXOMoveException {
+    void testInvalidIdentifierCharacterException() {
         String comment = "Controller failed to throw an InvalidIdentifierCharacterException for command ";
         assertThrows(InvalidIdentifierCharacterException.class, () -> sendCommandToController("@1"), comment + "'@1'");
         assertThrows(InvalidIdentifierCharacterException.class, () -> sendCommandToController("-4"), comment + "'-4'");
@@ -55,7 +54,7 @@ class ControllerMoveExceptionTests {
     }
 
     @Test
-    void testCellAlreadyTakenException() throws OXOMoveException {
+    void testCellAlreadyTakenException() {
         String comment = "Controller failed to throw an CellAlreadyTakenException for command ";
         sendCommandToController("a1");
         assertThrows(CellAlreadyTakenException.class, () -> sendCommandToController("a1"), comment + "'a1'");
@@ -68,7 +67,7 @@ class ControllerMoveExceptionTests {
     }
 
     @Test
-    void testCaseInsensitive() throws OXOMoveException {
+    void testCaseInsensitive() {
         String comment = "Cell identifier failed to be case-insensitive for command ";
         sendCommandToController("a1");
         assertThrows(CellAlreadyTakenException.class, () -> sendCommandToController("A1"), comment + "'A1'");

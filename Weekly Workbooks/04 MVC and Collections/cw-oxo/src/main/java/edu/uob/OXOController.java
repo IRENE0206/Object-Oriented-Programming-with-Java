@@ -83,29 +83,24 @@ public class OXOController {
     }
 
     public void addRow() {
-        if (!gameModel.isWinDetected()) {
-            gameModel.addRow();
-        }
+        gameModel.addRow();
     }
+
     public void removeRow() {
-        if (!gameModel.isWinDetected()) {
-            gameModel.removeRow();
-            if (drawnDetected()) {
-                gameModel.setGameDrawn();
-            }
+        gameModel.removeRow();
+        if (drawnDetected()) {
+            gameModel.setGameDrawn();
         }
     }
+
     public void addColumn() {
-        if (!gameModel.isWinDetected()) {
-            gameModel.addColumn();
-        }
+        gameModel.addColumn();
     }
+
     public void removeColumn() {
-        if (!gameModel.isWinDetected()) {
-            gameModel.removeColumn();
-            if (drawnDetected()) {
-                gameModel.setGameDrawn();
-            }
+        gameModel.removeColumn();
+        if (drawnDetected()) {
+            gameModel.setGameDrawn();
         }
     }
 
@@ -122,11 +117,11 @@ public class OXOController {
         }
         return true;
     }
+
     public void increaseWinThreshold() {
-        if (!gameModel.isWinDetected()) {
-            gameModel.setWinThreshold(gameModel.getWinThreshold() + 1);
-        }
+        gameModel.setWinThreshold(gameModel.getWinThreshold() + 1);
     }
+
     public void decreaseWinThreshold() {
         if (!gameModel.isWinDetected() && !gameModel.isGameStarted()) {
             int threshold = gameModel.getWinThreshold();
@@ -135,6 +130,7 @@ public class OXOController {
             }
         }
     }
+
     public void reset() {
         gameModel.setWinner(null);
         gameModel.cancelGameDrawn();
