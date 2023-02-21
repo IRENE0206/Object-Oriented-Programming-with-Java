@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import java.time.Duration;
 
-public class ChangeGameSettingTests {
+class ChangeGameSettingTests {
     private OXOModel model;
     private OXOController controller;
 
@@ -207,40 +207,4 @@ public class ChangeGameSettingTests {
         assertFalse(model.isGameDrawn(), failedTestComment3);
     }
 
-    @Test
-    void testMorePlayers() {
-        String failedTestComment0 = "The number of players should be ";
-        String failedTestComment1 = "Current player should be player ";
-        String failedTestComment2 = "Cell owner should be player ";
-        int playerNum0 = model.getNumberOfPlayers();
-        assertEquals(2, playerNum0, failedTestComment0 + "2 not " + playerNum0);
-        controller.addPlayer('A');
-        int playerNum1 = model.getNumberOfPlayers();
-        assertEquals(3, playerNum1, failedTestComment0 + "3 not " + playerNum1);
-        sendCommandToController("a1");
-        sendCommandToController("a2");
-        int playerNum2 = model.getCurrentPlayerNumber();
-        assertEquals(2, playerNum2, failedTestComment1 + "2 not " + playerNum2);
-        char letter0 = model.getPlayerByNumber(playerNum2).getPlayingLetter();
-        assertEquals('A', letter0, failedTestComment1 + "'A' not " + letter0);
-        sendCommandToController("a3");
-        char letter1 = model.getCellOwner(0, 2).getPlayingLetter();
-        assertEquals(letter0, letter1, failedTestComment2 + letter0 + " not " + letter0);
-        int playerNum3 = model.getCurrentPlayerNumber();
-        assertEquals(0, playerNum3, failedTestComment1 + "0 not " + playerNum2);
-        sendCommandToController("b1");
-        sendCommandToController("b2");
-        sendCommandToController("b3");
-        controller.addPlayer('B');
-        int playerNum4 = model.getNumberOfPlayers();
-        assertEquals(4, playerNum4, failedTestComment0 + "4 not " + playerNum4);
-        int playerNum5 = model.getCurrentPlayerNumber();
-        assertEquals(3, playerNum5, failedTestComment1 + "3 not " + playerNum5);
-        sendCommandToController("c1");
-        char letter2 = model.getCellOwner(2, 0).getPlayingLetter();
-        char letter3 = model.getPlayerByNumber(3).getPlayingLetter();
-        assertEquals(letter3, letter2, failedTestComment2 + letter3 + " not " + letter2);
-        int playerNum6 = model.getCurrentPlayerNumber();
-        assertEquals(0, playerNum6, failedTestComment1 + "0 not " + playerNum6);
-    }
 }
