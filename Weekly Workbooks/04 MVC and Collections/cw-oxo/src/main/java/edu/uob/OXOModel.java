@@ -28,6 +28,7 @@ public class OXOModel {
         this.gameDrawn = false;
         this.winner = null;
         this.winDetected = false;
+        this.gameStarted = false;
     }
 
     public int getNumberOfPlayers() {
@@ -112,7 +113,6 @@ public class OXOModel {
         for (int i = 0; i < getNumberOfRows(); i++) {
             cells.get(i).add(null);
         }
-        cancelGameDrawn();
     }
 
     public void addRow() {
@@ -125,7 +125,6 @@ public class OXOModel {
             row.add(null);
         }
         cells.add(row);
-        cancelGameDrawn();
     }
 
     public void removeColumn() {
@@ -177,6 +176,6 @@ public class OXOModel {
     }
 
     public void cancelGameStarted() {
-            gameStarted = false;
+        gameStarted = false;
     }
 }

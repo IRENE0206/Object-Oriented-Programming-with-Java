@@ -36,28 +36,23 @@ public class OXOController {
         if (row < 0 || row >= gameModel.getNumberOfRows()) {
             throw new OutsideCellRangeException(RowOrColumn.ROW, row);
         }
-        int col = Character.getNumericValue(colChar);
-        if (col <= 0 || col > gameModel.getNumberOfColumns()) {
+        int col = Character.getNumericValue(colChar) - 1;
+        if (col < 0 || col >= gameModel.getNumberOfColumns()) {
             throw new OutsideCellRangeException(RowOrColumn.COLUMN, col);
         }
-        if (gameModel.getCellOwner(row, col - 1) != null) {
+        if (gameModel.getCellOwner(row, col) != null) {
             throw new CellAlreadyTakenException(row, col);
         }
-        markCell(row, col - 1);
-        setNextPlayer();
+        markCellSetNextPlayer(row, col);
     }
 
-    private void markCell(int row, int col) {
+    private void markCellSetNextPlayer(int row, int col) {
         int currPlayer = gameModel.getCurrentPlayerNumber();
         gameModel.setCellOwner(row, col, gameModel.getPlayerByNumber(currPlayer));
-    }
-
-    private void setNextPlayer() {
-        int currPlayerNum = gameModel.getCurrentPlayerNumber();
         int playerNumbers = gameModel.getNumberOfPlayers();
-        assert currPlayerNum < playerNumbers;
-        if (currPlayerNum < playerNumbers - 1) {
-            gameModel.setCurrentPlayerNumber(currPlayerNum + 1);
+        assert currPlayer < playerNumbers;
+        if (currPlayer < playerNumbers - 1) {
+            gameModel.setCurrentPlayerNumber(currPlayer + 1);
         } else {
             gameModel.setCurrentPlayerNumber(0);
         }
@@ -65,6 +60,7 @@ public class OXOController {
 
     public void addRow() {
         gameModel.addRow();
+        gameModel.cancelGameDrawn();
     }
 
     public void removeRow() {
@@ -76,6 +72,7 @@ public class OXOController {
 
     public void addColumn() {
         gameModel.addColumn();
+        gameModel.cancelGameDrawn();
     }
 
     public void removeColumn() {
@@ -104,7 +101,7 @@ public class OXOController {
     }
 
     public void decreaseWinThreshold() {
-        if (!gameModel.isWinDetected() && !gameModel.isGameStarted()) {
+        if (!gameModel.isGameStarted()) {
             int threshold = gameModel.getWinThreshold();
             if (threshold > 3) {
                 gameModel.setWinThreshold(gameModel.getWinThreshold() - 1);
@@ -181,12 +178,11 @@ public class OXOController {
         if (rowOutOfRange || colOutOfRange) {
             return false;
         }
-        char letter0 = player0.getPlayingLetter();
         for (int i = 1; i < threshold; i++) {
             int rowI = row0 + i * rowFactor;
             int colI = col0 + i * colFactor;
             OXOPlayer currOwner = gameModel.getCellOwner(rowI, colI);
-            if (currOwner == null || currOwner.getPlayingLetter() != letter0) {
+            if (currOwner == null || currOwner != player0) {
                 return false;
             }
         }
