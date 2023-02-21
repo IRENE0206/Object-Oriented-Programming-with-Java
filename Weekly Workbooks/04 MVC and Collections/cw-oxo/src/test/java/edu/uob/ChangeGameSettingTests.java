@@ -2,10 +2,8 @@ package edu.uob;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.time.Duration;
-
 import static org.junit.jupiter.api.Assertions.*;
+import java.time.Duration;
 
 public class ChangeGameSettingTests {
     private OXOModel model;
@@ -74,6 +72,19 @@ public class ChangeGameSettingTests {
         controller.decreaseWinThreshold();
         int threshold7 = model.getWinThreshold();
         assertEquals(threshold6, threshold7, failedTestComment + threshold6 + " not " + threshold7);
+        sendCommandToController("b2");
+        sendCommandToController("a2");
+        sendCommandToController("c3");
+        sendCommandToController("b1");
+        controller.addRow();
+        controller.addColumn();
+        sendCommandToController("d4");
+        controller.increaseWinThreshold();
+        int threshold8 = model.getWinThreshold();
+        assertEquals(5, threshold8, failedTestComment + "5 not " + threshold8);
+        controller.reset();
+        int threshold9 = model.getWinThreshold();
+        assertEquals(threshold8, threshold9, failedTestComment + threshold8 + " not " + threshold9);
     }
 
     @Test
@@ -137,6 +148,8 @@ public class ChangeGameSettingTests {
         assertEquals(2, rowNum0, failedTestComment0 + "2 not " + rowNum0);
         int colNum0 = model.getNumberOfColumns();
         assertEquals(2, colNum0, failedTestComment1 + "2 not " + colNum0);
+        controller.removeRow();
+        controller.removeColumn();
         int rowNum1 = model.getNumberOfRows();
         assertEquals(2, rowNum1, failedTestComment0 + "2 not " + rowNum1);
         int colNum1 = model.getNumberOfColumns();
@@ -146,24 +159,30 @@ public class ChangeGameSettingTests {
     @Test
     void testChangeWonGrid() {
         sendCommandToController("a1");
-        sendCommandToController("c1");
-        sendCommandToController("a2");
         sendCommandToController("b1");
+        sendCommandToController("a2");
+        sendCommandToController("b2");
         sendCommandToController("a3");
         String failedTestComment0 = "The grid row number should be ";
         String failedTestComment1 = "The grid col number should be ";
         controller.addRow();
         controller.addColumn();
         int rowNum0 = model.getNumberOfRows();
-        assertEquals(3, rowNum0, failedTestComment0 + "3 not " + rowNum0);
+        assertEquals(4, rowNum0, failedTestComment0 + "4 not " + rowNum0);
         int colNum0 = model.getNumberOfColumns();
-        assertEquals(3, colNum0, failedTestComment1 + "3 not " + colNum0);
+        assertEquals(4, colNum0, failedTestComment1 + "4 not " + colNum0);
         controller.removeRow();
         controller.removeColumn();
         int rowNum1 = model.getNumberOfRows();
         assertEquals(3, rowNum1, failedTestComment0 + "3 not " + rowNum1);
         int colNum1 = model.getNumberOfColumns();
         assertEquals(3, colNum1, failedTestComment1 + "3 not " + colNum1);
+        controller.removeRow();
+        controller.removeColumn();
+        int rowNum2 = model.getNumberOfRows();
+        assertEquals(2, rowNum2, failedTestComment0 + "2 not " + rowNum2);
+        int colNum2 = model.getNumberOfColumns();
+        assertEquals(3, colNum2, failedTestComment1 + "3 not " + colNum2);
     }
 
     @Test

@@ -2,10 +2,8 @@ package edu.uob;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.time.Duration;
-
 import static org.junit.jupiter.api.Assertions.*;
+import java.time.Duration;
 
 class GameStateUpdateTests {
     private OXOModel model;
