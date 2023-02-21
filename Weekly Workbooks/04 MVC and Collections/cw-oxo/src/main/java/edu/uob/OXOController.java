@@ -13,6 +13,7 @@ public class OXOController {
             return;
         }
         validateMove(command);
+        gameModel.setGameStarted();
         if (winDetected()) {
             gameModel.setWinDetected();
         }
@@ -43,15 +44,30 @@ public class OXOController {
             throw new CellAlreadyTakenException(row, col);
         }
         markCell(row, col - 1);
+        setNextPlayer();
     }
 
     private void markCell(int row, int col) {
-        gameModel.setCellOwner(row, col, gameModel.getPlayerByNumber(gameModel.getCurrentPlayerNumber()));
-        gameModel.setCurrentPlayerNumber(gameModel.getNumberOfPlayers() - 1 - gameModel.getCurrentPlayerNumber());
+        int currPlayer = gameModel.getCurrentPlayerNumber();
+        gameModel.setCellOwner(row, col, gameModel.getPlayerByNumber(currPlayer));
+    }
+
+    private void setNextPlayer() {
+        int currPlayerNum = gameModel.getCurrentPlayerNumber();
+        int playerNumbers = gameModel.getNumberOfPlayers();
+        assert currPlayerNum < playerNumbers;
+        if (currPlayerNum < playerNumbers - 1) {
+            gameModel.setCurrentPlayerNumber(currPlayerNum + 1);
+        } else {
+            gameModel.setCurrentPlayerNumber(0);
+        }
     }
 
     public void addPlayer(char letter) {
         if (isUniqueLetter(letter)) {
+            if (gameModel.isGameStarted() && gameModel.getCurrentPlayerNumber() == 0) {
+                gameModel.setCurrentPlayerNumber(gameModel.getNumberOfPlayers());
+            }
             OXOPlayer player = new OXOPlayer(letter);
             gameModel.addPlayer(player);
         }
@@ -92,7 +108,7 @@ public class OXOController {
         }
     }
     public void decreaseWinThreshold() {
-        if (!gameModel.isWinDetected()) {
+        if (!gameModel.isWinDetected() && !gameModel.isGameStarted()) {
             int threshold = gameModel.getWinThreshold();
             if (threshold > 3) {
                 gameModel.setWinThreshold(gameModel.getWinThreshold() - 1);
@@ -109,6 +125,7 @@ public class OXOController {
                 gameModel.setCellOwner(i, j, null);
             }
         }
+        gameModel.cancelGameStarted();
     }
 
     private boolean winDetected() {
