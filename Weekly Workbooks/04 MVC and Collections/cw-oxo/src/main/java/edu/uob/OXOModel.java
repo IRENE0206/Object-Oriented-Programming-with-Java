@@ -5,11 +5,12 @@ import java.util.List;
 public class OXOModel {
 
     private List<List<OXOPlayer>> cells;
-    private OXOPlayer[] players;
+    private List<OXOPlayer> players;
     private int currentPlayerNumber;
     private OXOPlayer winner;
     private boolean gameDrawn;
     private boolean winDetected;
+    private boolean gameStarted;
     private int winThreshold;
 
     public OXOModel(int numberOfRows, int numberOfColumns, int winThresh) {
@@ -23,27 +24,22 @@ public class OXOModel {
             cells.add(row);
         }
         this.currentPlayerNumber = 0;
-        this.players = new OXOPlayer[2];
+        this.players = new ArrayList<>(2);
         this.gameDrawn = false;
         this.winner = null;
         this.winDetected = false;
     }
 
     public int getNumberOfPlayers() {
-        return players.length;
+        return players.size();
     }
 
     public void addPlayer(OXOPlayer player) {
-        for (int i = 0; i < players.length; i++) {
-            if (players[i] == null) {
-                players[i] = player;
-                return;
-            }
-        }
+        players.add(player);
     }
 
     public OXOPlayer getPlayerByNumber(int number) {
-        return players[number];
+        return players.get(number);
     }
 
     public OXOPlayer getWinner() {
@@ -158,6 +154,21 @@ public class OXOModel {
     }
 
     public void cancelWinDetected() {
-        winDetected = true;
+        winDetected = false;
+    }
+
+    public boolean isGameStarted() {
+        return gameStarted;
+    }
+
+    public void setGameStarted() {
+        if (!gameStarted) {
+            gameStarted = true;
+        }
+    }
+    public void cancelGameStarted() {
+        if (gameStarted) {
+            gameStarted = false;
+        }
     }
 }

@@ -21,7 +21,7 @@ class GameStateUpdateTests {
 
     void sendCommandToController(String command) {
         String timeoutComment = "Controller took too long to respond (probably stuck in an infinite loop)";
-        assertTimeoutPreemptively(Duration.ofMillis(1000), ()-> controller.handleIncomingCommand(command), timeoutComment);
+        assertTimeoutPreemptively(Duration.ofMillis(1000), () -> controller.handleIncomingCommand(command), timeoutComment);
     }
 
     @Test
@@ -57,7 +57,6 @@ class GameStateUpdateTests {
         sendCommandToController("c1");
         int p4 = model.getCurrentPlayerNumber();
         assertEquals(0, p4, failedTestComment + "0" + " not " + p4);
-        testReset();
     }
 
     @Test
@@ -83,7 +82,6 @@ class GameStateUpdateTests {
         OXOPlayer currWinner = model.getWinner();
         char currWinnerLetter = currWinner.getPlayingLetter();
         assertEquals(winnerLetter, currWinnerLetter, "Winner should stay the same");
-        testReset();
     }
 
     @Test
@@ -109,7 +107,6 @@ class GameStateUpdateTests {
         OXOPlayer currWinner = model.getWinner();
         char currWinnerLetter = currWinner.getPlayingLetter();
         assertEquals(winnerLetter, currWinnerLetter, "Winner should stay the same");
-        testReset();
     }
 
     @Test
@@ -136,7 +133,6 @@ class GameStateUpdateTests {
         OXOPlayer currWinner = model.getWinner();
         char currWinnerLetter = currWinner.getPlayingLetter();
         assertEquals(winnerLetter, currWinnerLetter, "Winner should stay the same");
-        testReset();
     }
 
     @Test
@@ -163,8 +159,8 @@ class GameStateUpdateTests {
         OXOPlayer currWinner = model.getWinner();
         char currWinnerLetter = currWinner.getPlayingLetter();
         assertEquals(winnerLetter, currWinnerLetter, "Winner should stay the same");
-        testReset();
     }
+
     @Test
     void testReset() {
         controller.reset();
@@ -176,7 +172,7 @@ class GameStateUpdateTests {
         int colNum = model.getNumberOfColumns();
         for (int i = 0; i < rowNum; i++) {
             for (int j = 0; j < colNum; j++) {
-                assertNull(model.getCellOwner(i, j), "Cell " + i + j +"isn't empty");
+                assertNull(model.getCellOwner(i, j), "Cell " + i + j + "isn't empty");
             }
         }
     }
