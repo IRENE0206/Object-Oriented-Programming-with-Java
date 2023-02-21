@@ -87,7 +87,9 @@ public class OXOModel {
     }
 
     public void cancelGameDrawn() {
-        gameDrawn = false;
+        if (isGameDrawn()) {
+            gameDrawn = false;
+        }
     }
 
     public boolean isGameDrawn() {
@@ -146,7 +148,9 @@ public class OXOModel {
     }
 
     public void setWinDetected() {
-        winDetected = true;
+        if (!isWinDetected()) {
+            winDetected = true;
+        }
     }
 
     public boolean isWinDetected() {
@@ -154,7 +158,9 @@ public class OXOModel {
     }
 
     public void cancelWinDetected() {
-        winDetected = false;
+        if (isWinDetected()) {
+            winDetected = false;
+        }
     }
 
     public boolean isGameStarted() {
@@ -162,12 +168,12 @@ public class OXOModel {
     }
 
     public void setGameStarted() {
-        if (!gameStarted) {
+        if (!isGameStarted()) {
             gameStarted = true;
         }
     }
     public void cancelGameStarted() {
-        if (gameStarted) {
+        if (isGameStarted()) {
             gameStarted = false;
         }
     }
