@@ -90,6 +90,9 @@ public class OXOController {
     public void removeRow() {
         if (!gameModel.isWinDetected()) {
             gameModel.removeRow();
+            if (drawnDetected()) {
+                gameModel.setGameDrawn();
+            }
         }
     }
     public void addColumn() {
@@ -100,7 +103,24 @@ public class OXOController {
     public void removeColumn() {
         if (!gameModel.isWinDetected()) {
             gameModel.removeColumn();
+            if (drawnDetected()) {
+                gameModel.setGameDrawn();
+            }
         }
+    }
+
+    private boolean drawnDetected() {
+        if (gameModel.isWinDetected()) {
+            return false;
+        }
+        for (int i = 0; i < gameModel.getNumberOfRows(); i++) {
+            for (int j = 0; j < gameModel.getNumberOfColumns(); j++) {
+                if (gameModel.getCellOwner(i, j) == null) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
     public void increaseWinThreshold() {
         if (!gameModel.isWinDetected()) {
