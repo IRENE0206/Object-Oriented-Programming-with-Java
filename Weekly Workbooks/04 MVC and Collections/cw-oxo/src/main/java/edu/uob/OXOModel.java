@@ -35,11 +35,22 @@ public class OXOModel {
     }
 
     public void addPlayer(OXOPlayer player) {
-        players.add(player);
+        if (isUniqueLetter(player.getPlayingLetter())) {
+            players.add(player);
+        }
     }
 
     public OXOPlayer getPlayerByNumber(int number) {
         return players.get(number);
+    }
+
+    private boolean isUniqueLetter(char letter) {
+        for (int i = 0; i < getNumberOfPlayers(); i++) {
+            if (getPlayerByNumber(i).getPlayingLetter() == letter) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public OXOPlayer getWinner() {

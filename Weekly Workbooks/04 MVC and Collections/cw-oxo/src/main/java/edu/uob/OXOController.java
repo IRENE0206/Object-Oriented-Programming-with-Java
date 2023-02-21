@@ -63,25 +63,6 @@ public class OXOController {
         }
     }
 
-    public void addPlayer(char letter) {
-        if (isUniqueLetter(letter)) {
-            if (gameModel.isGameStarted() && gameModel.getCurrentPlayerNumber() == 0) {
-                gameModel.setCurrentPlayerNumber(gameModel.getNumberOfPlayers());
-            }
-            OXOPlayer player = new OXOPlayer(letter);
-            gameModel.addPlayer(player);
-        }
-    }
-
-    private boolean isUniqueLetter(char letter) {
-        for (int i = 0; i < gameModel.getNumberOfPlayers(); i++) {
-            if (gameModel.getPlayerByNumber(i).getPlayingLetter() == letter) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     public void addRow() {
         gameModel.addRow();
     }
