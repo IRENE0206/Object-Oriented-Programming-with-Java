@@ -42,10 +42,11 @@ class ChangeGameSettingTests {
         assertEquals(4, rowNum0, failedTestComment0 + "2 not " + rowNum0);
         int colNum0 = model.getNumberOfColumns();
         assertEquals(4, colNum0, failedTestComment1 + "2 not " + colNum0);
+        assertFalse(model.isGameDrawn(), "Game drawn should be cancelled after expanding grid");
     }
 
     @Test
-    void testChangeThreshold() {
+    void testChangeThresholdBeforeGame() {
         String failedTestComment = "Threshold should be ";
         int threshold0 = model.getWinThreshold();
         assertEquals(3, threshold0, failedTestComment + "3 not " + threshold0);
@@ -64,14 +65,25 @@ class ChangeGameSettingTests {
         controller.decreaseWinThreshold();
         int threshold5 = model.getWinThreshold();
         assertEquals(3, threshold5, failedTestComment + "3 not " + threshold5);
+    }
+
+    @Test
+    void testChangeThresholdDuringGame() {
+        String failedTestComment = "Threshold should be ";
         sendCommandToController("a1");
         controller.increaseWinThreshold();
         int threshold6 = model.getWinThreshold();
         assertEquals(4, threshold6, failedTestComment + "4 not " + threshold6);
-        sendCommandToController("a3");
         controller.decreaseWinThreshold();
         int threshold7 = model.getWinThreshold();
         assertEquals(threshold6, threshold7, failedTestComment + threshold6 + " not " + threshold7);
+    }
+
+    @Test
+    void testChangeGameThresholdAfterWon() {
+        String failedTestComment = "Threshold should be ";
+        sendCommandToController("a1");
+        sendCommandToController("a3");
         sendCommandToController("b2");
         sendCommandToController("a2");
         sendCommandToController("c3");
@@ -81,10 +93,13 @@ class ChangeGameSettingTests {
         sendCommandToController("d4");
         controller.increaseWinThreshold();
         int threshold8 = model.getWinThreshold();
-        assertEquals(5, threshold8, failedTestComment + "5 not " + threshold8);
-        controller.reset();
+        assertEquals(4, threshold8, failedTestComment + "4 not " + threshold8);
+        controller.decreaseWinThreshold();
         int threshold9 = model.getWinThreshold();
-        assertEquals(threshold8, threshold9, failedTestComment + threshold8 + " not " + threshold9);
+        controller.reset();
+        assertEquals(3, threshold9, failedTestComment + "3 not " + threshold9);
+        int threshold10 = model.getWinThreshold();
+        assertEquals(threshold9, threshold10, failedTestComment + threshold9 + " not " + threshold10);
     }
 
     @Test

@@ -20,7 +20,7 @@ class MorePlayersTests {
 
     void sendCommandToController(String command) {
         String timeoutComment = "Controller took too long to respond (probably stuck in an infinite loop)";
-        assertTimeoutPreemptively(Duration.ofMillis(1000), ()-> controller.handleIncomingCommand(command), timeoutComment);
+        assertTimeoutPreemptively(Duration.ofMillis(1000), () -> controller.handleIncomingCommand(command), timeoutComment);
     }
 
     @Test
