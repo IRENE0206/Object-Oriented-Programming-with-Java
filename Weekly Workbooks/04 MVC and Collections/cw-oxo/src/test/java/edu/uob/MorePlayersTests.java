@@ -3,8 +3,7 @@ package edu.uob;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.time.Duration;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
+import static org.junit.jupiter.api.Assertions.*;
 
 class MorePlayersTests {
     private OXOModel model;
@@ -20,8 +19,6 @@ class MorePlayersTests {
     }
 
     void sendCommandToController(String command) {
-        // Try to send a command to the server - call will time out if it takes too long (in case the server enters an infinite loop)
-        // Note: this is ugly code and includes syntax that you haven't encountered yet
         String timeoutComment = "Controller took too long to respond (probably stuck in an infinite loop)";
         assertTimeoutPreemptively(Duration.ofMillis(1000), ()-> controller.handleIncomingCommand(command), timeoutComment);
     }
@@ -50,7 +47,8 @@ class MorePlayersTests {
 
     @Test
     void testWinDetection() {
-        String failedTestComment = "Winner should be player ";
+        String failedTestComment0 = "Winner should be player ";
+        String failedTestComment1 = "Current player should be player ";
         sendCommandToController("a1");
         sendCommandToController("b1");
         sendCommandToController("c1");
@@ -61,5 +59,10 @@ class MorePlayersTests {
         sendCommandToController("b3");
         sendCommandToController("c3");
         sendCommandToController("a4");
+        OXOPlayer winner = model.getWinner();
+        char letter0 = winner.getPlayingLetter();
+        assertEquals('A', letter0, failedTestComment0 + 'A');
+        int player0 = model.getCurrentPlayerNumber();
+        assertEquals(1, player0, failedTestComment1 + 1);
     }
 }
