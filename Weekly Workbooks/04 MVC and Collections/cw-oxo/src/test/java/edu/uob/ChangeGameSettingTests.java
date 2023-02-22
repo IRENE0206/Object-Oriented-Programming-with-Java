@@ -34,6 +34,11 @@ class ChangeGameSettingTests {
         sendCommandToController("b3");
         sendCommandToController("c2");
         assertTrue(model.isGameDrawn(), "Game should be drawn");
+        controller.removeRow();
+        assertEquals(3, model.getNumberOfRows(), "Cannot reduce row after game drawn");
+        controller.removeColumn();
+        assertEquals(3, model.getNumberOfColumns(), "Cannot reduce col after game drawn");
+        assertTrue(model.isGameDrawn(), "Game should still be drawn");
         String failedTestComment0 = "The grid row number should be ";
         String failedTestComment1 = "The grid col number should be ";
         controller.addRow();
