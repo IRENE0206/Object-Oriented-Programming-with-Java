@@ -37,6 +37,7 @@ class ChangeGameSettingTests {
         String failedTestComment0 = "The grid row number should be ";
         String failedTestComment1 = "The grid col number should be ";
         controller.addRow();
+        assertFalse(model.isGameDrawn(), "Game drawn should be cancelled after expanding grid");
         controller.addColumn();
         int rowNum0 = model.getNumberOfRows();
         assertEquals(4, rowNum0, failedTestComment0 + "2 not " + rowNum0);
@@ -202,24 +203,21 @@ class ChangeGameSettingTests {
 
     @Test
     void testChangeGridCauseDrawn() {
-        String failedTestComment0 = "Removing row should have caused game drawn";
-        String failedTestComment1 = "Removing col should have caused game drawn";
-        String failedTestComment2 = "Adding row should have cancelled game drawn";
-        String failedTestComment3 = "Adding col should have cancelled game drawn";
+        String failedTestComment0 = "Removing row will cause game drawn so not allowed";
+        String failedTestComment1 = "Removing col will cause game drawn so not allowed";
         sendCommandToController("a1");
         sendCommandToController("a2");
         sendCommandToController("a3");
         controller.removeRow();
         controller.removeRow();
-        assertTrue(model.isGameDrawn(), failedTestComment0);
+        assertEquals(2, model.getNumberOfRows(), failedTestComment0);
         controller.addRow();
-        assertFalse(model.isGameDrawn(), failedTestComment2);
         controller.addColumn();
         controller.removeRow();
+        controller.removeRow();
+        assertEquals(1, model.getNumberOfRows(), "Number of rows should be 1");
         controller.removeColumn();
-        assertTrue(model.isGameDrawn(), failedTestComment1);
-        controller.addColumn();
-        assertFalse(model.isGameDrawn(), failedTestComment3);
+        assertEquals(4, model.getNumberOfColumns(), failedTestComment1);
     }
 
 }

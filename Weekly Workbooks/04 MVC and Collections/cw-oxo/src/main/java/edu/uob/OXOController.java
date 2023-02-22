@@ -25,7 +25,7 @@ public class OXOController {
             throw new InvalidIdentifierLengthException(length);
         }
         char rowChar = command.charAt(0);
-        if (!Character.isLetter(rowChar)) {
+        if (!Character.isLowerCase(rowChar) && !Character.isUpperCase(rowChar)) {
             throw new InvalidIdentifierCharacterException(RowOrColumn.ROW, rowChar);
         }
         char colChar = command.charAt(1);
@@ -66,7 +66,7 @@ public class OXOController {
     public void removeRow() {
         gameModel.removeRow();
         if (drawnDetected()) {
-            gameModel.setGameDrawn();
+            gameModel.addRow();
         }
     }
 
@@ -78,7 +78,7 @@ public class OXOController {
     public void removeColumn() {
         gameModel.removeColumn();
         if (drawnDetected()) {
-            gameModel.setGameDrawn();
+            gameModel.addColumn();
         }
     }
 
