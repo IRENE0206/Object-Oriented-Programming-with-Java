@@ -64,9 +64,11 @@ public class OXOController {
     }
 
     public void removeRow() {
-        gameModel.removeRow();
-        if (drawnDetected()) {
-            gameModel.addRow();
+        if (!gameModel.isGameDrawn()) {
+            gameModel.removeRow();
+            if (drawnDetected()) {
+                gameModel.addRow();
+            }
         }
     }
 
@@ -76,9 +78,11 @@ public class OXOController {
     }
 
     public void removeColumn() {
-        gameModel.removeColumn();
-        if (drawnDetected()) {
-            gameModel.addColumn();
+        if (!gameModel.isGameDrawn()) {
+            gameModel.removeColumn();
+            if (drawnDetected()) {
+                gameModel.addColumn();
+            }
         }
     }
 
