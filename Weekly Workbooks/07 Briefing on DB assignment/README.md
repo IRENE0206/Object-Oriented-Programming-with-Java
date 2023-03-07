@@ -5,8 +5,8 @@
 This workbook will lead you through the next assessed exercise,
 the aim of which is to build a database server (from the ground up !)
 This will not only give you more practice writing complex Java programmes,
-but will also provide you with hands-on experience of using query languages. 
-Note that assignment WILL contribute to your unit mark with a weighting of 35%. 
+but will also provide you with hands-on experience of using query languages.
+Note that assignment WILL contribute to your unit mark with a weighting of 35%.
 
 The assignment will be marked on the lab machines, so it is essential that you check that you
 can compile and run your code using Maven on these machines before submission.
@@ -34,7 +34,7 @@ This may result in a mark of zero for the assignment, or perhaps even the entire
 Don't panic - if you stick to the above list of advice, you should remain safe !  
 
 
-# 
+#
 ### Task 2: Assignment Overview
 
 
@@ -42,12 +42,12 @@ In this assignment, you will build a relational database server from scratch.
 This server should receive incoming requests (conforming to a standard query language)
 and then interrogate and manipulate a set of stored records.
 Your server will maintain persistent data as a number of files on your filesystem.
-You will not be required to implement a client application - this will be provided for you 
+You will not be required to implement a client application - this will be provided for you
 (to allow you to connect to your server and check that is it working correctly).
 
 As usual, you have been provided with a <a href="resources/cw-db" target="_blank">Maven project</a>
 to help get you started with the assignment.
-As before, there is a <a href="resources/cw-db/src/test/java/edu/uob/DBTests.java" target="_blank">template test script</a>
+As before, there is a <a href="resources/cw-db/src/test/java/edu/uob/ExampleDBTests.java" target="_blank">template test script</a>
 for you to use - make sure you add suitable test cases to this script to ensure that your application is
 fully and systematically tested. As with the previous assignment, you will be assessed on the extent to which
 your test cases cover the implemented features of the software.
@@ -69,11 +69,11 @@ Your submission will be assessed on the success with which it implements the des
 as well as the flexibility and robustness with which your server operates.
 You will also be assessed on the "quality" of your source code (guidance will be provided during the assignment
 to help you improve this aspect of your work).
-Finally, since test-driven development is key to the processes taught on this programme, 
+Finally, since test-driven development is key to the processes taught on this programme,
 the extent and quality of your test cases will also be considered.  
 
 
-# 
+#
 ### Task 3: Persistent Storage
  <a href='03%20Persistent%20Storage/slides/segment-1.pdf' target='_blank'> ![](../../resources/icons/slides.png) </a> <a href='03%20Persistent%20Storage/video/segment-1.mp4' target='_blank'> ![](../../resources/icons/video.png) </a>
 
@@ -111,12 +111,12 @@ Some platforms use `\` and some platforms use `/` for separating folder names in
 Your java code should work on ALL platforms - for this reason, you should make use of `File.separator` constant
 (which will contain the relevant character for the platform the code is running on).
 
-Note that if you encounter a tab file with invalid formatting when reading in data from the filesystem, your file parsing method should 
+Note that if you encounter a tab file with invalid formatting when reading in data from the filesystem, your file parsing method should
 throw an `IOException`. You should ensure that this exception is subsequently caught by another part of your server - remember:
 don't let your server crash !  
 
 
-# 
+#
 ### Task 4: Maintaining Relationships
 
 
@@ -132,12 +132,12 @@ You should not "recycle" IDs in any table (e.g. if rows are deleted) since they 
 For simplicity, no primary or foreign key marker keywords are provided by the query language - the server relies upon programmer remembering which attributes are keys.
 
 It is _not_ your responsibility to normalise the database - this is a job for developers who have designed the database schema and who make use of your database server. If you don't know what normalisation is, then don't worry - you don't need to know for this assignment (although I bet you are intrigued to find out now ;o)
-  
+
 
 
 ![](04%20Maintaining%20Relationships/images/sheds.jpg)
 
-# 
+#
 ### Task 5: Java Data Structures
 
 
@@ -172,11 +172,11 @@ method to save these structures _back out_ to the filesystem again
 **Hints & Tips:**  
 In order to check that your code is successfully reading and writing data from the files,
 you should alter the data _whilst it is in memory_ (i.e. _after_ you have read it in but _before_ you write it back out again).
-You could for example replace the age of all people in the table with a randomly generated one. 
+You could for example replace the age of all people in the table with a randomly generated one.
 By changing the data in this way, you can check to make sure that the file system files are actually being over-written and updated !  
 
 
-# 
+#
 ### Task 6: Communication
 
 
@@ -191,7 +191,7 @@ Rather it should respond with the content of _all_ of the tables currently in yo
 (irrespective of what the incoming message contained).
 
 You should attempt to make the response as human-reader friendly as possible. It is important that your test cases do not
-check for exact formatting (since this may vary from implementation to implementation). 
+check for exact formatting (since this may vary from implementation to implementation).
 You will see from the sample test script provided in the template project how tests can be written using simple word matching.
 You should use the same approach when writing your own tests.
 
@@ -199,7 +199,7 @@ It is essential that your response is returned by the `handleCommand` method and
 When we test your server during the marking process, we will be monitoring what is returned via the network.
 You won't get any marks for just doing `println` messages in the terminal !
 
-To help you ensure that your server conforms to the correct protocol, a 
+To help you ensure that your server conforms to the correct protocol, a
 <a href="resources/cw-db/src/main/java/edu/uob/DBClient.java" target="_blank">command-line client</a>
 has been provided for you. This client can be run from the command line using `mvnw exec:java@client`
 You should not have to change any of the code in the client, any features that you implement in this class
@@ -211,7 +211,7 @@ For the sake of simplicity, you may assume only a single client is connected at 
 (i.e. there is no need to handle parallel queries or deal with issues of contention).  
 
 
-# 
+#
 ### Task 7: Query Language
 
 
@@ -234,11 +234,11 @@ The query language we shall use for this purpose supports the following main typ
 A grammar that fully defines the simplified query language is provided in <a href="resources/BNF.txt" target="_blank">this BNF document</a>.
 To help illustrate the use of the query language, we have also provided <a href="resources/example-transcript.docx" target="_blank">a transcript of example queries</a>.
 You will note that BNF grammar contains two distinct types of rule:
-- Symbols with angle brackets `<name>` denote rules which MAY contain arbitrary additional whitespace 
+- Symbols with angle brackets `<name>` denote rules which MAY contain arbitrary additional whitespace
 - Symbols with square brackets `[name]` indicate rules that can NOT contain additional whitespace
 
 As a consequence of these rules, your server should be able to correctly parse incoming commands irrespective of the number of _additional_ whitespace
-characters between certain tokens. So for example: 
+characters between certain tokens. So for example:
 <pre>SELECT    *  FROM     people  WHERE   Name  ==  'Steve' ;</pre>
 is valid and acceptable, being equivalent to:
 <pre>SELECT * FROM people WHERE Name=='Steve';</pre>
@@ -251,7 +251,7 @@ Don't panic, we will provide you some help and advice in the lectures to deal wi
 Note that you should NOT use any existing parsers or parser generators (Yacc, Lex, Antlr etc.) The aim of this assignment is to implement the command parsing using your own code.  
 
 
-# 
+#
 ### Task 8: Query Specifics
 
 
@@ -273,10 +273,10 @@ The order of values returned by a `SELECT` should be the same as specified in th
 This is so the user can determine which attributes came from which tables (as well as coping with the situation where
 two tables have attributes of the same name). The joined table should NOT contain the ID columns from the original tables,
 but rather should include a new ID column containing new sequentially generated IDs.
-  
 
 
-# 
+
+#
 ### Task 9: Error Handling
 
 
@@ -312,7 +312,7 @@ It is essential that your response back to the client begin with the correct sta
 These will be used by the automated testing scripts during the marking process !  
 
 
-# 
+#
 ### Task 10: Submission
 
 
@@ -326,7 +326,7 @@ You should add a suitable range of tests to your project: your aim is to cover a
 of the server and verify the correct operation of your code. The completeness and comprehensivity of your test cases will be taken
 into account during the marking of this assignment. You submission will also be assessed on "code quality" as outlined in the lectures.
 
-You should make sure your code can respond to _at the very least_ the "standard" query spacing (as illustrated in the 
+You should make sure your code can respond to _at the very least_ the "standard" query spacing (as illustrated in the
 <a href="resources/example-transcript.docx" target="_blank">example transcript</a>).
 As with any real implementation of SQL, you should also however try to support some level of variability and robustness.
 Remember that different users may attempt to use different spacing standards - it would be nice to support them, not constrain them.
@@ -348,4 +348,4 @@ Remember that your main class MUST be called `DBServer` and should not change th
 (or we won't be able to run your code !)  
 
 
-# 
+#
