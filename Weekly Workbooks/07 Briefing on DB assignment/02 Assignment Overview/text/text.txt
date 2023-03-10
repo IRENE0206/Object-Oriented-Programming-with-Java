@@ -7,7 +7,7 @@ You will not be required to implement a client application - this will be provid
 
 As usual, you have been provided with a <a href="resources/cw-db" target="_blank">Maven project</a>
 to help get you started with the assignment.
-As before, there is a <a href="resources/cw-db/src/test/java/edu/uob/DBTests.java" target="_blank">template test script</a>
+As before, there is a <a href="resources/cw-db/src/test/java/edu/uob/ExampleDBTests.java" target="_blank">template test script</a>
 for you to use - make sure you add suitable test cases to this script to ensure that your application is
 fully and systematically tested. As with the previous assignment, you will be assessed on the extent to which
 your test cases cover the implemented features of the software.
