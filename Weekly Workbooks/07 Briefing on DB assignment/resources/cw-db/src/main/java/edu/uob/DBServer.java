@@ -1,11 +1,6 @@
 package edu.uob;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Paths;
@@ -43,6 +38,7 @@ public class DBServer {
     */
     public String handleCommand(String command) {
         // TODO implement your server logic here
+
         return "";
     }
 
@@ -77,6 +73,62 @@ public class DBServer {
                 writer.write("\n" + END_OF_TRANSMISSION + "\n");
                 writer.flush();
             }
+        }
+    }
+
+    public DBTable readDataFromFile(String filename) {
+        File fileToRead = new File(filename);
+        try {
+            FileReader reader = new FileReader(fileToRead);
+            BufferedReader buffReader = new BufferedReader(reader);
+            try {
+                String firstLine = buffReader.readLine();
+                if (firstLine.length() > 0) {
+                    String[] firstLineSplit = firstLine.split("\t");
+                    String name = fileToRead.getName();
+                    DBTable table = new DBTable(name, firstLineSplit);
+                    int expectedLength = firstLineSplit.length;
+                    buffReader
+                            .lines()
+                            .filter(s -> s.length() > 0)
+                            .forEach(s -> addOrCatchInvalidFormatting(table, s, expectedLength));
+                    return table;
+                }
+                buffReader.close();
+            } catch (IOException ioException) {
+                System.out.println("Cannot read " + filename);
+            }
+        } catch (FileNotFoundException fileNotFoundException) {
+            System.out.println(filename + " not found");
+        }
+        return null;
+    }
+
+    private void addOrCatchInvalidFormatting (DBTable table, String line, int expectedLength) {
+        try {
+            String[] lineSplit = line.split("\t");
+            checkInvalidFormatting(lineSplit, expectedLength);
+            table.addRow(lineSplit);
+        } catch (IOException ioException) {
+            System.out.println("Tab file has invalid formatting");
+        }
+    }
+
+    private void checkInvalidFormatting(String[] line, int expectedLength) throws IOException {
+        if (line.length != expectedLength) {
+            throw new IOException();
+        }
+    }
+
+    public void tableToFile(DBTable table, File fileToWrite) {
+        try {
+            FileWriter writer = new FileWriter(fileToWrite);
+            writer.write(table.getColNames() + "\n");
+            writer.write(table.getValues());
+            writer.flush();
+            writer.close();
+        } catch (IOException ioException) {
+            System.out.println("Cannot write to " + fileToWrite);
         }
     }
 }
