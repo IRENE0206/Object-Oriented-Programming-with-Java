@@ -1,8 +1,8 @@
 package edu.uob;
 
-public class UseCMD extends DBCmd {
-    public UseCMD(String databaseName) {
-        this.commandType = "USE";
+public class CreateDatabaseCMD extends CreateCMD {
+    public CreateDatabaseCMD(String databaseName) {
+        super();
         this.databaseName = databaseName;
     }
 

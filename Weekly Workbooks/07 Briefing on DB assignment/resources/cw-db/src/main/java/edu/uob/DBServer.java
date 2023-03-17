@@ -56,7 +56,8 @@ public class DBServer {
         } catch (IOException ioException) {
             System.out.println(storageFolderPath + " is not correct path for storage folder");
         } */
-        return "";
+        Parser parser = new Parser(this, command);
+        return parser.parse().query(this);
     }
 
     //  === Methods below handle networking aspects of the project - you will not need to change these ! ===
