@@ -19,7 +19,7 @@ public class ReadAndWriteFileTests {
         File resourcesDir = new File(currDir.getParent());
         String peopleTabName = resourcesDir + File.separator + "people.tab";
         File peopleTab = new File(peopleTabName);
-        DBTable table = this.dbServer.readDataFromFile(peopleTabName);
+        DBTable table = this.dbServer.fileToTable(peopleTabName);
         compareTableContentsAndFile(table, peopleTab);
         table.changeValue(1, "age", "26");
         this.dbServer.tableToFile(table, peopleTab);
@@ -27,7 +27,7 @@ public class ReadAndWriteFileTests {
 
         String shedsTabName = resourcesDir + File.separator + "sheds.tab";
         File shedsTab = new File(shedsTabName);
-        table = this.dbServer.readDataFromFile(shedsTabName);
+        table = this.dbServer.fileToTable(shedsTabName);
         compareTableContentsAndFile(table, shedsTab);
         table.changeValue(3, "Height", "1200");
         this.dbServer.tableToFile(table, shedsTab);

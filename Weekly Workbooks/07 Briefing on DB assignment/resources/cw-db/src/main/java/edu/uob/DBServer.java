@@ -11,6 +11,7 @@ public class DBServer {
 
     private static final char END_OF_TRANSMISSION = 4;
     private String storageFolderPath;
+    private String databasePath;
 
     public static void main(String args[]) throws IOException {
         DBServer server = new DBServer();
@@ -38,7 +39,23 @@ public class DBServer {
     */
     public String handleCommand(String command) {
         // TODO implement your server logic here
-
+        /* File folder = new File(storageFolderPath);
+        try {
+            if (folder.exists() && folder.isDirectory()) {
+                File[] documents = folder.listFiles(n -> n.getName().endsWith(".tab"));
+                if (documents != null) {
+                    Arrays.stream(documents)
+                            .map(this::getBuffReaderFromFile)
+                            .filter(Objects::nonNull)
+                            .map(BufferedReader::lines)
+                            .;
+                }
+            } else {
+                throw new IOException();
+            }
+        } catch (IOException ioException) {
+            System.out.println(storageFolderPath + " is not correct path for storage folder");
+        } */
         return "";
     }
 
@@ -76,11 +93,10 @@ public class DBServer {
         }
     }
 
-    public DBTable readDataFromFile(String filename) {
+    public DBTable fileToTable(String filename) {
         File fileToRead = new File(filename);
-        try {
-            FileReader reader = new FileReader(fileToRead);
-            BufferedReader buffReader = new BufferedReader(reader);
+        BufferedReader buffReader = getBuffReaderFromFile(fileToRead);
+        if (buffReader != null) {
             try {
                 String firstLine = buffReader.readLine();
                 if (firstLine.length() > 0) {
@@ -98,37 +114,40 @@ public class DBServer {
             } catch (IOException ioException) {
                 System.out.println("Cannot read " + filename);
             }
+        }
+        return null;
+    }
+
+    private BufferedReader getBuffReaderFromFile(File fileToRead) {
+        try {
+            FileReader reader = new FileReader(fileToRead);
+            return new BufferedReader(reader);
         } catch (FileNotFoundException fileNotFoundException) {
-            System.out.println(filename + " not found");
+            System.out.println(fileToRead + " not found");
         }
         return null;
     }
 
     private void addOrCatchInvalidFormatting (DBTable table, String line, int expectedLength) {
-        try {
-            String[] lineSplit = line.split("\t");
-            checkInvalidFormatting(lineSplit, expectedLength);
-            table.addRow(lineSplit);
-        } catch (IOException ioException) {
+        String[] lineSplit = line.split("\t");
+        if (lineSplit.length != expectedLength) {
             System.out.println("Tab file has invalid formatting");
+        } else {
+            table.addRow(lineSplit);
         }
     }
 
-    private void checkInvalidFormatting(String[] line, int expectedLength) throws IOException {
-        if (line.length != expectedLength) {
-            throw new IOException();
-        }
+    public String getStorageFolderPath() {
+        return this.storageFolderPath;
     }
 
-    public void tableToFile(DBTable table, File fileToWrite) {
-        try {
-            FileWriter writer = new FileWriter(fileToWrite);
-            writer.write(table.getColNames() + "\n");
-            writer.write(table.getValues());
-            writer.flush();
-            writer.close();
-        } catch (IOException ioException) {
-            System.out.println("Cannot write to " + fileToWrite);
-        }
+    public String getDatabasePath() {
+        return this.databasePath;
     }
+
+    public void setDatabasePath(String path) {
+        this.databasePath = path;
+    }
+
+
 }
