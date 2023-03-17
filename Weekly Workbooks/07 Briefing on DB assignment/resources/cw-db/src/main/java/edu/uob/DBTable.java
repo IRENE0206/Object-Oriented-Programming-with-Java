@@ -16,6 +16,16 @@ public class DBTable {
     private List<Integer> idUsed;
     private List<List<String>> rows;
 
+
+    public DBTable(String name) {
+        this.tableName = name;
+        this.rowNum = 0;
+        this.colNum = 0;
+        this.idUsed = new ArrayList<>();
+        this.colNames = new ArrayList<>();
+        this.rows = new ArrayList<>();
+    }
+
     public DBTable(String name, List<String> firstLine) {
         this.tableName = name;
         this.rowNum = 0;
@@ -127,8 +137,7 @@ public class DBTable {
         return s1.toLowerCase().compareTo(s2.toLowerCase()) == 0;
     }
 
-    public String toFile(String databasePath) {
-        String fileToWrite = databasePath + File.separator + this.tableName + ".tab";
+    public String toFile(String fileToWrite) {
         try {
             FileWriter writer = new FileWriter(fileToWrite);
             writer.write(listToString(this.getColNames()) + "\n");
@@ -138,7 +147,7 @@ public class DBTable {
                     .trim());
             writer.flush();
             writer.close();
-            return "[OK] Successfully write contents of table " + this.tableName + " to file";
+            return "[OK] ";
         } catch (IOException ioException) {
             return "[ERROR] Failed to write to file " + fileToWrite;
         }
