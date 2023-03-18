@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Paths;
 import java.nio.file.Files;
+import java.util.Arrays;
 
 /** This class implements the DB server. */
 public class DBServer {
@@ -91,50 +92,6 @@ public class DBServer {
                 writer.write("\n" + END_OF_TRANSMISSION + "\n");
                 writer.flush();
             }
-        }
-    }
-
-    public DBTable fileToTable(String filename) {
-        File fileToRead = new File(filename);
-        BufferedReader buffReader = getBuffReaderFromFile(fileToRead);
-        if (buffReader != null) {
-            try {
-                String firstLine = buffReader.readLine();
-                if (firstLine.length() > 0) {
-                    String[] firstLineSplit = firstLine.split("\t");
-                    String name = fileToRead.getName();
-                    DBTable table = new DBTable(name, firstLineSplit);
-                    int expectedLength = firstLineSplit.length;
-                    buffReader
-                            .lines()
-                            .filter(s -> s.length() > 0)
-                            .forEach(s -> addOrCatchInvalidFormatting(table, s, expectedLength));
-                    return table;
-                }
-                buffReader.close();
-            } catch (IOException ioException) {
-                System.out.println("Cannot read " + filename);
-            }
-        }
-        return null;
-    }
-
-    private BufferedReader getBuffReaderFromFile(File fileToRead) {
-        try {
-            FileReader reader = new FileReader(fileToRead);
-            return new BufferedReader(reader);
-        } catch (FileNotFoundException fileNotFoundException) {
-            System.out.println(fileToRead + " not found");
-        }
-        return null;
-    }
-
-    private void addOrCatchInvalidFormatting (DBTable table, String line, int expectedLength) {
-        String[] lineSplit = line.split("\t");
-        if (lineSplit.length != expectedLength) {
-            System.out.println("Tab file has invalid formatting");
-        } else {
-            table.addRow(lineSplit);
         }
     }
 

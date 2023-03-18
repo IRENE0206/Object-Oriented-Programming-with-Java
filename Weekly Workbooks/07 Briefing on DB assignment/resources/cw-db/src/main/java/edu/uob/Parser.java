@@ -1,6 +1,5 @@
 package edu.uob;
 
-import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -127,20 +126,20 @@ public class Parser {
             setLackMoreTokensErrorMessage();
             return null;
         }
-        if (toCreateDatabase(databaseOrTable)) {
+        if (toDatabase(databaseOrTable)) {
             return createDatabase();
-        } else if (toCreateTable(databaseOrTable)) {
+        } else if (toTable(databaseOrTable)) {
             return createTable();
         }
         setSyntaxErrorMessage();
         return null;
     }
 
-    private boolean toCreateDatabase(String databaseOrTable) {
+    private boolean toDatabase(String databaseOrTable) {
         return stringsEqualCaseInsensitively(databaseOrTable, "DATABASE");
     }
 
-    private boolean toCreateTable(String databaseOrTable) {
+    private boolean toTable(String databaseOrTable) {
         return stringsEqualCaseInsensitively(databaseOrTable, "TABLE");
     }
 
@@ -196,8 +195,7 @@ public class Parser {
             return null;
         }
         List<String> attributeList = new ArrayList<>();
-        getAttributeList(attributeList);
-        if (attributeList.size() == 0) {
+        if (!getAttributeList(attributeList)) {
             return null;
         }
         if (!isCloseBracket(tokeniser.getToken())) {
@@ -223,20 +221,20 @@ public class Parser {
         setErrorMessage("Missing " + bracket);
     }
 
-    private boolean isValidAttributeName(String s) {
+    private boolean invalidAttributeName(String s) {
         if (isPlainText(s)) {
-            return true;
-        } else if (!s.contains(".")) {
             return false;
+        } else if (!s.contains(".")) {
+            return true;
         }
         int strLength = s.length();
         int index = s.indexOf(".");
         if (index == strLength - 1) {
-            return false;
+            return true;
         }
         String tableName = s.substring(0, index);
         String plainText = s.substring(index + 1);
-        return !invalidTableName(tableName) && !invalidPlainText(plainText);
+        return invalidTableName(tableName) || invalidPlainText(plainText);
     }
 
     private boolean invalidPlainText(String plainText) {
@@ -251,30 +249,30 @@ public class Parser {
         setErrorMessage(attributeName + " is not valid [AttributeName");
     }
 
-    private void getAttributeList(List<String> accumulator) {
+    private boolean getAttributeList(List<String> accumulator) {
         String token = tokeniser.getToken();
-        if (!isValidAttributeName(token)) {
+        if (invalidAttributeName(token)) {
             setInvalidAttributeNameErrorMessage(token);
             accumulator.clear();
-            return;
+            return false;
         }
         if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
             accumulator.clear();
-            return;
+            return false;
         }
         String currToken = tokeniser.getToken();
         if (!isComma(currToken)) {
             accumulator.add(token);
-            return;
+            return false;
         }
         if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
             accumulator.clear();
-            return;
+            return false;
         }
         accumulator.add(token);
-        getAttributeList(accumulator);
+        return getAttributeList(accumulator);
     }
 
     private void setTableNameErrorMessage(String tableName) {
@@ -325,137 +323,54 @@ public class Parser {
         return true;
     }
 
-    private String useDatabase(String databaseName) {
-        if (!isPlainText(databaseName)) {
-            return errorMessage(databaseName, "[PlainText]");
-        }
 
-        return ok + "Changed the database to " + databaseName;
-    }
-
-    private String createDB(String databaseName) {
-        if (!isPlainText(databaseName)) {
-            return errorMessage(databaseName, "[PlainText]");
+    private AlterCMD alter() {
+        String secondKeyword = tokeniser.getToken();
+        if (!toTable(secondKeyword)) {
+            setErrorMessage(secondKeyword + " is not valid syntax");
+            return null;
         }
-        String name = getDBPath(databaseName);
-        File databaseToCreate = new File(name);
-        try {
-            boolean createSuccessful = databaseToCreate.createNewFile();
-            if (!createSuccessful) {
-                return error + databaseName + "already exists";
-            } else if (!databaseToCreate.isDirectory()) {
-                if (!databaseToCreate.delete()) {
-                    return error + databaseName + "is not a directory and can't be deleted";
-                }
-                return error + databaseName + "is not a directory";
-            }
-            return ok + "Successfully creates database " + databaseName;
-        } catch (IOException ioException) {
-            return error + "Failed to create database " + databaseName;
+        if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            return null;
         }
-    }
-
-    private String createTableWithoutAttributes(String tableName) {
-        if (!isPlainText(tableName)) {
-            return errorMessage(tableName, "[PlainText]");
+        String tableName = tokeniser.getToken();
+        if (invalidTableName(tableName)) {
+            return null;
         }
-        String name = getTablePath(tableName);
-        File tableToCreate = new File(name);
-        try {
-            boolean createSuccessful = tableToCreate.createNewFile();
-            if (!createSuccessful) {
-                return error + tableToCreate + "already exists";
-            } else if (!tableToCreate.isFile()) {
-                if (!tableToCreate.delete()) {
-                    return error + tableToCreate + " is not a file and can't be deleted";
-                }
-                return error + tableToCreate + " is not a file";
-            }
-            return ok + "Successfully created table " + tableToCreate;
-        } catch (IOException ioException) {
-            return error + "Failed to create table " + tableToCreate;
+        if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            return null;
         }
-    }
-
-    private String createTableWithAttributes(String tableName, List<String> tokens) {
-        int tokenCount = tokens.size();
-        if (tokens.size() <= 2) {
-            return syntaxErrorMessage();
+        String alterType = tokeniser.getToken();
+        if(!isAdd(alterType) && !isDrop(alterType)) {
+            setErrorMessage(alterType + " is not valid [AlterationType]");
+            return null;
         }
-        if (!isOpenBracket(tokens.get(0))) {
-            return error + "Missing (";
+        if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            return null;
         }
-        if (!isCloseBracket(tokens.get(tokenCount - 1))) {
-            return error + "Missing )";
+        String attributeName = tokeniser.getToken();
+        if (invalidAttributeName(attributeName)) {
+            setInvalidAttributeNameErrorMessage(attributeName);
+            return null;
         }
-        List<String> tokensLeft = tokens.subList(1, tokenCount - 1);
-        List<String> firstLine = new ArrayList<>();
-        for (int i = 0; i < tokenCount - 2; i++) {
-            String s = tokensLeft.get(i);
-            if (i / 2 == 0 && !isComma(s)) {
-                s = stripAttributeName(s, tableName);
-                if (isPlainText(s)) {
-                    firstLine.add(s);
-                } else {
-                    return errorMessage(s, "AttributeName");
-                }
-            } else if ((i / 2 != 0 && !isComma(s)) || (i / 2 == 0 && isComma(s))) {
-                return syntaxErrorMessage();
-            }
+        if (failToMoveToNextToken()) {
+            setMissingSemiColonErrorMessage();
+            return null;
         }
-        String message = createTableWithoutAttributes(tableName);
-        if (message.startsWith(ok)) {
-            String name = getTablePath(tableName);
-            File fileToOpen = new File(name);
-            DBTable dbTable = new DBTable(tableName, firstLine);
-            this.dbServer.tableToFile(dbTable, fileToOpen);
-            return ok + "Successfully create table " + tableName;
+        if (failToEndWithSemicolonProperly()) {
+            return null;
         }
-        return message;
-    }
-
-    private String stripAttributeName(String s, String tableName) {
-        if (s.startsWith(tableName + ".")) {
-            return s.substring(s.indexOf(".") + 1);
-        }
-        return s;
-    }
-
-    private String alter(List<String> tokens) {
-        if (tokens.size() != 4) {
-            return syntaxErrorMessage();
-        }
-        String secondKeyword = tokens.get(0);
-        if (!toActOnTable(secondKeyword)) {
-            return errorMessage(secondKeyword, "TABLE");
-        }
-        String tableName = tokens.get(1);
-        String fileName = getTablePath(tableName);
-        File fileToAlter = new File(fileName);
-        if (!isExistingTable(fileToAlter)) {
-            return error + tableName + " doesn't exist";
-        }
-        String alterType = tokens.get(2);
-        if (isAdd(alterType) || isDrop(alterType)) {
-            DBTable dbTable = this.dbServer.fileToTable(fileName);
-            String attributeName = tokens.get(3);
-            String message;
-            boolean hasAttribute = dbTable.getColNames().contains(attributeName);
-            if (isDrop(alterType)) {
-                message = dbTable.dropCol(attributeName);
-            } else {
-                message = dbTable.addCol(attributeName);
-            }
-            this.dbServer.tableToFile(dbTable, fileToAlter);
-            return message;
+        setParsedOK();
+        if (isAdd(alterType)) {
+            return new AlterAddCMD(tableName, alterType, attributeName);
         } else {
-            return errorMessage(alterType, "[AlterationType]");
+            return new AlterDropCMD(tableName, alterType, attributeName);
         }
     }
 
-    private boolean isExistingAttribute(File tableFile, String attributeName) {
-
-    }
 
     private boolean isComma(String s) {
         return s.compareTo(",") == 0;
@@ -469,16 +384,8 @@ public class Parser {
         return s.compareTo(")") == 0;
     }
 
-    private String errorMessage(String s, String expected) {
-        return error + s + " is not valid" + expected;
-    }
-
     private boolean toCreate(String firstKeyword) {
         return stringsEqualCaseInsensitively(firstKeyword, "CREATE");
-    }
-
-    private boolean toActOnDB(String secondKeyword) {
-        return stringsEqualCaseInsensitively(secondKeyword, "DATABASE");
     }
 
     private boolean toActOnTable(String secondKeyword) {
@@ -489,61 +396,50 @@ public class Parser {
         return stringsEqualCaseInsensitively(firstKeyword, "DROP");
     }
 
-    private String drop(List<String> tokens) {
-        if (tokens.size() != 2) {
-            return syntaxErrorMessage();
+    private DropCMD drop() {
+        String databaseOrTable = tokeniser.getToken();
+        if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            return null;
         }
-        String secondKeyword = tokens.get(0);
-        String name = tokens.get(1);
-        if (toActOnDB(secondKeyword)) {
-            return dropDB(name);
-        } else if (toActOnTable(secondKeyword)) {
-            return dropTable(name);
+        if (toDatabase(databaseOrTable)) {
+            return dropDatabase();
+        } else if (toTable(databaseOrTable)) {
+            return dropTable();
         } else {
-            return syntaxErrorMessage();
+            setErrorMessage(databaseOrTable + " is not valid keyword for Drop");
+            return null;
         }
     }
 
-    private String dropDB(String databaseName) {
-        String name = getDBPath(databaseName);
-        File fileToDrop = new File(name);
-        if (!isExistingDB(fileToDrop)) {
-            return error + databaseName + " is not existing database";
+    private DropDatabaseCMD dropDatabase() {
+        String databaseName = tokeniser.getToken();
+        if (invalidDatabaseName(databaseName)) {
+            return null;
         }
-        File[] fileInDatabase = fileToDrop.listFiles();
-        if (fileInDatabase != null) {
-            for (File f : fileInDatabase) {
-                if (!f.delete()) {
-                    return error + "Failed to delete " + f + " in database " + databaseName;
-                }
-            }
+        if (failToMoveToNextToken()) {
+            setMissingSemiColonErrorMessage();
+            return null;
+        } else if (failToEndWithSemicolonProperly()) {
+            return null;
         }
-        if (fileToDrop.delete()) {
-            return ok + "Successfully deleted database " + databaseName;
-        } else {
-            return error + "Failed to delete database " + databaseName;
-        }
+        setParsedOK();
+        return new DropDatabaseCMD(databaseName);
     }
 
-    private String dropTable(String tableName) {
-        String name = getTablePath(tableName);
-        File fileToDrop = new File(name);
-        if (!isExistingTable(fileToDrop)) {
-            return error + tableName + " is not existing table in current database";
+    private DropTableCMD dropTable() {
+        String tableName = tokeniser.getToken();
+        if (invalidTableName(tableName)) {
+            return null;
         }
-        if (fileToDrop.delete()) {
-            return ok + "Successfully deleted database " + tableName;
-        } else {
-            return error + "Failed to delete database " + tableName;
+        if (failToMoveToNextToken()) {
+            setMissingSemiColonErrorMessage();
+            return null;
+        } else if (failToEndWithSemicolonProperly()) {
+            return null;
         }
-    }
-
-    private String getTablePath(String tableName) {
-        return this.dbServer.getCurrentDataBasePath() + File.separator + tableName + tableFileExtension;
-    }
-
-    private boolean isExistingTable(File table) {
-        return table.exists() && table.getName().endsWith(tableFileExtension);
+        setParsedOK();
+        return new DropTableCMD(tableName);
     }
 
     private boolean toAlter(String firstKeyword) {
@@ -554,37 +450,80 @@ public class Parser {
         return stringsEqualCaseInsensitively(firstKeyword, "INSERT");
     }
 
-    private String insert(List<String> tokens) {
-        int tokenCount = tokens.size();
-        if (tokenCount < 5) {
-            return syntaxErrorMessage();
+    private InsertCMD insert() {
+        String secondKeyword = tokeniser.getToken();
+        if(!stringsEqualCaseInsensitively(secondKeyword, "INTO")) {
+            setErrorMessage(secondKeyword + " is not invalid keyword 'INTO'");
+            return null;
         }
-        if (!stringsEqualCaseInsensitively(tokens.get(0), "INTO")) {
-            return syntaxErrorMessage();
+        if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            return null;
         }
-        String tableName = getTablePath(tokens.get(1));
-        File tableToInsert = new File(tableName);
-        if (!isExistingTable(tableToInsert)) {
-            return error + tableName + " doesn't exist";
+        String tableName = tokeniser.getToken();
+        if (invalidTableName(tableName)) {
+            return null;
         }
-        if (!stringsEqualCaseInsensitively(tokens.get(2), "VALUES") || !isOpenBracket(tokens.get(3))) {
-            return syntaxErrorMessage();
+        if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            return null;
         }
-        List<String> subList = tokens.subList(4, tokenCount - 1);
-        DBTable dbTable = this.dbServer.fileToTable(tableName);
-        for (int i = 0; i < subList.size(); i++) {
-            String s = subList.get(i);
-            if (i / 2 == 0 && isComma(s) || i / 2 != 0 && !isComma(s)) {
-                return syntaxErrorMessage();
-            }
+        String thirdKeyword = tokeniser.getToken();
+        if(!stringsEqualCaseInsensitively(thirdKeyword, "VALUES")) {
+            setErrorMessage(secondKeyword + " is not invalid keyword 'VALUES'");
+            return null;
         }
-        if (subList.size() != dbTable.getColNames().size()) {
-            return error +
+        if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            return null;
         }
+        if (missingOpenBracket()) {
+            return null;
+        }
+        if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            return null;
+        }
+        List<String> accumulator = new ArrayList<>();
+        if (!getValueList(accumulator)) {
+            return null;
+        }
+        if (failToMoveToNextToken()) {
+            failToEndWithSemicolonProperly();
+            return null;
+        }
+        return new InsertCMD(tableName, accumulator);
     }
 
     private boolean toSelect(String firstKeyword) {
         return stringsEqualCaseInsensitively(firstKeyword, "SELECT");
+    }
+
+    private boolean getValueList(List<String> accumulator) {
+        String value = tokeniser.getToken();
+        if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            accumulator.clear();
+            return false;
+        }
+        String currToken = tokeniser.getToken();
+        if (isValue(value) && isCloseBracket(currToken)) {
+            accumulator.add(value);
+            return true;
+        } else if (isValue(value) && isComma(currToken)) {
+            if (failToMoveToNextToken()) {
+                setLackMoreTokensErrorMessage();
+                accumulator.clear();
+                return false;
+            }
+            return getValueList(accumulator);
+        } else if (isValue(value)) {
+            setMissingBracketMessage(")");
+            accumulator.clear();
+            return false;
+        }
+        accumulator.clear();
+        return false;
     }
 
     private boolean toUpdate(String firstKeyword) {
@@ -623,9 +562,17 @@ public class Parser {
         return Character.isUpperCase(c) || Character.isLowerCase(c);
     }
 
+    private boolean isLetter(String s) {
+        return s.length() == 1 && isLetter(s.charAt(0));
+    }
+
     private boolean isDigit(Character c) {
         int i = Character.getNumericValue(c);
         return 0 <= i && i <= 9;
+    }
+
+    private boolean isDigit(String s) {
+        return s.length() == 1 && isDigit(s.charAt(0));
     }
 
     private boolean isSpace(String s) {
@@ -646,23 +593,21 @@ public class Parser {
         return stringsEqualCaseInsensitively(s, "ADD");
     }
 
-
-
-
     private boolean isNull(String s) {
-        return s.toUpperCase().compareTo("NULL") == 0;
+        return stringsEqualCaseInsensitively(s, "NULL");
     }
 
     private boolean isBooleanLiteral(String s) {
-        String[] booleanLiterals = {"TRUE", "FALSE"};
-        return arrayContains(booleanLiterals, s);
+        return stringsEqualCaseInsensitively(s, "TRUE") || stringsEqualCaseInsensitively(s, "FALSE");
     }
 
     private boolean arrayContains(String[] array, String s) {
         return Arrays.stream(array).toList().contains(s.toUpperCase());
     }
 
-    private boolean isWildAttribList()
+    private boolean isWildAttribList() {
+        return
+    }
 
     private boolean isBoolOperator(String s) {
         return stringsEqualCaseInsensitively(s, "AND") || stringsEqualCaseInsensitively(s, "OR");
@@ -673,4 +618,53 @@ public class Parser {
         return arrayContains(comparators, s.toUpperCase());
     }
 
+    private boolean isCharLiteral(String s) {
+        return isSpace(s) || isLetter(s) || isSymbol(s) || isDigit(s);
+    }
+
+    private boolean isDigitalSequence(String s) {
+        return isDigit(s) ||
+                (s.length() > 1 && isDigit(s.charAt(0)) && isDigitalSequence(s.substring(1)));
+    }
+
+    private boolean isIntegerLiteral(String s) {
+        return isDigitalSequence(s) ||
+                (s.length() > 1 && isPlusOrMinusSign(s.charAt(0)) && isDigitalSequence(s.substring(1)));
+    }
+
+    private boolean isPlusOrMinusSign(char c) {
+        return c == '+' || c == '-';
+    }
+
+    private boolean isFloatLiteral(String s) {
+        if (!s.contains(".") || s.length() < 3) {
+            return false;
+        }
+        int length = s.length();
+        int index = s.indexOf(".");
+        if (index == length - 1) {
+            return false;
+        }
+        String substring1 = s.substring(0, index);
+        String substring2 = s.substring(index + 1, length);
+        return isDigitalSequence(substring2) &&
+                (isDigitalSequence(substring1) ||
+                        (substring1.length() > 1 && isPlusOrMinusSign(substring1.charAt(0))
+                                && isDigitalSequence(substring1.substring(1))));
+    }
+
+    private boolean isStringLiteral(String s) {
+        return s.isEmpty() || isCharLiteral(s) ||
+                (isStringLiteral(s.substring(0, s.length() - 1))
+                        && isCharLiteral(s.substring(s.length() - 1)));
+    }
+
+    private boolean isValue(String s) {
+        if (isNull(s) || isIntegerLiteral(s) || isFloatLiteral(s) || isBooleanLiteral(s)) {
+            return true;
+        } else if (s.length() >= 2) {
+            return s.startsWith("'") && s.endsWith("'") && isStringLiteral(s.substring(1, s.length() - 1));
+        }
+        return false;
+    }
 }

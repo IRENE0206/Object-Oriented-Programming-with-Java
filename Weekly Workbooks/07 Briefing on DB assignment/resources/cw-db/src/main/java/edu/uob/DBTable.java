@@ -1,10 +1,8 @@
 package edu.uob;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -39,7 +37,7 @@ public class DBTable {
 
     public String addRow(List<String> line) {
         if (line.size() != this.colNum - 1) {
-            return "[ERROR] Not expected number of values. Cannot insert into table " + this.tableName;
+            return "Not expected number of values. Cannot insert into table " + this.tableName;
         }
         List<String> row = new ArrayList<>();
         if (idUsed.isEmpty()) {
@@ -51,7 +49,7 @@ public class DBTable {
         }
         this.rows.add(row);
         this.rowNum += 1;
-        return "[OK] Successfully inserted values into table " + this.tableName;
+        return "";
     }
 
     public String deleteRow(String id) {
@@ -105,28 +103,30 @@ public class DBTable {
         return null;
     }
 
-    public String dropCol(String colName) {
+    public void dropCol(String colName) {
         if (compareStringsCaseInsensitively(colName, "id")) {
-            return "[ERROR] Cannot delete column id of table " + this.tableName;
+            return;
         }
-        if (!listContainsString(this.colNames, colName)) {
-            return "[ERROR] " + tableName + " does not have attribute " + colName;
+        if (!tableContainsAttribute(colName)) {
+            return;
         }
         int colIndex = colNames.indexOf(colName) + 1;
         colNames.remove(colName);
         this.rows.forEach(row -> row.remove(colIndex));
         this.colNum -= 1;
-        return "[OK] Successfully removed " + colName + " from " + tableName;
     }
 
-    public String addCol(String colName) {
-        if (listContainsString(this.colNames, colName)) {
-            return "[ERROR] " + tableName + " already have attribute " + colName;
+    public void addCol(String colName) {
+        if (tableContainsAttribute(colName)) {
+            return;
         }
         colNames.add(colName);
         this.rows.forEach(row -> row.add(""));
         this.colNum += 1;
-        return "[OK] Successfully added " + colName + " to " + tableName;
+    }
+
+    public boolean tableContainsAttribute(String colName) {
+        return listContainsString(this.colNames, colName);
     }
 
     private boolean listContainsString(List<String> stringList, String s) {
@@ -137,7 +137,7 @@ public class DBTable {
         return s1.toLowerCase().compareTo(s2.toLowerCase()) == 0;
     }
 
-    public String toFile(String fileToWrite) {
+    public boolean failToFile(String fileToWrite) {
         try {
             FileWriter writer = new FileWriter(fileToWrite);
             writer.write(listToString(this.getColNames()) + "\n");
@@ -147,9 +147,9 @@ public class DBTable {
                     .trim());
             writer.flush();
             writer.close();
-            return "[OK] ";
+            return false;
         } catch (IOException ioException) {
-            return "[ERROR] Failed to write to file " + fileToWrite;
+            return true;
         }
     }
 

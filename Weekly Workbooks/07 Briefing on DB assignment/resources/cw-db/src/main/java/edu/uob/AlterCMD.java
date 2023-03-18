@@ -1,9 +1,18 @@
 package edu.uob;
 
-public class AlterCMD extends DBCmd {
+import java.io.File;
 
-    @Override
-    public String query(DBServer dbServer) {
-        return null;
+public abstract class AlterCMD extends DBCmd {
+    String alterType;
+    String attributeName;
+
+    public AlterCMD(String tableName, String alterType, String attributeName) {
+        this.commandType = "ALTER";
+        this.tableName = tableName;
+        this.alterType = alterType;
+        this.attributeName = attributeName;
     }
+
+    public abstract String query(DBServer dbServer);
 }
+

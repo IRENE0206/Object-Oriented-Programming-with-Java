@@ -20,8 +20,8 @@ public class CreateTableCMD extends CreateCMD {
     @Override
     public String query(DBServer dbServer) {
         setDatabasePathFromCurrentDatabasePath(dbServer.getDatabasePath());
-        String tabFileToCreate = this.databasePath + File.separator + this.tableName + tabTileExtension;
-        File fileToCreate = new File(tabFileToCreate);
+        setTableFilePath();
+        File fileToCreate = new File(this.tableFilePath);
         if (fileToCreate.exists()) {
             return errorMessage("Table " + this.tableName + " already exists");
         }
@@ -31,6 +31,9 @@ public class CreateTableCMD extends CreateCMD {
         } else {
             dbTable = new DBTable(this.tableName);
         }
-        return dbTable.toFile(this.databasePath);
+        if (dbTable.failToFile(this.databasePath)) {
+            return errorMessage("Failed to create table " + this.tableName);
+        }
+        return getQueryResults("");
     }
 }
