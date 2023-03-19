@@ -11,18 +11,21 @@ public class SelectCMD extends DBCmd {
         this.tableName = tableName;
         this.selectAll = true;
         this.unconditional = true;
+        this.dbTable = new DBTable(this.tableName);
     }
 
     public SelectCMD(String tableName, List<Condition> condition, boolean unconditional) {
         this.tableName = tableName;
         this.unconditional = unconditional;
         this.condition = condition;
+        this.dbTable = new DBTable(this.tableName);
     }
 
     public SelectCMD(String tableName, List<String> attributeList) {
         this.tableName = tableName;
         this.selectAll = false;
         this.unconditional = true;
+        this.dbTable = new DBTable(this.tableName);
         this.attributeList = attributeList;
     }
 
@@ -30,6 +33,7 @@ public class SelectCMD extends DBCmd {
         this.tableName = tableName;
         this.selectAll = false;
         this.unconditional = false;
+        this.dbTable = new DBTable(this.tableName);
         this.attributeList = attributeList;
         this.condition = condition;
     }
@@ -38,7 +42,7 @@ public class SelectCMD extends DBCmd {
     public String query(DBServer dbServer) {
         setDatabasePathFromCurrentDatabasePath(dbServer.getDatabasePath());
         setTableFilePath();
-        String error1 = tableFileToDBTable();
+        String error1 = tableFileToDBTable(this.tableFilePath, this.dbTable);
         if (!error1.isEmpty()) {
             return error1;
         }

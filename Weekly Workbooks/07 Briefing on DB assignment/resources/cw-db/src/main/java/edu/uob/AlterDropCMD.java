@@ -15,7 +15,7 @@ public class AlterDropCMD extends AlterCMD {
         if (!fileToAlter.isFile()) {
             return errorMessage(tableName + " doesn't exist");
         }
-        String error = tableFileToDBTable();
+        String error = tableFileToDBTable(this.tableFilePath, this.dbTable);
         if (!error.isEmpty()) {
             return error;
         }

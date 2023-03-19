@@ -38,37 +38,52 @@ public abstract class DBCmd {
     }
 
     void setTableFilePath() {
-        this.tableFilePath = this.databasePath + File.separator + this.tableName + tabFileExtension;
+        this.tableFilePath = getTableFilePath(this.tableName);
     }
 
-    String tableFileToDBTable() {
-        File fileToRead = new File(this.tableFilePath);
+    String getTableFilePath(String tableName) {
+        return this.databasePath + File.separator + tableName + tabFileExtension;
+    }
+
+    String tableFileToDBTable(String tableFilePath, DBTable dbTable) {
+        File fileToRead = new File(tableFilePath);
         FileReader reader;
         try {
             reader = new FileReader(fileToRead);
         } catch (FileNotFoundException e) {
-            return errorMessage(this.tableName + " not found");
+            return errorMessage("Table " + dbTable.getTableName() + " not found");
         }
         BufferedReader buffReader = new BufferedReader(reader);
-        this.dbTable = new DBTable(this.tableName);
         try {
             String firstLine = buffReader.readLine();
             if (firstLine.length() > 0) {
                 String[] firstLineSplit = firstLine.split("\t");
-                this.dbTable = new DBTable(this.tableName);
-                this.dbTable.setColNamesNoNeedToAddId(Arrays.stream(firstLineSplit).toList());
-                System.out.println("New: ");
-                this.dbTable.getColNames().forEach(System.out::println);
+                dbTable.setColNamesNoNeedToAddId(Arrays.stream(firstLineSplit).toList());
+                // System.out.println("New: ");
+                // dbTable.getColNames().forEach(System.out::println);
                 buffReader
                         .lines()
                         .filter(s -> s.length() > 0)
-                        .forEachOrdered(s -> this.dbTable.setRows(Arrays.stream(s.split("\t")).toList()));
+                        .forEachOrdered(s -> dbTable.setRows(Arrays.stream(s.split("\t")).toList()));
             }
             buffReader.close();
             return "";
         } catch (IOException e) {
-            return errorMessage("Failed to read table " + this.tableName);
+            return errorMessage("Failed to read table " + tableFilePath);
         }
+    }
+
+    boolean stringListContainsStringCaseInsensitively(List<String> stringList, String s) {
+        for (String str : stringList) {
+            if (stringsEqualCaseInsensitively(str, s)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean stringsEqualCaseInsensitively(String s1, String s2) {
+        return s1.toLowerCase().compareTo(s2.toLowerCase()) == 0;
     }
 }
 

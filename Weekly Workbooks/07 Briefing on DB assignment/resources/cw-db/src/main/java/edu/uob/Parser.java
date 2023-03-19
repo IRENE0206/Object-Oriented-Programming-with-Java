@@ -283,33 +283,27 @@ public class Parser {
 
     private boolean getAttributeList(List<String> accumulator) {
         String token = tokeniser.getToken();
-        System.out.println("a");
         if (invalidAttributeName(token)) {
-            System.out.println("b");
             setInvalidAttributeNameErrorMessage(token);
             accumulator.clear();
             return false;
         }
         if (failToMoveToNextToken()) {
-            System.out.println("c");
             setLackMoreTokensErrorMessage();
             accumulator.clear();
             return false;
         }
         String currToken = tokeniser.getToken();
         if (!isComma(currToken)) {
-            System.out.println("d");
-            accumulator.add(token);
+            accumulator.add(getRidOfSingleQuote(token));
             return true;
         }
         if (failToMoveToNextToken()) {
-            System.out.println("e");
             setLackMoreTokensErrorMessage();
             accumulator.clear();
             return false;
         }
         accumulator.add(token);
-        System.out.println("f");
         return getAttributeList(accumulator);
     }
 
@@ -317,39 +311,94 @@ public class Parser {
         setErrorMessage(tableName + " is not a valid [TableName]");
     }
 
+    private String getRidOfSingleQuote(String s) {
+        if (s.startsWith("'") && s.endsWith("'")) {
+            return s.substring(1, s.length() - 1);
+        }
+        return s;
+    }
+
     private boolean toJoin(String firstKeyword) {
         return stringsEqualCaseInsensitively(firstKeyword, "JOIN");
+    }
+
+    private boolean isAnd(String s) {
+        return stringsEqualCaseInsensitively(s, "AND");
+    }
+
+    private boolean isOn(String s) {
+        return stringsEqualCaseInsensitively(s, "ON");
     }
 
     private JoinCMD join() {
         String tableName1 = tokeniser.getToken();
         if (invalidTableName(tableName1)) {
+            setTableNameErrorMessage(tableName1);
             return null;
         }
         if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
             return null;
         }
-        String and = tokeniser.getToken();
-        if (!stringsEqualCaseInsensitively(and, "AND")) {
-            setErrorMessage("Should be 'AND' not " + and);
+        String and1 = tokeniser.getToken();
+        if (!isAnd(and1)) {
+            setErrorMessage("Should be 'AND' not " + and1);
             return null;
         }
         if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
             return null;
         }
         String tableName2 = tokeniser.getToken();
         if (invalidTableName(tableName2)) {
+            setTableNameErrorMessage(tableName2);
             return null;
         }
         if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
             return null;
         }
         String on = tokeniser.getToken();
-        if (!stringsEqualCaseInsensitively(on, "AND")) {
-            setErrorMessage("Should be 'AND' not " + and);
+        if (!isOn(on)) {
+            setErrorMessage("Should be 'ON' not " + on);
             return null;
         }
-        return null;
+        if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            return null;
+        }
+        String attributeName1 = tokeniser.getToken();
+        if (invalidAttributeName(attributeName1)) {
+            setInvalidAttributeNameErrorMessage(attributeName1);
+            return null;
+        }
+        if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            return null;
+        }
+        String and2 = tokeniser.getToken();
+        if (!isAnd(and2)) {
+            setErrorMessage("Should be 'AND' not " + and2);
+            return null;
+        }
+        if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            return null;
+        }
+        String attributeName2 = tokeniser.getToken();
+        if (invalidAttributeName(attributeName2)) {
+            setInvalidAttributeNameErrorMessage(attributeName2);
+            return null;
+        }
+        if (failToMoveToNextToken()) {
+            setMissingSemiColonErrorMessage();
+            return null;
+        }
+        if (failToEndWithSemicolonProperly()) {
+            return null;
+        }
+        setParsedOK();
+        return new JoinCMD(tableName1, tableName2, attributeName1, attributeName2);
     }
 
     private boolean failToMoveToNextToken() {
@@ -522,14 +571,12 @@ public class Parser {
         }
         List<String> accumulator = new ArrayList<>();
         if (!getValueList(accumulator)) {
-            System.out.println("r");
             return null;
         }
         if (failToMoveToNextToken()) {
             failToEndWithSemicolonProperly();
             return null;
         }
-        System.out.println("t");
         setParsedOK();
         return new InsertCMD(tableName, accumulator);
     }
@@ -547,7 +594,7 @@ public class Parser {
         }
         String currToken = tokeniser.getToken();
         if (isValue(value) && isCloseBracket(currToken)) {
-            accumulator.add(value);
+            accumulator.add(getRidOfSingleQuote(value));
             return true;
         } else if (isValue(value) && isComma(currToken)) {
             if (failToMoveToNextToken()) {
@@ -555,7 +602,7 @@ public class Parser {
                 accumulator.clear();
                 return false;
             }
-            accumulator.add(value);
+            accumulator.add(getRidOfSingleQuote(value));
             return getValueList(accumulator);
         } else if (isValue(value)) {
             setMissingBracketMessage(")");

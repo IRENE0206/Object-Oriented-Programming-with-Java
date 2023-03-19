@@ -43,7 +43,7 @@ public class DBTable {
         row.addAll(line);
         this.rows.add(row);
         this.rowNum += 1;
-        this.rows.forEach(System.out::println);
+        // this.rows.forEach(System.out::println);
         return "";
     }
 
@@ -77,8 +77,14 @@ public class DBTable {
 
     public void setColNames(List<String> line) {
         this.colNames.add("id");
-        this.colNames.addAll(line);
-        this.colNames.forEach(System.out::println);
+        for (String l : line) {
+            if (l.startsWith("'") && l.endsWith("'")) {
+                this.colNames.add(l.substring(1, l.length() - 1));
+            } else {
+                this.colNames.add(l);
+            }
+        }
+        // this.colNames.forEach(System.out::println);
         this.colNum = colNames.size();
     }
 
@@ -128,6 +134,10 @@ public class DBTable {
         return null;
     }
 
+    public List<List<String>> getRows() {
+        return this.rows;
+    }
+
     public void dropCol(String colName) {
         if (compareStringsCaseInsensitively(colName, "id")) {
             return;
@@ -163,7 +173,7 @@ public class DBTable {
     }
 
     public boolean failToFile(String fileToWrite) {
-        System.out.println(fileToWrite);
+        // System.out.println(fileToWrite);
         try {
             FileWriter writer = new FileWriter(fileToWrite);
             writer.write(toString());

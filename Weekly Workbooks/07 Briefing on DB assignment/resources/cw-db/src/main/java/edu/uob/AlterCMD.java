@@ -10,6 +10,7 @@ public abstract class AlterCMD extends DBCmd {
         this.commandType = "ALTER";
         this.tableName = tableName;
         this.alterType = alterType;
+        this.dbTable = new DBTable(this.tableName);
         this.attributeName = attributeName;
     }
 
