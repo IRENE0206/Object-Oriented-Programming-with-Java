@@ -11,9 +11,9 @@ public class UseCMD extends DBCmd {
     @Override
     public String query(DBServer dbServer) {
         setDatabasePathFromStorageFolderPath(dbServer.getStorageFolderPath());
-        File databaseToUse = new File(databasePath);
+        File databaseToUse = new File(this.databasePath);
         if (databaseToUse.isDirectory()) {
-            dbServer.setDatabasePath(databasePath);
+            dbServer.setDatabasePath(this.databasePath);
             return getQueryResults("");
         }
         return errorMessage("Database " + this.databaseName + " is not an existing directory");

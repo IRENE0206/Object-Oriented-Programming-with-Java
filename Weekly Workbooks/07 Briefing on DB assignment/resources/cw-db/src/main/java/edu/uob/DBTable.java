@@ -24,32 +24,44 @@ public class DBTable {
         this.rows = new ArrayList<>();
     }
 
-    public DBTable(String name, List<String> firstLine) {
-        this.tableName = name;
-        this.rowNum = 0;
-        this.colNum = firstLine.size() + 1;
-        this.idUsed = new ArrayList<>();
-        this.colNames = new ArrayList<>();
-        colNames.add("id");
-        colNames.addAll(firstLine);
-        this.rows = new ArrayList<>();
-    }
-
     public String addRow(List<String> line) {
         if (line.size() != this.colNum - 1) {
+            System.out.println("line " + line.size());
+            this.colNames.forEach(System.out::println);
+            System.out.println(this.colNum);
             return "Not expected number of values. Cannot insert into table " + this.tableName;
         }
         List<String> row = new ArrayList<>();
         if (idUsed.isEmpty()) {
             row.add("1");
-            idUsed.add(1);
+            addUsedID(1);
         } else {
-            int newId = idUsed.get(idUsed.size() - 1) + 1;
+            int newId = getNewID();
             row.add(Integer.toString(newId));
+            addUsedID(newId);
         }
+        row.addAll(line);
         this.rows.add(row);
         this.rowNum += 1;
+        this.rows.forEach(System.out::println);
         return "";
+    }
+
+    public boolean isEmpty() {
+        return this.colNum == 0;
+    }
+
+    private void addUsedID(Integer id) {
+        this.idUsed.add(id);
+    }
+
+    private int getNewID() {
+        return idUsed.get(idUsed.size() - 1) + 1;
+    }
+
+    public void setRows(List<String> row) {
+        this.rows.add(row);
+        addUsedID(Integer.valueOf(row.get(0)));
     }
 
     public String deleteRow(String id) {
@@ -63,6 +75,19 @@ public class DBTable {
         return "[ERROR] Cannot find entry with primaryId " + id;
     }
 
+    public void setColNames(List<String> line) {
+        this.colNames.add("id");
+        this.colNames.addAll(line);
+        this.colNames.forEach(System.out::println);
+        this.colNum = colNames.size();
+    }
+
+    public void setColNamesNoNeedToAddId(List<String> line) {
+        this.colNames.addAll(line);
+        this.colNames.forEach(System.out::println);
+        this.colNum = colNames.size();
+    }
+
     public List<String> getColNames() {
         return this.colNames;
     }
@@ -71,7 +96,7 @@ public class DBTable {
         return this.tableName;
     }
 
-    public void changeValue(int primaryKey, String column, String newValue) {
+    /* public void changeValue(int primaryKey, String column, String newValue) {
         try {
             int i = getColIndex(column);
             try {
@@ -83,7 +108,7 @@ public class DBTable {
         } catch (NoSuchElementException noSuchElementException) {
             System.out.println(column + " doesn't exit");
         }
-    }
+    } */
 
     private int getColIndex(String column) {
         List<String> lowerCaseColNames = colNames.stream().map(String::toLowerCase).toList();
@@ -107,7 +132,7 @@ public class DBTable {
         if (compareStringsCaseInsensitively(colName, "id")) {
             return;
         }
-        if (!tableContainsAttribute(colName)) {
+        if (!containsAttribute(colName)) {
             return;
         }
         int colIndex = colNames.indexOf(colName) + 1;
@@ -117,7 +142,7 @@ public class DBTable {
     }
 
     public void addCol(String colName) {
-        if (tableContainsAttribute(colName)) {
+        if (containsAttribute(colName)) {
             return;
         }
         colNames.add(colName);
@@ -125,7 +150,7 @@ public class DBTable {
         this.colNum += 1;
     }
 
-    public boolean tableContainsAttribute(String colName) {
+    public boolean containsAttribute(String colName) {
         return listContainsString(this.colNames, colName);
     }
 
@@ -138,17 +163,15 @@ public class DBTable {
     }
 
     public boolean failToFile(String fileToWrite) {
+        System.out.println(fileToWrite);
         try {
             FileWriter writer = new FileWriter(fileToWrite);
-            writer.write(listToString(this.getColNames()) + "\n");
-            writer.write(this.rows.stream()
-                    .map(this::listToString)
-                    .reduce("", (s1, s2) -> String.join("\n", s1, s2))
-                    .trim());
+            writer.write(toString());
             writer.flush();
             writer.close();
             return false;
         } catch (IOException ioException) {
+            // System.out.println("WHY");
             return true;
         }
     }
@@ -158,4 +181,58 @@ public class DBTable {
                 .reduce("", (s1, s2) -> String.join("\t", s1, s2))
                 .trim();
     }
+
+    public String toString() {
+        return listToString(this.getColNames()) + "\n" + rowsToString();
+    }
+
+    private String rowsToString() {
+        return this.rows.stream()
+                .map(this::listToString)
+                .reduce("", (s1, s2) -> String.join("\n", s1, s2))
+                .trim();
+    }
+
+    public boolean containsQueriedAttributes(List<String> attributeList) {
+        for (String attribute : attributeList) {
+            if (!containsAttribute(attribute)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private List<Integer> getIndexOfQueriedAttributes(List<String> attributeList) {
+        List<Integer> matches = new ArrayList<>();
+        for (String attribute : attributeList) {
+            matches.add(this.colNames.indexOf(attribute));
+        }
+        return matches;
+    }
+
+    public String selectedContentToString(List<String> attributeList) {
+        List<Integer> indexOfQueriedAttributes = getIndexOfQueriedAttributes(attributeList);
+        return selectedColNamesToString(indexOfQueriedAttributes) + selectedRowsToString(indexOfQueriedAttributes);
+    }
+
+    private String selectedColNamesToString(List<Integer> indexOfQueriedAttributes) {
+        return selectedStringFromList(this.colNames, indexOfQueriedAttributes).concat("\n");
+    }
+
+    private String selectedRowsToString(List<Integer> indexOfQueriedAttributes) {
+        StringBuilder accumulator = new StringBuilder();
+        for (List<String> row : this.rows) {
+            accumulator.append(selectedStringFromList(row, indexOfQueriedAttributes)).append("\n");
+        }
+        return accumulator.toString().trim();
+    }
+
+    private String selectedStringFromList(List<String> stringList, List<Integer> indexOfQueriedAttributes) {
+        StringBuilder accumulator = new StringBuilder();
+        for (Integer index : indexOfQueriedAttributes) {
+            accumulator.append(stringList.get(index)).append("\t");
+        }
+        return accumulator.toString().trim();
+    }
+
 }

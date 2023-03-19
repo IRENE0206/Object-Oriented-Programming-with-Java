@@ -9,12 +9,12 @@ public class CreateTableCMD extends CreateCMD {
     public CreateTableCMD(String tableName) {
         super();
         this.tableName = tableName;
-        this.colNames = new ArrayList<>();
+        this.attributeList = new ArrayList<>();
     }
 
-    public CreateTableCMD(String tableName, List<String> colNames) {
+    public CreateTableCMD(String tableName, List<String> attributeList) {
         this.tableName = tableName;
-        this.colNames = colNames;
+        this.attributeList = attributeList;
     }
 
     @Override
@@ -25,13 +25,12 @@ public class CreateTableCMD extends CreateCMD {
         if (fileToCreate.exists()) {
             return errorMessage("Table " + this.tableName + " already exists");
         }
-        DBTable dbTable;
-        if (this.colNames.size() > 0) {
-            dbTable = new DBTable(this.tableName, this.colNames);
-        } else {
-            dbTable = new DBTable(this.tableName);
+        DBTable dbTable = new DBTable(this.tableName);
+        if (this.attributeList.size() > 0) {
+            dbTable.setColNames(attributeList);
         }
-        if (dbTable.failToFile(this.databasePath)) {
+        System.out.println(this.tableFilePath);
+        if (dbTable.failToFile(this.tableFilePath)) {
             return errorMessage("Failed to create table " + this.tableName);
         }
         return getQueryResults("");

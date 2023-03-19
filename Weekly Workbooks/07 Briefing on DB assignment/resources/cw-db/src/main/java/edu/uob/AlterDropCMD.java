@@ -19,7 +19,7 @@ public class AlterDropCMD extends AlterCMD {
         if (!error.isEmpty()) {
             return error;
         }
-        if (!this.dbTable.tableContainsAttribute(this.attributeName)) {
+        if (!this.dbTable.containsAttribute(this.attributeName)) {
             return errorMessage(this.attributeName + " does not in table " + this.tableName);
         } else if (this.attributeName.toLowerCase().compareTo("id") == 0) {
             return errorMessage("Cannot drop id");

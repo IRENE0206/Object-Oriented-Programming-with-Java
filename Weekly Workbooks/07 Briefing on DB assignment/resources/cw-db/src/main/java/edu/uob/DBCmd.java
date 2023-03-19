@@ -14,11 +14,9 @@ public abstract class DBCmd {
     String databasePath;
     String tableName;
     String tableFilePath;
-    List<String> colNames;
     List<String> attributeList;
     List<String> tableNames;
-    List<Condition> conditions;
-    List<String> values;
+    List<Condition> condition;
     DBTable dbTable;
 
     public abstract String query(DBServer dbServer);
@@ -52,18 +50,19 @@ public abstract class DBCmd {
             return errorMessage(this.tableName + " not found");
         }
         BufferedReader buffReader = new BufferedReader(reader);
-        String firstLine;
+        this.dbTable = new DBTable(this.tableName);
         try {
-            firstLine = buffReader.readLine();
+            String firstLine = buffReader.readLine();
             if (firstLine.length() > 0) {
                 String[] firstLineSplit = firstLine.split("\t");
-                this.dbTable = new DBTable(this.tableName, Arrays.stream(firstLineSplit).toList());
+                this.dbTable = new DBTable(this.tableName);
+                this.dbTable.setColNamesNoNeedToAddId(Arrays.stream(firstLineSplit).toList());
+                System.out.println("New: ");
+                this.dbTable.getColNames().forEach(System.out::println);
                 buffReader
                         .lines()
                         .filter(s -> s.length() > 0)
-                        .forEach(s -> this.dbTable.addRow(Arrays.stream(s.split("\t")).toList()));
-            } else {
-                this.dbTable = new DBTable(this.tableName);
+                        .forEachOrdered(s -> this.dbTable.setRows(Arrays.stream(s.split("\t")).toList()));
             }
             buffReader.close();
             return "";

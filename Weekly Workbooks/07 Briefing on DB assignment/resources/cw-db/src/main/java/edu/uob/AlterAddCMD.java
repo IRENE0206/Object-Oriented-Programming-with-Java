@@ -19,7 +19,7 @@ public class AlterAddCMD extends AlterCMD {
         if (!error.isEmpty()) {
             return error;
         }
-        if (this.dbTable.tableContainsAttribute(this.attributeName)) {
+        if (this.dbTable.containsAttribute(this.attributeName)) {
             return errorMessage(this.attributeName + " already exists in table " + this.tableName);
         }
         this.dbTable.addCol(this.attributeName);

@@ -8,17 +8,26 @@ public class Parser {
     private DBServer dbServer;
     private Tokeniser tokeniser;
     private Boolean parsedOK;
-    private String errorMessage;
+    private StringBuilder errorMessage;
 
     public Parser(DBServer dbServer, String query) {
         this.dbServer = dbServer;
         this.tokeniser = new Tokeniser(query);
         this.parsedOK = false;
-        this.errorMessage = "[ERROR] ";
+        this.errorMessage = new StringBuilder();
+        this.errorMessage.append("[ERROR] ");
     }
 
     public DBCmd parse() {
         return getCommandType();
+    }
+
+    public boolean isParsedOK() {
+        return this.parsedOK;
+    }
+
+    public String getErrorMessage() {
+        return this.errorMessage.toString();
     }
 
     private DBCmd getCommandType() {
@@ -105,14 +114,14 @@ public class Parser {
     }
 
     private void setErrorMessage(String message) {
-        this.errorMessage += message;
+        this.errorMessage.append(message);
     }
 
     private boolean invalidDatabaseName(String s) {
-        if (isPlainText(s)) {
+        if (!isPlainText(s)) {
+            setDatabaseNameErrorMessage(s);
             return true;
         }
-        setDatabaseNameErrorMessage(s);
         return false;
     }
 
@@ -124,13 +133,17 @@ public class Parser {
         String databaseOrTable = tokeniser.getToken();
         if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
+            System.out.println("?HERE");
             return null;
         }
         if (toDatabase(databaseOrTable)) {
+            System.out.println("??HERE");
             return createDatabase();
         } else if (toTable(databaseOrTable)) {
+            System.out.println("???HERE");
             return createTable();
         }
+        System.out.println("HERE");
         setSyntaxErrorMessage();
         return null;
     }
@@ -146,6 +159,7 @@ public class Parser {
     private CreateDatabaseCMD createDatabase() {
         String databaseName = tokeniser.getToken();
         if (invalidDatabaseName(databaseName)) {
+            System.out.println("HI");
             return null;
         }
         if (failToMoveToNextToken()) {
@@ -155,6 +169,7 @@ public class Parser {
         if (failToEndWithSemicolonProperly()) {
             return null;
         }
+        System.out.println("HI");
         setParsedOK();
         return new CreateDatabaseCMD(databaseName);
     }
@@ -177,39 +192,56 @@ public class Parser {
 
     private CreateTableCMD createTable() {
         String tableName = tokeniser.getToken();
+        System.out.println("1");
         if (invalidTableName(tableName)) {
+            System.out.println("2");
             return null;
         }
         if (failToMoveToNextToken()) {
+            System.out.println("3");
             setMissingSemiColonErrorMessage();
             return null;
         }
         String currToken = tokeniser.getToken();
+        System.out.println("4");
         if (isSemiColon(currToken) && !tokeniser.hasNextToken()) {
+            System.out.println("5");
             setParsedOK();
             return new CreateTableCMD(tableName);
         } else if (missingOpenBracket()) {
+            System.out.println("6");
             return null;
         } else if (failToMoveToNextToken()) {
+            System.out.println("7");
             setLackMoreTokensErrorMessage();
             return null;
         }
         List<String> attributeList = new ArrayList<>();
         if (!getAttributeList(attributeList)) {
+            System.out.println("8");
             return null;
         }
+        System.out.println("YES LIST");
         if (!isCloseBracket(tokeniser.getToken())) {
+            System.out.println("9");
+            attributeList.clear();
             setMissingBracketMessage(")");
             return null;
         }
         if (failToMoveToNextToken()) {
+            System.out.println("10");
+            attributeList.clear();
             setMissingSemiColonErrorMessage();
             return null;
         }
         if (failToEndWithSemicolonProperly()) {
+            System.out.println("11");
             return null;
         }
         setParsedOK();
+        if (parsedOK) {
+            System.out.println("OKK");
+        }
         return new CreateTableCMD(tableName, attributeList);
     }
 
@@ -251,27 +283,33 @@ public class Parser {
 
     private boolean getAttributeList(List<String> accumulator) {
         String token = tokeniser.getToken();
+        System.out.println("a");
         if (invalidAttributeName(token)) {
+            System.out.println("b");
             setInvalidAttributeNameErrorMessage(token);
             accumulator.clear();
             return false;
         }
         if (failToMoveToNextToken()) {
+            System.out.println("c");
             setLackMoreTokensErrorMessage();
             accumulator.clear();
             return false;
         }
         String currToken = tokeniser.getToken();
         if (!isComma(currToken)) {
+            System.out.println("d");
             accumulator.add(token);
-            return false;
+            return true;
         }
         if (failToMoveToNextToken()) {
+            System.out.println("e");
             setLackMoreTokensErrorMessage();
             accumulator.clear();
             return false;
         }
         accumulator.add(token);
+        System.out.println("f");
         return getAttributeList(accumulator);
     }
 
@@ -285,8 +323,7 @@ public class Parser {
 
     private JoinCMD join() {
         String tableName1 = tokeniser.getToken();
-        if (!isValidTableName(tableName1)) {
-            setTableNameErrorMessage(tableName1);
+        if (invalidTableName(tableName1)) {
             return null;
         }
         if (failToMoveToNextToken()) {
@@ -301,8 +338,7 @@ public class Parser {
             return null;
         }
         String tableName2 = tokeniser.getToken();
-        if (!isValidTableName(tableName2)) {
-            setTableNameErrorMessage(tableName2);
+        if (invalidTableName(tableName2)) {
             return null;
         }
         if (failToMoveToNextToken()) {
@@ -313,6 +349,7 @@ public class Parser {
             setErrorMessage("Should be 'AND' not " + and);
             return null;
         }
+        return null;
     }
 
     private boolean failToMoveToNextToken() {
@@ -388,10 +425,6 @@ public class Parser {
         return stringsEqualCaseInsensitively(firstKeyword, "CREATE");
     }
 
-    private boolean toActOnTable(String secondKeyword) {
-        return stringsEqualCaseInsensitively(secondKeyword, "TABLE");
-    }
-
     private boolean toDrop(String firstKeyword) {
         return stringsEqualCaseInsensitively(firstKeyword, "DROP");
     }
@@ -452,6 +485,7 @@ public class Parser {
 
     private InsertCMD insert() {
         String secondKeyword = tokeniser.getToken();
+        System.out.println("q");
         if(!stringsEqualCaseInsensitively(secondKeyword, "INTO")) {
             setErrorMessage(secondKeyword + " is not invalid keyword 'INTO'");
             return null;
@@ -462,6 +496,7 @@ public class Parser {
         }
         String tableName = tokeniser.getToken();
         if (invalidTableName(tableName)) {
+            System.out.println("w");
             return null;
         }
         if (failToMoveToNextToken()) {
@@ -478,6 +513,7 @@ public class Parser {
             return null;
         }
         if (missingOpenBracket()) {
+            System.out.println("e");
             return null;
         }
         if (failToMoveToNextToken()) {
@@ -486,12 +522,15 @@ public class Parser {
         }
         List<String> accumulator = new ArrayList<>();
         if (!getValueList(accumulator)) {
+            System.out.println("r");
             return null;
         }
         if (failToMoveToNextToken()) {
             failToEndWithSemicolonProperly();
             return null;
         }
+        System.out.println("t");
+        setParsedOK();
         return new InsertCMD(tableName, accumulator);
     }
 
@@ -516,26 +555,101 @@ public class Parser {
                 accumulator.clear();
                 return false;
             }
+            accumulator.add(value);
             return getValueList(accumulator);
         } else if (isValue(value)) {
             setMissingBracketMessage(")");
             accumulator.clear();
             return false;
         }
+        setErrorMessage(value + " is invalid for [VALUE]");
         accumulator.clear();
         return false;
+    }
+
+    //TODO
+    private SelectCMD select() {
+        if (isWildCard()) {
+            if (failToMoveToNextToken()) {
+                setLackMoreTokensErrorMessage();
+                return null;
+            }
+            String from = tokeniser.getToken();
+            if (isNotFrom(from)) {
+                setErrorMessage(from + " is invalid. Should be FROM");
+                return null;
+            }
+            if (failToMoveToNextToken()) {
+                setLackMoreTokensErrorMessage();
+                return null;
+            }
+            String tableName = tokeniser.getToken();
+            if (invalidTableName(tableName)) {
+                setTableNameErrorMessage(tableName);
+            }
+            if (failToMoveToNextToken()) {
+                setLackMoreTokensErrorMessage();
+                return null;
+            }
+            if (isSemiColon(tokeniser.getToken())) {
+                setParsedOK();
+                return new SelectCMD(tableName);
+            }
+        } else {
+            List<String> accumulator = new ArrayList<>();
+            if (!getAttributeList(accumulator)) {
+                return null;
+            }
+            String from = tokeniser.getToken();
+            if (isNotFrom(from)) {
+                setErrorMessage(from + " is invalid. Should be FROM");
+                return null;
+            }
+            if (failToMoveToNextToken()) {
+                setLackMoreTokensErrorMessage();
+                return null;
+            }
+            String tableName = tokeniser.getToken();
+            if (invalidTableName(tableName)) {
+                setTableNameErrorMessage(tableName);
+            }
+            if (failToMoveToNextToken()) {
+                setLackMoreTokensErrorMessage();
+                return null;
+            }
+            if (isSemiColon(tokeniser.getToken())) {
+                setParsedOK();
+                return new SelectCMD(tableName, accumulator);
+            }
+        }
+
+        return null;
     }
 
     private boolean toUpdate(String firstKeyword) {
         return stringsEqualCaseInsensitively(firstKeyword, "UPDATE");
     }
 
+    // TODO
+    private UpdateCMD update() {
+        return null;
+    }
+
+    private boolean isWildCard() {
+        return tokeniser.getToken().compareTo("*") == 0;
+    }
+
+    private boolean isNotFrom(String s) {
+        return !stringsEqualCaseInsensitively(s, "FROM");
+    }
+
     private boolean toDelete(String firstKeyword) {
         return stringsEqualCaseInsensitively(firstKeyword, "DELETE");
     }
 
-    private boolean endWithSemicolon(List<String> tokens) {
-        return tokens.get(tokens.size() - 1).compareTo(";") == 0;
+    // TODO
+    private DeleteCMD delete() {
+        return null;
     }
 
     private boolean stringsEqualCaseInsensitively(String s1, String s2) {
@@ -603,10 +717,6 @@ public class Parser {
 
     private boolean arrayContains(String[] array, String s) {
         return Arrays.stream(array).toList().contains(s.toUpperCase());
-    }
-
-    private boolean isWildAttribList() {
-        return
     }
 
     private boolean isBoolOperator(String s) {
