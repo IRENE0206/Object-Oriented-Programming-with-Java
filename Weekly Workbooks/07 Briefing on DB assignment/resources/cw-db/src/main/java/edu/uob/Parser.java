@@ -3,6 +3,7 @@ package edu.uob;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Stack;
 
 public class Parser {
     private DBServer dbServer;
@@ -457,9 +458,76 @@ public class Parser {
         }
     }
 
+    private boolean getCondition(DBCmd dbCmd, Stack<Condition> boolOperators, List<Condition> atomicCondition) {
+        if (!tokeniser.hasNextToken()) {
+            if (failToEndWithSemicolonProperly()) {
+                return false;
+            }
+            while (!boolOperators.isEmpty()) {
+                dbCmd.addConditionList(boolOperators.pop());
+            }
+            return true;
+        }
+        String token = tokeniser.getToken();
+        if (isOpenBracket(token)) {
+            boolOperators.push()
+        }
+    }
+
+    private BoolOperator storeIntoBoolOperator(String operator) {
+        return new BoolOperator()
+    }
+
+    private void setBoolOperatorErrorMessage(String s) {
+        setErrorMessage(s + " is not a valid [BoolOperator]");
+    }
+
+    private AtomicCondition getAtomicCondition() {
+        String attributeName = tokeniser.getToken();
+        if (invalidAttributeName(attributeName)) {
+            return null;
+        }
+        if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            return null;
+        }
+        String comparator = tokeniser.getToken();
+        if (invalidComparator(comparator)) {
+            return null;
+        }
+        if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            return null;
+        }
+        String value = tokeniser.getToken();
+        if (invalidValue(value)) {
+            return null;
+        }
+        if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            return null;
+        }
+        return new AtomicCondition(comparator, attributeName, value);
+    }
 
     private boolean isComma(String s) {
         return s.compareTo(",") == 0;
+    }
+
+    private boolean invalidComparator(String comparator) {
+        if (isComparator(comparator)) {
+            return true;
+        }
+        setErrorMessage(comparator + " is not a valid [Comparator]");
+        return false;
+    }
+
+    private boolean invalidValue(String value) {
+        if (isComparator(value)) {
+            return true;
+        }
+        setErrorMessage(value + " is not a valid [Value]");
+        return false;
     }
 
     private boolean isOpenBracket(String s) {

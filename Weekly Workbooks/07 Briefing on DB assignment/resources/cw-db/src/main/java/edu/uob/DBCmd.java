@@ -3,7 +3,7 @@ package edu.uob;
 import java.io.*;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.locks.Condition;
+import java.util.Stack;
 
 public abstract class DBCmd {
     String errorTag = "[ERROR] ";
@@ -16,7 +16,7 @@ public abstract class DBCmd {
     String tableFilePath;
     List<String> attributeList;
     List<String> tableNames;
-    List<Condition> condition;
+    List<Condition> conditions;
     DBTable dbTable;
 
     public abstract String query(DBServer dbServer);
@@ -84,6 +84,10 @@ public abstract class DBCmd {
 
     boolean stringsEqualCaseInsensitively(String s1, String s2) {
         return s1.toLowerCase().compareTo(s2.toLowerCase()) == 0;
+    }
+
+    public void addConditionList(Condition condition) {
+        this.conditions.add(condition);
     }
 }
 

@@ -1,7 +1,6 @@
 package edu.uob;
 
 import java.util.List;
-import java.util.concurrent.locks.Condition;
 
 public class DeleteCMD extends DBCmd {
 
@@ -11,10 +10,6 @@ public class DeleteCMD extends DBCmd {
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
-    }
-
-    public void setConditions(List<Condition> conditions) {
-
     }
 
     @Override

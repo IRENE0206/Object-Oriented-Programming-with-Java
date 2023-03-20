@@ -1,7 +1,6 @@
 package edu.uob;
 
 import java.util.List;
-import java.util.concurrent.locks.Condition;
 
 public class SelectCMD extends DBCmd {
     boolean selectAll;
@@ -14,7 +13,7 @@ public class SelectCMD extends DBCmd {
         this.dbTable = new DBTable(this.tableName);
     }
 
-    public SelectCMD(String tableName, List<Condition> condition, boolean unconditional) {
+    public SelectCMD(String tableName, Condition condition, boolean unconditional) {
         this.tableName = tableName;
         this.unconditional = unconditional;
         this.condition = condition;
@@ -29,7 +28,7 @@ public class SelectCMD extends DBCmd {
         this.attributeList = attributeList;
     }
 
-    public SelectCMD(String tableName, List<String> attributeList, List<Condition> condition) {
+    public SelectCMD(String tableName, List<String> attributeList, Condition condition) {
         this.tableName = tableName;
         this.selectAll = false;
         this.unconditional = false;
