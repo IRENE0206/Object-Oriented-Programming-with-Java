@@ -5,7 +5,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Paths;
 import java.nio.file.Files;
-import java.util.Arrays;
 
 /** This class implements the DB server. */
 public class DBServer {
@@ -14,7 +13,7 @@ public class DBServer {
     private String storageFolderPath;
     private String databasePath;
 
-    public static void main(String args[]) throws IOException {
+    public static void main(String[] args) throws IOException {
         DBServer server = new DBServer();
         server.blockingListenOn(8888);
     }
@@ -27,7 +26,7 @@ public class DBServer {
         try {
             // Create the database storage folder if it doesn't already exist !
             Files.createDirectories(Paths.get(storageFolderPath));
-        } catch(IOException ioe) {
+        } catch (IOException ioe) {
             System.out.println("Can't seem to create database storage folder " + storageFolderPath);
         }
     }
@@ -69,10 +68,11 @@ public class DBServer {
     }
 
     private void blockingHandleConnection(ServerSocket serverSocket) throws IOException {
-        try (Socket s = serverSocket.accept();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()))) {
-
+        try (
+            Socket s = serverSocket.accept();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()))
+        ) {
             System.out.println("Connection established: " + serverSocket.getInetAddress());
             while (!Thread.interrupted()) {
                 String incomingCommand = reader.readLine();

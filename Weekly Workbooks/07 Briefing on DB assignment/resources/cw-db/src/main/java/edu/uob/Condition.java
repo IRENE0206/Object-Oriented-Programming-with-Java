@@ -4,7 +4,7 @@ import java.util.List;
 
 public abstract class Condition {
     String errorMessage;
-    List<String> colNames;
+    List<String> columnNames;
     String operator;
     boolean result;
 

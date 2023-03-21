@@ -1,7 +1,5 @@
 package edu.uob;
 
-import java.io.File;
-
 public abstract class AlterCMD extends DBCmd {
     String alterType;
     String attributeName;

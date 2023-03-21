@@ -2,6 +2,7 @@ package edu.uob;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
@@ -31,9 +32,14 @@ public abstract class DBCmd {
         this.databasePath = currentDatabasePath;
     }
 
-    String errorMessage(String message) {
+    public String errorMessage(String message) {
         this.interpretError = true;
         return errorTag + message;
+    }
+
+    public void setError(String message) {
+        this.interpretError = true;
+        this.errorTag += message;
     }
 
     String getQueryResults(String results) {
@@ -44,17 +50,17 @@ public abstract class DBCmd {
         this.tableFilePath = getTableFilePath(this.tableName);
     }
 
-    String getTableFilePath(String tableName) {
-        return this.databasePath + File.separator + tableName + tabFileExtension;
+    String getTableFilePath(String tbName) {
+        return this.databasePath + File.separator + tbName + tabFileExtension;
     }
 
-    String tableFileToDBTable(String tableFilePath, DBTable dbTable) {
-        File fileToRead = new File(tableFilePath);
+    String tableFileToDBTable(String tbFilePath, DBTable table) {
+        File fileToRead = new File(tbFilePath);
         FileReader reader;
         try {
             reader = new FileReader(fileToRead);
         } catch (FileNotFoundException e) {
-            return errorMessage("Table " + dbTable.getTableName() + " not found");
+            return errorMessage("Table " + table.getTableName() + " not found");
         }
         BufferedReader buffReader = new BufferedReader(reader);
         try {
@@ -67,12 +73,12 @@ public abstract class DBCmd {
                 buffReader
                         .lines()
                         .filter(s -> s.length() > 0)
-                        .forEachOrdered(s -> dbTable.setRows(Arrays.stream(s.split("\t")).toList()));
+                        .forEachOrdered(s -> table.setRows(new LinkedList<>(Arrays.asList(s.split("\t")))));
             }
             buffReader.close();
             return "";
         } catch (IOException e) {
-            return errorMessage("Failed to read table " + tableFilePath);
+            return errorMessage("Failed to read table " + tbFilePath);
         }
     }
 

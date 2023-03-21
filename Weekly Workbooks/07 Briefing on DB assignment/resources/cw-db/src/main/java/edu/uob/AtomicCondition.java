@@ -15,8 +15,8 @@ public class AtomicCondition extends Condition {
     }
 
     public void setAttributeIndex() {
-        for (int i = 0; i < this.colNames.size(); i++) {
-            if (stringsEqualCaseInsensitively(this.colNames.get(i), this.attributeName)) {
+        for (int i = 0; i < this.columnNames.size(); i++) {
+            if (stringsEqualCaseInsensitively(this.columnNames.get(i), this.attributeName)) {
                 this.attributeIndex = i;
                 return;
             }
@@ -42,7 +42,7 @@ public class AtomicCondition extends Condition {
 
     @Override
     public void setCoNames(List<String> colNames) {
-        this.colNames = colNames;
+        this.columnNames = colNames;
     }
 
     @Override
@@ -80,7 +80,7 @@ public class AtomicCondition extends Condition {
             return false;
         } else if (isNull(this.value)) {
             return compareResult == 0;
-        }else if (equalSignComparator()) {
+        } else if (equalSignComparator()) {
             return compareResult == 0;
         } else if (unequalSignComparator()) {
             return compareResult != 0;

@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Tokeniser {
-    private final String[] specialCharacters = {"(",")",",",";"};
+    private final String[] specialCharacters = {"(", ")", ",", ";"};
     private List<String> tokens = new ArrayList<String>();
     private int currentToken;
 
@@ -12,8 +12,7 @@ public class Tokeniser {
         this.setup(query);
     }
 
-    private void setup(String query)
-    {
+    private void setup(String query) {
         query = query.trim();
         String[] fragments = query.split("'");
         for (int i = 0; i < fragments.length; i++) {
@@ -27,12 +26,13 @@ public class Tokeniser {
         this.currentToken = 0;
     }
 
-    private String[] tokenize(String input)
-    {
+    private String[] tokenize(String input) {
         for (String specialCharacter : specialCharacters) {
             input = input.replace(specialCharacter, " " + specialCharacter + " ");
         }
-        while (input.contains("  ")) {input = input.replaceAll("  ", " ");}
+        while (input.contains("  ")) {
+            input = input.replaceAll("  ", " ");
+        }
         input = input.trim();
         return input.split(" ");
     }

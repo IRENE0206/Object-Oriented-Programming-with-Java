@@ -2,9 +2,7 @@ package edu.uob;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 public class DBTable {
     private String tableName;
@@ -19,9 +17,9 @@ public class DBTable {
         this.tableName = name;
         this.rowNum = 0;
         this.colNum = 0;
-        this.idUsed = new ArrayList<>();
-        this.colNames = new ArrayList<>();
-        this.rows = new ArrayList<>();
+        this.idUsed = new LinkedList<>();
+        this.colNames = new LinkedList<>();
+        this.rows = new LinkedList<>();
     }
 
     public String addRow(List<String> line) {
@@ -31,7 +29,7 @@ public class DBTable {
             System.out.println(this.colNum);
             return "Not expected number of values. Cannot insert into table " + this.tableName;
         }
-        List<String> row = new ArrayList<>();
+        List<String> row = new LinkedList<>();
         if (idUsed.isEmpty()) {
             row.add("1");
             addUsedID(1);
@@ -64,15 +62,8 @@ public class DBTable {
         addUsedID(Integer.valueOf(row.get(0)));
     }
 
-    public String deleteRow(String id) {
-        for (List<String> row : this.rows) {
-            if (compareStringsCaseInsensitively(row.get(0), id)) {
-                rows.remove(row);
-                this.rowNum -= 1;
-                return "[OK] Successfully delete values from table " + this.tableName;
-            }
-        }
-        return "[ERROR] Cannot find entry with primaryId " + id;
+    public boolean deleteRow(List<Condition> conditions, DBCmd dbCmd) {
+        return this.rows.removeIf(row -> dbCmd.evaluateConditions(row, this.colNames)) && !dbCmd.isInterpretError();
     }
 
     public void setColNames(List<String> line) {
@@ -100,38 +91,6 @@ public class DBTable {
 
     public String getTableName() {
         return this.tableName;
-    }
-
-    /* public void changeValue(int primaryKey, String column, String newValue) {
-        try {
-            int i = getColIndex(column);
-            try {
-                List<String> targetRow = getRow(primaryKey);
-                targetRow.set(i, newValue);
-            } catch (NoSuchElementException noSuchElementException) {
-                System.out.println("There is no entry with id " + primaryKey);
-            }
-        } catch (NoSuchElementException noSuchElementException) {
-            System.out.println(column + " doesn't exit");
-        }
-    } */
-
-    private int getColIndex(String column) {
-        List<String> lowerCaseColNames = colNames.stream().map(String::toLowerCase).toList();
-        int index = lowerCaseColNames.indexOf(column.toLowerCase());
-        if (index == -1) {
-            throw new NoSuchElementException();
-        }
-        return index;
-    }
-
-    public List<String> getRow(String id) {
-        for (List<String> r: this.rows) {
-            if (compareStringsCaseInsensitively(r.get(0), id)) {
-                return r;
-            }
-        }
-        return null;
     }
 
     public List<List<String>> getRows() {
@@ -172,6 +131,35 @@ public class DBTable {
         return s1.toLowerCase().compareTo(s2.toLowerCase()) == 0;
     }
 
+    public boolean update(Map<String, String> nameValueList, List<Condition> conditions, DBCmd dbCmd) {
+        String error = namesExist(nameValueList);
+        if (!error.isEmpty()) {
+            dbCmd.setError(error);
+            return false;
+        }
+        for (List<String> row : this.rows) {
+            if (dbCmd.evaluateConditions(row, this.colNames)) {
+                for (String key : nameValueList.keySet()) {
+                    int index = getIndexOfAttribute(key);
+                    row.set(index, nameValueList.get(key));
+                }
+            }
+            if (dbCmd.isInterpretError()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private String namesExist(Map<String, String> nameValueList) {
+        for (String key : nameValueList.keySet()) {
+            if (!listContainsString(this.colNames, key)) {
+                return "Table " + this.tableName + " does not have a column name " + key;
+            }
+        }
+        return "";
+    }
+
     public boolean failToFile(String fileToWrite) {
         // System.out.println(fileToWrite);
         try {
@@ -187,9 +175,7 @@ public class DBTable {
     }
 
     private String listToString(List<String> stringList) {
-        return stringList.stream()
-                .reduce("", (s1, s2) -> String.join("\t", s1, s2))
-                .trim();
+        return stringList.stream().reduce("", (s1, s2) -> String.join("\t", s1, s2)).trim();
     }
 
     public String toString() {
@@ -197,10 +183,7 @@ public class DBTable {
     }
 
     private String rowsToString() {
-        return this.rows.stream()
-                .map(this::listToString)
-                .reduce("", (s1, s2) -> String.join("\n", s1, s2))
-                .trim();
+        return this.rows.stream().map(this::listToString).reduce("", (s1, s2) -> String.join("\n", s1, s2)).trim();
     }
 
     public boolean containsQueriedAttributes(List<String> attributeList) {
@@ -215,18 +198,31 @@ public class DBTable {
     private List<Integer> getIndexOfQueriedAttributes(List<String> attributeList) {
         List<Integer> matches = new ArrayList<>();
         for (String attribute : attributeList) {
-            matches.add(this.colNames.indexOf(attribute));
+            matches.add(getIndexOfAttribute(attribute));
         }
         return matches;
     }
 
+    private int getIndexOfAttribute(String attribute) {
+        for (int i = 0; i < this.colNames.size(); i++) {
+            if (compareStringsCaseInsensitively(this.colNames.get(i), attribute)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     public String selectedContentToString(List<String> attributeList) {
         List<Integer> indexOfQueriedAttributes = getIndexOfQueriedAttributes(attributeList);
-        return selectedColNamesToString(indexOfQueriedAttributes) + selectedRowsAttributesToString(indexOfQueriedAttributes);
+        String s1 = selectedColNamesToString(indexOfQueriedAttributes);
+        String s2 = selectedRowsAttributesToString(indexOfQueriedAttributes);
+        return s1 + s2;
     }
     public String selectedContentToString(List<String> attributeList, DBCmd dbCmd) {
         List<Integer> indexOfQueriedAttributes = getIndexOfQueriedAttributes(attributeList);
-        return selectedColNamesToString(indexOfQueriedAttributes) + selectedRowsAttributesToString(indexOfQueriedAttributes, dbCmd);
+        String s1 = selectedColNamesToString(indexOfQueriedAttributes);
+        String s2 = selectedRowsAttributesToString(indexOfQueriedAttributes, dbCmd);
+        return s1 + s2;
     }
     public String selectedContentToString(DBCmd dbCmd) {
         return listToString(this.colNames) + "\n" + selectedRowsToString(dbCmd);
