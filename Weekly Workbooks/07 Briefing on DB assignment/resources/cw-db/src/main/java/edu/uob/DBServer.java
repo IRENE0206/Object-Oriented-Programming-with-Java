@@ -10,7 +10,7 @@ import java.nio.file.Files;
 public class DBServer {
 
     private static final char END_OF_TRANSMISSION = 4;
-    private String storageFolderPath;
+    private final String storageFolderPath;
     private String databasePath;
 
     public static void main(String[] args) throws IOException {
@@ -41,7 +41,7 @@ public class DBServer {
         if (command.isEmpty()) {
             return "";
         }
-        Parser parser = new Parser(this, command);
+        Parser parser = new Parser(command);
         DBCmd dbCmd = parser.parse();
         if (parser.isParsedOK() && dbCmd != null) {
             return dbCmd.query(this);

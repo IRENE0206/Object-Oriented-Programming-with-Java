@@ -3,13 +3,11 @@ package edu.uob;
 import java.util.*;
 
 public class Parser {
-    private DBServer dbServer;
-    private Tokeniser tokeniser;
+    private final Tokeniser tokeniser;
     private Boolean parsedOK;
     private StringBuilder errorMessage;
 
-    public Parser(DBServer dbServer, String query) {
-        this.dbServer = dbServer;
+    public Parser(String query) {
         this.tokeniser = new Tokeniser(query);
         this.parsedOK = false;
         this.errorMessage = new StringBuilder();
@@ -71,7 +69,7 @@ public class Parser {
             setReachSemicolonButNotEndErrorMessage();
             return true;
         }
-        setSyntaxErrorMessage();
+        setErrorMessage("Invalid syntax");
         return true;
     }
 
@@ -87,12 +85,10 @@ public class Parser {
         String databaseName = tokeniser.getToken();
         if (invalidDatabaseName(databaseName)) {
             return null;
-        }
-        if (failToMoveToNextToken()) {
+        } else if (failToMoveToNextToken()) {
             setMissingSemiColonErrorMessage();
             return null;
-        }
-        if (failToEndWithSemicolonProperly()) {
+        } else if (failToEndWithSemicolonProperly()) {
             return null;
         }
         setParsedOK();
@@ -116,7 +112,7 @@ public class Parser {
     }
 
     private boolean invalidDatabaseName(String s) {
-        if (!isPlainText(s)) {
+        if (!isPlainText(s) || isReservedKeyword(s)) {
             setDatabaseNameErrorMessage(s);
             return true;
         }
@@ -138,7 +134,7 @@ public class Parser {
         } else if (toTable(databaseOrTable)) {
             return createTable();
         }
-        setSyntaxErrorMessage();
+        setErrorMessage(databaseOrTable + " is not valid keyword. Should be 'DATABASE' or 'TABLE'");
         return null;
     }
 
@@ -154,12 +150,10 @@ public class Parser {
         String databaseName = tokeniser.getToken();
         if (invalidDatabaseName(databaseName)) {
             return null;
-        }
-        if (failToMoveToNextToken()) {
+        } else if (failToMoveToNextToken()) {
             setMissingSemiColonErrorMessage();
             return null;
-        }
-        if (failToEndWithSemicolonProperly()) {
+        } else if (failToEndWithSemicolonProperly()) {
             return null;
         }
         setParsedOK();
@@ -167,7 +161,7 @@ public class Parser {
     }
 
     private boolean invalidTableName(String tableName) {
-        if (isPlainText(tableName)) {
+        if (isPlainText(tableName) || !isReservedKeyword(tableName)) {
             return false;
         }
         setTableNameErrorMessage(tableName);
@@ -186,8 +180,7 @@ public class Parser {
         String tableName = tokeniser.getToken();
         if (invalidTableName(tableName)) {
             return null;
-        }
-        if (failToMoveToNextToken()) {
+        } else if (failToMoveToNextToken()) {
             setMissingSemiColonErrorMessage();
             return null;
         }
@@ -204,26 +197,19 @@ public class Parser {
         List<String> attributeList = new ArrayList<>();
         if (!getAttributeList(attributeList)) {
             return null;
-        }
-        if (!isCloseBracket(tokeniser.getToken())) {
+        } else if (!isCloseBracket(tokeniser.getToken())) {
             attributeList.clear();
             setMissingBracketMessage(")");
             return null;
-        }
-        if (failToMoveToNextToken()) {
+        } else if (failToMoveToNextToken()) {
             attributeList.clear();
             setMissingSemiColonErrorMessage();
             return null;
-        }
-        if (failToEndWithSemicolonProperly()) {
+        } else if (failToEndWithSemicolonProperly()) {
             return null;
         }
         setParsedOK();
         return new CreateTableCMD(tableName, attributeList);
-    }
-
-    private void setSyntaxErrorMessage() {
-        setErrorMessage("Invalid syntax");
     }
 
     private void setMissingBracketMessage(String bracket) {
@@ -254,18 +240,12 @@ public class Parser {
         return true;
     }
 
-    private void setInvalidAttributeNameErrorMessage(String attributeName) {
-        setErrorMessage(attributeName + " is not valid [AttributeName");
-    }
-
     private boolean getAttributeList(List<String> accumulator) {
         String token = tokeniser.getToken();
         if (invalidAttributeName(token)) {
-            setInvalidAttributeNameErrorMessage(token);
             accumulator.clear();
             return false;
-        }
-        if (failToMoveToNextToken()) {
+        } else if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
             accumulator.clear();
             return false;
@@ -274,8 +254,7 @@ public class Parser {
         if (!isComma(currToken)) {
             accumulator.add(getRidOfSingleQuote(token));
             return true;
-        }
-        if (failToMoveToNextToken()) {
+        } else if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
             accumulator.clear();
             return false;
@@ -310,7 +289,6 @@ public class Parser {
     private JoinCMD join() {
         String tableName1 = tokeniser.getToken();
         if (invalidTableName(tableName1)) {
-            setTableNameErrorMessage(tableName1);
             return null;
         }
         if (failToMoveToNextToken()) {
@@ -328,7 +306,6 @@ public class Parser {
         }
         String tableName2 = tokeniser.getToken();
         if (invalidTableName(tableName2)) {
-            setTableNameErrorMessage(tableName2);
             return null;
         }
         if (failToMoveToNextToken()) {
@@ -346,7 +323,6 @@ public class Parser {
         }
         String attributeName1 = tokeniser.getToken();
         if (invalidAttributeName(attributeName1)) {
-            setInvalidAttributeNameErrorMessage(attributeName1);
             return null;
         }
         if (failToMoveToNextToken()) {
@@ -364,7 +340,6 @@ public class Parser {
         }
         String attributeName2 = tokeniser.getToken();
         if (invalidAttributeName(attributeName2)) {
-            setInvalidAttributeNameErrorMessage(attributeName2);
             return null;
         }
         if (failToMoveToNextToken()) {
@@ -400,8 +375,7 @@ public class Parser {
         String tableName = tokeniser.getToken();
         if (invalidTableName(tableName)) {
             return null;
-        }
-        if (failToMoveToNextToken()) {
+        } else if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
             return null;
         }
@@ -409,29 +383,24 @@ public class Parser {
         if (!isAdd(alterType) && !isDrop(alterType)) {
             setErrorMessage(alterType + " is not valid [AlterationType]");
             return null;
-        }
-        if (failToMoveToNextToken()) {
+        } else if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
             return null;
         }
         String attributeName = tokeniser.getToken();
         if (invalidAttributeName(attributeName)) {
-            setInvalidAttributeNameErrorMessage(attributeName);
             return null;
-        }
-        if (failToMoveToNextToken()) {
+        } else if (failToMoveToNextToken()) {
             setMissingSemiColonErrorMessage();
             return null;
-        }
-        if (failToEndWithSemicolonProperly()) {
+        } else if (failToEndWithSemicolonProperly()) {
             return null;
         }
         setParsedOK();
         if (isAdd(alterType)) {
             return new AlterAddCMD(tableName, alterType, attributeName);
-        } else {
-            return new AlterDropCMD(tableName, alterType, attributeName);
         }
+        return new AlterDropCMD(tableName, alterType, attributeName);
     }
 
     private List<Condition> buildCondition() {
@@ -509,7 +478,6 @@ public class Parser {
         return conditions;
     }
 
-
     private int getPrecedence(String operator) {
         if (isOr(operator)) {
             return 1;
@@ -525,44 +493,29 @@ public class Parser {
         return getPrecedence(s1) - getPrecedence(s2) > 0;
     }
 
-    private void setBoolOperatorErrorMessage(String s) {
-        setErrorMessage(s + " is not a valid [BoolOperator]");
-    }
-
     private boolean isOr(String s) {
         return stringsEqualCaseInsensitively(s, "OR");
-    }
-
-    private boolean invalidBoolOperator(String s) {
-        if (isBoolOperator(s)) {
-            return false;
-        }
-        setBoolOperatorErrorMessage(s);
-        return true;
     }
 
     private AtomicCondition getAtomicCondition() {
         String attributeName = tokeniser.getToken();
         if (invalidAttributeName(attributeName)) {
             return null;
-        }
-        if (failToMoveToNextToken()) {
+        } else if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
             return null;
         }
         String comparator = tokeniser.getToken();
         if (invalidComparator(comparator)) {
             return null;
-        }
-        if (failToMoveToNextToken()) {
+        } else if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
             return null;
         }
         String value = tokeniser.getToken();
         if (invalidValue(value)) {
             return null;
-        }
-        if (failToMoveToNextToken()) {
+        } else if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
             return null;
         }
@@ -610,23 +563,20 @@ public class Parser {
         if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
             return null;
-        }
-        if (toDatabase(databaseOrTable)) {
+        } else if (toDatabase(databaseOrTable)) {
             return dropDatabase();
         } else if (toTable(databaseOrTable)) {
             return dropTable();
-        } else {
-            setErrorMessage(databaseOrTable + " is not valid keyword for Drop");
-            return null;
         }
+        setErrorMessage(databaseOrTable + " is not valid keyword for Drop");
+        return null;
     }
 
     private DropDatabaseCMD dropDatabase() {
         String databaseName = tokeniser.getToken();
         if (invalidDatabaseName(databaseName)) {
             return null;
-        }
-        if (failToMoveToNextToken()) {
+        } else if (failToMoveToNextToken()) {
             setMissingSemiColonErrorMessage();
             return null;
         } else if (failToEndWithSemicolonProperly()) {
@@ -640,8 +590,7 @@ public class Parser {
         String tableName = tokeniser.getToken();
         if (invalidTableName(tableName)) {
             return null;
-        }
-        if (failToMoveToNextToken()) {
+        }else if (failToMoveToNextToken()) {
             setMissingSemiColonErrorMessage();
             return null;
         } else if (failToEndWithSemicolonProperly()) {
@@ -661,21 +610,17 @@ public class Parser {
 
     private InsertCMD insert() {
         String secondKeyword = tokeniser.getToken();
-        System.out.println("q");
         if (!stringsEqualCaseInsensitively(secondKeyword, "INTO")) {
             setErrorMessage(secondKeyword + " is not invalid keyword 'INTO'");
             return null;
-        }
-        if (failToMoveToNextToken()) {
+        } else if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
             return null;
         }
         String tableName = tokeniser.getToken();
         if (invalidTableName(tableName)) {
-            System.out.println("w");
             return null;
-        }
-        if (failToMoveToNextToken()) {
+        } else if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
             return null;
         }
@@ -683,24 +628,19 @@ public class Parser {
         if (!stringsEqualCaseInsensitively(thirdKeyword, "VALUES")) {
             setErrorMessage(secondKeyword + " is not invalid keyword 'VALUES'");
             return null;
-        }
-        if (failToMoveToNextToken()) {
+        } else if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
             return null;
-        }
-        if (missingOpenBracket()) {
-            System.out.println("e");
+        } else if (missingOpenBracket()) {
             return null;
-        }
-        if (failToMoveToNextToken()) {
+        } else if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
             return null;
         }
         List<String> accumulator = new ArrayList<>();
         if (!getValueList(accumulator)) {
             return null;
-        }
-        if (failToMoveToNextToken()) {
+        } else if (failToMoveToNextToken()) {
             failToEndWithSemicolonProperly();
             return null;
         }
@@ -751,17 +691,14 @@ public class Parser {
             if (isNotFrom(from)) {
                 setErrorMessage(from + " is invalid. Should be FROM");
                 return null;
-            }
-            if (failToMoveToNextToken()) {
+            } else if (failToMoveToNextToken()) {
                 setLackMoreTokensErrorMessage();
                 return null;
             }
             String tableName = tokeniser.getToken();
             if (invalidTableName(tableName)) {
-                setTableNameErrorMessage(tableName);
                 return null;
-            }
-            if (failToMoveToNextToken()) {
+            } else if (failToMoveToNextToken()) {
                 setLackMoreTokensErrorMessage();
                 return null;
             }
@@ -783,10 +720,8 @@ public class Parser {
                 }
                 setParsedOK();
                 return new SelectCMD(tableName, conditions, true);
-            } else {
-                setErrorMessage(token + " is not valid keyword");
-                return null;
             }
+            setErrorMessage(token + " is not valid keyword");
         } else {
             List<String> accumulator = new ArrayList<>();
             if (!getAttributeList(accumulator)) {
@@ -796,17 +731,14 @@ public class Parser {
             if (isNotFrom(from)) {
                 setErrorMessage(from + " is invalid. Should be FROM");
                 return null;
-            }
-            if (failToMoveToNextToken()) {
+            } else if (failToMoveToNextToken()) {
                 setLackMoreTokensErrorMessage();
                 return null;
             }
             String tableName = tokeniser.getToken();
             if (invalidTableName(tableName)) {
-                setTableNameErrorMessage(tableName);
                 return null;
-            }
-            if (failToMoveToNextToken()) {
+            } else if (failToMoveToNextToken()) {
                 setLackMoreTokensErrorMessage();
                 return null;
             }
@@ -828,11 +760,10 @@ public class Parser {
                 }
                 setParsedOK();
                 return new SelectCMD(tableName, accumulator, conditions);
-            } else {
-                setErrorMessage(token + " is not valid keyword");
-                return null;
             }
+            setErrorMessage(token + " is not valid keyword");
         }
+        return null;
     }
 
     private boolean toUpdate(String firstKeyword) {
@@ -842,7 +773,6 @@ public class Parser {
     private UpdateCMD update() {
         String tableName = tokeniser.getToken();
         if (invalidTableName(tableName)) {
-            setTableNameErrorMessage(tableName);
             return null;
         } else if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
@@ -850,7 +780,7 @@ public class Parser {
         }
         String token1 = tokeniser.getToken();
         if (!isSet(token1)) {
-            setErrorMessage(token1 + " is not valid syntax. Should be SET");
+            setErrorMessage(token1 + " is not valid. Should be SET");
             return null;
         }
         if (failToMoveToNextToken()) {
@@ -884,7 +814,6 @@ public class Parser {
     private boolean getNameValuePair(Map<String, String> accumulator) {
         String attributeName = tokeniser.getToken();
         if (invalidAttributeName(attributeName)) {
-            setInvalidAttributeNameErrorMessage(attributeName);
             return false;
         }
         if (failToMoveToNextToken()) {
@@ -895,8 +824,7 @@ public class Parser {
         if (equalSign.compareTo("=") != 0) {
             setErrorMessage(equalSign + " is invalid. Should be '='");
             return false;
-        }
-        if (failToMoveToNextToken()) {
+        } else if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
             return false;
         }
@@ -904,8 +832,7 @@ public class Parser {
         if (!isValue(value)) {
             setErrorMessage(value + " is not valid [Value]");
             return false;
-        }
-        if (failToMoveToNextToken()) {
+        } else if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
             return false;
         }
@@ -951,16 +878,14 @@ public class Parser {
         if (isNotFrom(from)) {
             setErrorMessage(from + " is not valid keyword. Should be 'FROM'");
             return null;
-        }
-        if (failToMoveToNextToken()) {
+        } else if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
             return null;
         }
         String tableName = tokeniser.getToken();
         if (invalidTableName(tableName)) {
             return null;
-        }
-        if (failToMoveToNextToken()) {
+        } else if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
             return null;
         }
@@ -968,8 +893,7 @@ public class Parser {
         if (!isWhere(where)) {
             setWhereErrorMessage(where);
             return null;
-        }
-        if (failToMoveToNextToken()) {
+        } else if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
             return null;
         }
@@ -977,7 +901,6 @@ public class Parser {
         if (conditions == null) {
             return null;
         }
-        System.out.println("NOW");
         setParsedOK();
         return new DeleteCMD(tableName, conditions);
     }
@@ -991,10 +914,10 @@ public class Parser {
     }
 
     private boolean isReservedKeyword(String s) {
-        String[] reservedKeywords =
-                {"USE", "CREATE", "DATABASE", "TABLE", "DROP", "ALTER", "INSERT", "INTO", "VALUES",
-                "SELECT", "FROM", "UPDATE", "SET", "WHERE", "DELETE", "JOIN", "ON"};
-        return arrayContains(reservedKeywords, s);
+        String[] reservedKeywords = {"USE", "CREATE", "DATABASE", "TABLE", "DROP", "ALTER", "INSERT", "INTO", "VALUES",
+                "SELECT", "FROM", "UPDATE", "SET", "WHERE", "DELETE", "JOIN", "ON",
+                "AND", "ADD", "TRUE", "FALSE", "OR", "LIKE"};
+        return arrayContains(reservedKeywords, s.toUpperCase());
     }
 
     private boolean isPlainText(String s) {

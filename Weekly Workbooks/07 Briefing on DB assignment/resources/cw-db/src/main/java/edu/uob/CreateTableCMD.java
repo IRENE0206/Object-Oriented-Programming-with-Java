@@ -8,7 +8,7 @@ public class CreateTableCMD extends CreateCMD {
 
     public CreateTableCMD(String tableName) {
         super();
-        this.tableName = tableName;
+        this.tableName = tableName.toLowerCase();
         this.attributeList = new ArrayList<>();
     }
 
@@ -27,9 +27,11 @@ public class CreateTableCMD extends CreateCMD {
         }
         DBTable dbTable = new DBTable(this.tableName);
         if (this.attributeList.size() > 0) {
-            dbTable.setColNames(attributeList);
+            String error = dbTable.setColNames(attributeList);
+            if (error != null) {
+                return errorMessage(error);
+            }
         }
-        System.out.println(this.tableFilePath);
         if (dbTable.failToFile(this.tableFilePath)) {
             return errorMessage("Failed to create table " + this.tableName);
         }

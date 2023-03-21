@@ -47,7 +47,10 @@ public class JoinCMD extends DBCmd {
         DBTable tmp = new DBTable("tmp");
         List<String> newAttributeList = new ArrayList<>(addColNames(attributeList1, tableName1, index1));
         newAttributeList.addAll(addColNames(attributeList2, tableName2, index2));
-        tmp.setColNames(newAttributeList);
+        String error3 = tmp.setColNames(newAttributeList);
+        if (error3 != null) {
+            return errorMessage(error3);
+        }
         for (List<String> row : dbTable1.getRows()) {
             List<String> matchedRow = getMatchedRowFromTableRows(row.get(index1), dbTable2.getRows(), index2);
             if (matchedRow != null) {

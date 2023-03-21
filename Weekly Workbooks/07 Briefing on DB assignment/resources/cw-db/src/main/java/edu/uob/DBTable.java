@@ -24,9 +24,6 @@ public class DBTable {
 
     public String addRow(List<String> line) {
         if (line.size() != this.colNum - 1) {
-            System.out.println("line " + line.size());
-            this.colNames.forEach(System.out::println);
-            System.out.println(this.colNum);
             return "Not expected number of values. Cannot insert into table " + this.tableName;
         }
         List<String> row = new LinkedList<>();
@@ -41,7 +38,6 @@ public class DBTable {
         row.addAll(line);
         this.rows.add(row);
         this.rowNum += 1;
-        // this.rows.forEach(System.out::println);
         return "";
     }
 
@@ -66,22 +62,24 @@ public class DBTable {
         return this.rows.removeIf(row -> dbCmd.evaluateConditions(row, this.colNames)) && !dbCmd.isInterpretError();
     }
 
-    public void setColNames(List<String> line) {
+    public String setColNames(List<String> line) {
         this.colNames.add("id");
         for (String l : line) {
+            if (containsAttribute(l)) {
+                return "Failed to add " + l + ". Cannot add duplicate ColNames";
+            }
             if (l.startsWith("'") && l.endsWith("'")) {
                 this.colNames.add(l.substring(1, l.length() - 1));
             } else {
                 this.colNames.add(l);
             }
         }
-        // this.colNames.forEach(System.out::println);
         this.colNum = colNames.size();
+        return null;
     }
 
     public void setColNamesNoNeedToAddId(List<String> line) {
         this.colNames.addAll(line);
-        this.colNames.forEach(System.out::println);
         this.colNum = colNames.size();
     }
 
@@ -161,7 +159,6 @@ public class DBTable {
     }
 
     public boolean failToFile(String fileToWrite) {
-        // System.out.println(fileToWrite);
         try {
             FileWriter writer = new FileWriter(fileToWrite);
             writer.write(toString());
@@ -169,7 +166,6 @@ public class DBTable {
             writer.close();
             return false;
         } catch (IOException ioException) {
-            // System.out.println("WHY");
             return true;
         }
     }

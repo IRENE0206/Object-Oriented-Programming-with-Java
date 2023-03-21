@@ -67,7 +67,7 @@ public abstract class DBCmd {
             String firstLine = buffReader.readLine();
             if (firstLine.length() > 0) {
                 String[] firstLineSplit = firstLine.split("\t");
-                dbTable.setColNamesNoNeedToAddId(Arrays.stream(firstLineSplit).toList());
+                table.setColNamesNoNeedToAddId(Arrays.stream(firstLineSplit).toList());
                 // System.out.println("New: ");
                 // dbTable.getColNames().forEach(System.out::println);
                 buffReader
