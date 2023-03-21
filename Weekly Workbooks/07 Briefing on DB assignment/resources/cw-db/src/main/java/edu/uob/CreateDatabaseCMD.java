@@ -13,7 +13,7 @@ public class CreateDatabaseCMD extends CreateCMD {
         setDatabasePathFromStorageFolderPath(dbServer.getStorageFolderPath());
         File databaseToCreate = new File(this.databasePath);
         if (databaseToCreate.isDirectory()) {
-            return errorMessage("Database" + this.databaseName + " already exists");
+            return errorMessage("Database " + this.databaseName + " already exists");
         } else if (databaseToCreate.mkdir()) {
             return getQueryResults("");
         }

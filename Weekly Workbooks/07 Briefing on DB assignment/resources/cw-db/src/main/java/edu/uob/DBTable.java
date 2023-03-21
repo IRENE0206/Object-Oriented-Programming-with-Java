@@ -229,7 +229,7 @@ public class DBTable {
         return selectedColNamesToString(indexOfQueriedAttributes) + selectedRowsAttributesToString(indexOfQueriedAttributes, dbCmd);
     }
     public String selectedContentToString(DBCmd dbCmd) {
-        return listToString(this.colNames) + selectedRowsToString(dbCmd);
+        return listToString(this.colNames) + "\n" + selectedRowsToString(dbCmd);
     }
 
     private String selectedRowsToString(DBCmd dbCmd) {
@@ -239,7 +239,10 @@ public class DBTable {
                 if (dbCmd.isInterpretError()) {
                     return "";
                 }
-                accumulator.append(row).append("\n");
+                for (String s : row) {
+                    accumulator.append(s).append("\t");
+                }
+                accumulator.append("\n");
             }
         }
         return accumulator.toString().trim();

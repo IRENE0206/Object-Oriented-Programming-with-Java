@@ -134,17 +134,13 @@ public class Parser {
         String databaseOrTable = tokeniser.getToken();
         if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
-            System.out.println("?HERE");
             return null;
         }
         if (toDatabase(databaseOrTable)) {
-            System.out.println("??HERE");
             return createDatabase();
         } else if (toTable(databaseOrTable)) {
-            System.out.println("???HERE");
             return createTable();
         }
-        System.out.println("HERE");
         setSyntaxErrorMessage();
         return null;
     }
@@ -160,7 +156,6 @@ public class Parser {
     private CreateDatabaseCMD createDatabase() {
         String databaseName = tokeniser.getToken();
         if (invalidDatabaseName(databaseName)) {
-            System.out.println("HI");
             return null;
         }
         if (failToMoveToNextToken()) {
@@ -170,7 +165,6 @@ public class Parser {
         if (failToEndWithSemicolonProperly()) {
             return null;
         }
-        System.out.println("HI");
         setParsedOK();
         return new CreateDatabaseCMD(databaseName);
     }
@@ -193,56 +187,41 @@ public class Parser {
 
     private CreateTableCMD createTable() {
         String tableName = tokeniser.getToken();
-        System.out.println("1");
         if (invalidTableName(tableName)) {
-            System.out.println("2");
             return null;
         }
         if (failToMoveToNextToken()) {
-            System.out.println("3");
             setMissingSemiColonErrorMessage();
             return null;
         }
         String currToken = tokeniser.getToken();
-        System.out.println("4");
         if (isSemiColon(currToken) && !tokeniser.hasNextToken()) {
-            System.out.println("5");
             setParsedOK();
             return new CreateTableCMD(tableName);
         } else if (missingOpenBracket()) {
-            System.out.println("6");
             return null;
         } else if (failToMoveToNextToken()) {
-            System.out.println("7");
             setLackMoreTokensErrorMessage();
             return null;
         }
         List<String> attributeList = new ArrayList<>();
         if (!getAttributeList(attributeList)) {
-            System.out.println("8");
             return null;
         }
-        System.out.println("YES LIST");
         if (!isCloseBracket(tokeniser.getToken())) {
-            System.out.println("9");
             attributeList.clear();
             setMissingBracketMessage(")");
             return null;
         }
         if (failToMoveToNextToken()) {
-            System.out.println("10");
             attributeList.clear();
             setMissingSemiColonErrorMessage();
             return null;
         }
         if (failToEndWithSemicolonProperly()) {
-            System.out.println("11");
             return null;
         }
         setParsedOK();
-        if (parsedOK) {
-            System.out.println("OKK");
-        }
         return new CreateTableCMD(tableName, attributeList);
     }
 
@@ -586,7 +565,7 @@ public class Parser {
             setLackMoreTokensErrorMessage();
             return null;
         }
-        return new AtomicCondition(comparator, attributeName, value);
+        return new AtomicCondition(comparator, attributeName, getRidOfSingleQuote(value));
     }
 
     private boolean isComma(String s) {
@@ -763,6 +742,7 @@ public class Parser {
 
     private SelectCMD select() {
         if (isWildCard()) {
+            System.out.println("WILDCARD");
             if (failToMoveToNextToken()) {
                 setLackMoreTokensErrorMessage();
                 return null;
@@ -797,10 +777,14 @@ public class Parser {
                     setLackMoreTokensErrorMessage();
                     return null;
                 }
+                System.out.println("WHERE");
                 List<Condition> conditions = buildCondition();
+                System.out.println("CONDITIONS");
                 if (conditions == null) {
                     return null;
                 }
+                System.out.println("NOTNULL");
+                setParsedOK();
                 return new SelectCMD(tableName, conditions, true);
             } else {
                 setErrorMessage(token + " is not valid keyword");
@@ -845,6 +829,7 @@ public class Parser {
                 if (conditions == null) {
                     return null;
                 }
+                setParsedOK();
                 return new SelectCMD(tableName, accumulator, conditions);
             } else {
                 setErrorMessage(token + " is not valid keyword");

@@ -90,46 +90,30 @@ public abstract class DBCmd {
     }
 
     public boolean evaluateConditions(List<String> row, List<String> colNames) {
-        Stack<Condition> output = new Stack<>();
         Stack<Boolean> booleans = new Stack<>();
-        for (Condition condition0 : conditions) {
-            if (condition0.isBoolOperator()) {
-                String boolOperator = condition0.getOperator();
-                Condition condition1 = output.pop();
-                condition1.setResult(row);
-                if (!condition1.getErrorMessage().isEmpty()) {
-                    errorMessage(condition1.getErrorMessage());
-                    return false;
-                }
-                boolean bool1 = condition1.getResult();
+        for (Condition condition : conditions) {
+            System.out.println("look");
+            if (condition.isBoolOperator()) {
+                String boolOperator = condition.getOperator();
+                boolean bool1 = booleans.pop();
+                boolean bool2 = booleans.pop();
                 if (stringsEqualCaseInsensitively(boolOperator, "OR")) {
                     if (bool1) {
                         booleans.push(true);
                     } else {
-                        Condition condition2 = output.pop();
-                        condition2.setResult(row);
-                        if (!condition2.getErrorMessage().isEmpty()) {
-                            errorMessage(condition2.getErrorMessage());
-                            return false;
-                        }
-                        booleans.push(condition2.getResult());
+                        booleans.push(bool2);
                     }
                 } else {
                     if (!bool1) {
                         booleans.push(false);
                     } else {
-                        Condition condition2 = output.pop();
-                        condition2.setResult(row);
-                        if (!condition2.getErrorMessage().isEmpty()) {
-                            errorMessage(condition2.getErrorMessage());
-                            return false;
-                        }
-                        booleans.push(condition2.getResult());
+                        booleans.push(bool2);
                     }
                 }
             } else {
-                condition0.setCoNames(colNames);
-                output.push(condition0);
+                condition.setCoNames(colNames);
+                condition.setResult(row);
+                booleans.push(condition.getResult());
             }
         }
         return booleans.pop();

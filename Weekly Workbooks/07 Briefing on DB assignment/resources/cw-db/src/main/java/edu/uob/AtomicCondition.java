@@ -136,4 +136,5 @@ public class AtomicCondition extends Condition {
     private boolean smallerThanOrEqualComparator() {
         return this.operator.compareTo("<=") == 0;
     }
+
 }

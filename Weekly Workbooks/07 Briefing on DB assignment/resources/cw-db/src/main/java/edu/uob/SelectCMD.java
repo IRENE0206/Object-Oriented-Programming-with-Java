@@ -43,18 +43,24 @@ public class SelectCMD extends DBCmd {
         setDatabasePathFromCurrentDatabasePath(dbServer.getDatabasePath());
         setTableFilePath();
         String error1 = tableFileToDBTable(this.tableFilePath, this.dbTable);
+        System.out.println("0HEY");
         if (!error1.isEmpty()) {
             return error1;
         }
         if (this.selectAll && this.unconditional) {
+            System.out.println("1HEY");
             return getQueryResults(this.dbTable.toString());
-        } else if (!this.dbTable.containsQueriedAttributes(this.attributeList)) {
+        } else if (!this.selectAll && !this.dbTable.containsQueriedAttributes(this.attributeList)) {
+            System.out.println("2HEY");
             return errorMessage("Invalid attribute list for " + tableName);
         } else if (!this.selectAll && this.unconditional) {
+            System.out.println("3HEY");
             return this.dbTable.selectedContentToString(this.attributeList);
         } else if (this.selectAll && !this.unconditional) {
+            System.out.println("4HEY");
             return this.dbTable.selectedContentToString(this);
         } else {
+            System.out.println("5HEY");
             return this.dbTable.selectedContentToString(this.attributeList, this);
         }
     }

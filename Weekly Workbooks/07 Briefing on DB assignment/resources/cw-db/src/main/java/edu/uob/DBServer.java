@@ -39,24 +39,6 @@ public class DBServer {
     * <p>This method handles all incoming DB commands and carries out the required actions.
     */
     public String handleCommand(String command) {
-        // TODO implement your server logic here
-        /* File folder = new File(storageFolderPath);
-        try {
-            if (folder.exists() && folder.isDirectory()) {
-                File[] documents = folder.listFiles(n -> n.getName().endsWith(".tab"));
-                if (documents != null) {
-                    Arrays.stream(documents)
-                            .map(this::getBuffReaderFromFile)
-                            .filter(Objects::nonNull)
-                            .map(BufferedReader::lines)
-                            .;
-                }
-            } else {
-                throw new IOException();
-            }
-        } catch (IOException ioException) {
-            System.out.println(storageFolderPath + " is not correct path for storage folder");
-        } */
         if (command.isEmpty()) {
             return "";
         }
