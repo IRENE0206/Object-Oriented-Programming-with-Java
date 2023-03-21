@@ -458,28 +458,107 @@ public class Parser {
         }
     }
 
-    private boolean getCondition(DBCmd dbCmd, Stack<Condition> boolOperators, List<Condition> atomicCondition) {
-        if (!tokeniser.hasNextToken()) {
-            if (failToEndWithSemicolonProperly()) {
-                return false;
+    private List<Condition> buildCondition() {
+        List<Condition> conditions = new ArrayList<>();
+        Stack<String> operators = new Stack<>();
+        String token1 = tokeniser.getToken();
+        int openBracketCount = 0;
+        while (tokeniser.hasNextToken()) {
+            if (isOpenBracket(token1)) {
+                String token2 = tokeniser.getToken();
+                if (!isOpenBracket(token2)) {
+                    if (invalidAttributeName(token2)) {
+                        return null;
+                    }
+                    Condition atomicCondition = getAtomicCondition();
+                    if (atomicCondition == null) {
+                        return null;
+                    }
+                    String token3 = tokeniser.getToken();
+                    if (isCloseBracket(token3)) {
+                        if (failToMoveToNextToken()) {
+                            setLackMoreTokensErrorMessage();
+                            return null;
+                        }
+                        conditions.add(atomicCondition);
+                    } else {
+                        openBracketCount += 1;
+                        operators.push(token1);
+                        conditions.add(atomicCondition);
+                    }
+                } else {
+                    openBracketCount += 1;
+                    operators.push(token1);
+                }
+            } else if (isCloseBracket(token1)) {
+                openBracketCount -= 1;
+                if (openBracketCount < 0) {
+                    return null;
+                }
+                while (!operators.isEmpty() && !isOpenBracket(operators.peek())) {
+                    conditions.add(new BoolOperator(operators.pop()));
+                }
+                operators.pop();
+            } else if (isBoolOperator(token1)) {
+                if (operators.isEmpty() || operators.contains("(") || hasGreaterPrecedence(token1, operators.peek())) {
+                    operators.push(token1);
+                } else {
+                    while (!operators.isEmpty() && !isOpenBracket(operators.peek())) {
+                        conditions.add(new BoolOperator(operators.pop()));
+                    }
+                    operators.push(token1);
+                }
+                return null;
+            } else {
+                if (invalidAttributeName(token1)) {
+                    return null;
+                }
+                Condition atomicCondition = getAtomicCondition();
+                if (atomicCondition == null) {
+                    return null;
+                }
+                conditions.add(atomicCondition);
             }
-            while (!boolOperators.isEmpty()) {
-                dbCmd.addConditionList(boolOperators.pop());
-            }
-            return true;
         }
-        String token = tokeniser.getToken();
-        if (isOpenBracket(token)) {
-            boolOperators.push()
+        if (failToEndWithSemicolonProperly()) {
+            return null;
         }
+        while (!operators.isEmpty()) {
+            conditions.add(new BoolOperator(operators.pop()));
+        }
+        return conditions;
     }
 
-    private BoolOperator storeIntoBoolOperator(String operator) {
-        return new BoolOperator()
+
+    private int getPrecedence(String operator) {
+        if (isOr(operator)) {
+            return 1;
+        } else if (isAnd(operator)) {
+            return 2;
+        } else if (isOpenBracket(operator)) {
+            return 3;
+        }
+        return 0;
+    }
+
+    private boolean hasGreaterPrecedence(String s1, String s2) {
+        return getPrecedence(s1) - getPrecedence(s2) > 0;
     }
 
     private void setBoolOperatorErrorMessage(String s) {
         setErrorMessage(s + " is not a valid [BoolOperator]");
+    }
+
+    private boolean isOr(String s) {
+        return stringsEqualCaseInsensitively(s, "OR");
+    }
+
+    private boolean invalidBoolOperator(String s) {
+        if (isBoolOperator(s)) {
+            return false;
+        }
+        setBoolOperatorErrorMessage(s);
+        return true;
     }
 
     private AtomicCondition getAtomicCondition() {
@@ -516,18 +595,18 @@ public class Parser {
 
     private boolean invalidComparator(String comparator) {
         if (isComparator(comparator)) {
-            return true;
+            return false;
         }
         setErrorMessage(comparator + " is not a valid [Comparator]");
-        return false;
+        return true;
     }
 
     private boolean invalidValue(String value) {
-        if (isComparator(value)) {
-            return true;
+        if (isValue(value)) {
+            return false;
         }
         setErrorMessage(value + " is not a valid [Value]");
-        return false;
+        return true;
     }
 
     private boolean isOpenBracket(String s) {
@@ -682,7 +761,6 @@ public class Parser {
         return false;
     }
 
-    //TODO
     private SelectCMD select() {
         if (isWildCard()) {
             if (failToMoveToNextToken()) {
@@ -701,14 +779,32 @@ public class Parser {
             String tableName = tokeniser.getToken();
             if (invalidTableName(tableName)) {
                 setTableNameErrorMessage(tableName);
+                return null;
             }
             if (failToMoveToNextToken()) {
                 setLackMoreTokensErrorMessage();
                 return null;
             }
-            if (isSemiColon(tokeniser.getToken())) {
+            String token = tokeniser.getToken();
+            if (isSemiColon(token)) {
+                if (failToEndWithSemicolonProperly()) {
+                    return null;
+                }
                 setParsedOK();
                 return new SelectCMD(tableName);
+            } else if (isWhere(token)) {
+                if (failToMoveToNextToken()) {
+                    setLackMoreTokensErrorMessage();
+                    return null;
+                }
+                List<Condition> conditions = buildCondition();
+                if (conditions == null) {
+                    return null;
+                }
+                return new SelectCMD(tableName, conditions, true);
+            } else {
+                setErrorMessage(token + " is not valid keyword");
+                return null;
             }
         } else {
             List<String> accumulator = new ArrayList<>();
@@ -727,18 +823,34 @@ public class Parser {
             String tableName = tokeniser.getToken();
             if (invalidTableName(tableName)) {
                 setTableNameErrorMessage(tableName);
+                return null;
             }
             if (failToMoveToNextToken()) {
                 setLackMoreTokensErrorMessage();
                 return null;
             }
-            if (isSemiColon(tokeniser.getToken())) {
+            String token = tokeniser.getToken();
+            if (isSemiColon(token)) {
+                if (failToEndWithSemicolonProperly()) {
+                    return null;
+                }
                 setParsedOK();
                 return new SelectCMD(tableName, accumulator);
+            } else if (isWhere(token)) {
+                if (failToMoveToNextToken()) {
+                    setLackMoreTokensErrorMessage();
+                    return null;
+                }
+                List<Condition> conditions = buildCondition();
+                if (conditions == null) {
+                    return null;
+                }
+                return new SelectCMD(tableName, accumulator, conditions);
+            } else {
+                setErrorMessage(token + " is not valid keyword");
+                return null;
             }
         }
-
-        return null;
     }
 
     private boolean toUpdate(String firstKeyword) {
@@ -748,6 +860,10 @@ public class Parser {
     // TODO
     private UpdateCMD update() {
         return null;
+    }
+
+    private boolean isWhere(String s) {
+        return stringsEqualCaseInsensitively(s, "WHERE");
     }
 
     private boolean isWildCard() {

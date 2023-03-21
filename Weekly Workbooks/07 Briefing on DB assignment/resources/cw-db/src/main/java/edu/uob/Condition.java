@@ -5,9 +5,16 @@ import java.util.List;
 public abstract class Condition {
     String errorMessage;
     List<String> colNames;
+    String operator;
+    boolean result;
 
-    public abstract boolean getResult(List<String> row);
+    abstract boolean evaluate(List<String> row);
     public abstract void setCoNames(List<String> colNames);
+    public abstract void setResult(List<String> row);
+    public abstract boolean getResult();
+    public String getOperator() {
+        return this.operator;
+    }
 
     public String getErrorMessage() {
         return this.errorMessage;
@@ -16,6 +23,9 @@ public abstract class Condition {
     boolean stringsEqualCaseInsensitively(String s1, String s2) {
         return s1.toLowerCase().compareTo(s2.toLowerCase()) == 0;
     }
-    abstract void setErrorMessage(String message);
+
+    public abstract boolean isBoolOperator();
+
+
 }
 

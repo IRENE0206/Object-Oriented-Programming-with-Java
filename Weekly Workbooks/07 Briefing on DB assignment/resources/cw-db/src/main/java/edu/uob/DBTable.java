@@ -222,17 +222,50 @@ public class DBTable {
 
     public String selectedContentToString(List<String> attributeList) {
         List<Integer> indexOfQueriedAttributes = getIndexOfQueriedAttributes(attributeList);
-        return selectedColNamesToString(indexOfQueriedAttributes) + selectedRowsToString(indexOfQueriedAttributes);
+        return selectedColNamesToString(indexOfQueriedAttributes) + selectedRowsAttributesToString(indexOfQueriedAttributes);
+    }
+    public String selectedContentToString(List<String> attributeList, DBCmd dbCmd) {
+        List<Integer> indexOfQueriedAttributes = getIndexOfQueriedAttributes(attributeList);
+        return selectedColNamesToString(indexOfQueriedAttributes) + selectedRowsAttributesToString(indexOfQueriedAttributes, dbCmd);
+    }
+    public String selectedContentToString(DBCmd dbCmd) {
+        return listToString(this.colNames) + selectedRowsToString(dbCmd);
+    }
+
+    private String selectedRowsToString(DBCmd dbCmd) {
+        StringBuilder accumulator = new StringBuilder();
+        for (List<String> row : this.rows) {
+            if (dbCmd.evaluateConditions(row, this.colNames)) {
+                if (dbCmd.isInterpretError()) {
+                    return "";
+                }
+                accumulator.append(row).append("\n");
+            }
+        }
+        return accumulator.toString().trim();
     }
 
     private String selectedColNamesToString(List<Integer> indexOfQueriedAttributes) {
         return selectedStringFromList(this.colNames, indexOfQueriedAttributes).concat("\n");
     }
 
-    private String selectedRowsToString(List<Integer> indexOfQueriedAttributes) {
+    private String selectedRowsAttributesToString(List<Integer> indexOfQueriedAttributes) {
         StringBuilder accumulator = new StringBuilder();
         for (List<String> row : this.rows) {
             accumulator.append(selectedStringFromList(row, indexOfQueriedAttributes)).append("\n");
+        }
+        return accumulator.toString().trim();
+    }
+
+    private String selectedRowsAttributesToString(List<Integer> indexOfQueriedAttributes, DBCmd dbCmd) {
+        StringBuilder accumulator = new StringBuilder();
+        for (List<String> row : this.rows) {
+            if (dbCmd.evaluateConditions(row, this.colNames)) {
+                if (dbCmd.isInterpretError()) {
+                    return "";
+                }
+                accumulator.append(selectedStringFromList(row, indexOfQueriedAttributes)).append("\n");
+            }
         }
         return accumulator.toString().trim();
     }
@@ -244,5 +277,7 @@ public class DBTable {
         }
         return accumulator.toString().trim();
     }
+
+
 
 }

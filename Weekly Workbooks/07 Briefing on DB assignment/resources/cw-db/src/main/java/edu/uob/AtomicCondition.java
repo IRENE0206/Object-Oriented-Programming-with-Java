@@ -3,13 +3,12 @@ package edu.uob;
 import java.util.List;
 
 public class AtomicCondition extends Condition {
-    private String comparator;
     private String attributeName;
     private int attributeIndex;
     private String value;
 
     public AtomicCondition(String comparator, String attributeName, String value) {
-        this.comparator = comparator;
+        this.operator = comparator;
         this.attributeName = attributeName;
         this.value = value;
         this.errorMessage = "";
@@ -22,11 +21,11 @@ public class AtomicCondition extends Condition {
                 return;
             }
         }
-        setErrorMessage(" does not exist in the table");
+        this.setErrorMessage(" does not exist in the table");
     }
 
     @Override
-    public boolean getResult(List<String> row) {
+    boolean evaluate(List<String> row) {
         setAttributeIndex();
         if (this.errorMessage.isEmpty()) {
             String attribute = row.get(this.attributeIndex);
@@ -47,8 +46,23 @@ public class AtomicCondition extends Condition {
     }
 
     @Override
-    void setErrorMessage(String message) {
-        this.errorMessage = attributeName + message;
+    public void setResult(List<String> row) {
+        this.result = evaluate(row);
+    }
+
+    @Override
+    public boolean getResult() {
+        return this.result;
+    }
+
+    @Override
+    public boolean isBoolOperator() {
+        return false;
+    }
+
+
+    void setErrorMessage(String errorMessage) {
+        this.errorMessage = attributeName + errorMessage;
     }
 
     private boolean nullValueCompare() {
@@ -100,26 +114,26 @@ public class AtomicCondition extends Condition {
     }
 
     private boolean equalSignComparator() {
-        return this.comparator.compareTo("==") == 0;
+        return this.operator.compareTo("==") == 0;
     }
 
     private boolean unequalSignComparator() {
-        return this.comparator.compareTo("!=") == 0;
+        return this.operator.compareTo("!=") == 0;
     }
 
     private boolean biggerThanComparator() {
-        return this.comparator.compareTo(">") == 0;
+        return this.operator.compareTo(">") == 0;
     }
 
     private boolean biggerThanOrEqualComparator() {
-        return this.comparator.compareTo(">=") == 0;
+        return this.operator.compareTo(">=") == 0;
     }
 
     private boolean smallerThanComparator() {
-        return this.comparator.compareTo("<") == 0;
+        return this.operator.compareTo("<") == 0;
     }
 
     private boolean smallerThanOrEqualComparator() {
-        return this.comparator.compareTo("<=") == 0;
+        return this.operator.compareTo("<=") == 0;
     }
 }

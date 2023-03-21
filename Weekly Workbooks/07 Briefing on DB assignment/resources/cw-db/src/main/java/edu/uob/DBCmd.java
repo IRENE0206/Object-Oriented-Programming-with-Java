@@ -19,6 +19,8 @@ public abstract class DBCmd {
     List<Condition> conditions;
     DBTable dbTable;
 
+    boolean interpretError;
+
     public abstract String query(DBServer dbServer);
 
     void setDatabasePathFromStorageFolderPath(String storageFolderPath) {
@@ -30,6 +32,7 @@ public abstract class DBCmd {
     }
 
     String errorMessage(String message) {
+        this.interpretError = true;
         return errorTag + message;
     }
 
@@ -86,8 +89,54 @@ public abstract class DBCmd {
         return s1.toLowerCase().compareTo(s2.toLowerCase()) == 0;
     }
 
-    public void addConditionList(Condition condition) {
-        this.conditions.add(condition);
+    public boolean evaluateConditions(List<String> row, List<String> colNames) {
+        Stack<Condition> output = new Stack<>();
+        Stack<Boolean> booleans = new Stack<>();
+        for (Condition condition0 : conditions) {
+            if (condition0.isBoolOperator()) {
+                String boolOperator = condition0.getOperator();
+                Condition condition1 = output.pop();
+                condition1.setResult(row);
+                if (!condition1.getErrorMessage().isEmpty()) {
+                    errorMessage(condition1.getErrorMessage());
+                    return false;
+                }
+                boolean bool1 = condition1.getResult();
+                if (stringsEqualCaseInsensitively(boolOperator, "OR")) {
+                    if (bool1) {
+                        booleans.push(true);
+                    } else {
+                        Condition condition2 = output.pop();
+                        condition2.setResult(row);
+                        if (!condition2.getErrorMessage().isEmpty()) {
+                            errorMessage(condition2.getErrorMessage());
+                            return false;
+                        }
+                        booleans.push(condition2.getResult());
+                    }
+                } else {
+                    if (!bool1) {
+                        booleans.push(false);
+                    } else {
+                        Condition condition2 = output.pop();
+                        condition2.setResult(row);
+                        if (!condition2.getErrorMessage().isEmpty()) {
+                            errorMessage(condition2.getErrorMessage());
+                            return false;
+                        }
+                        booleans.push(condition2.getResult());
+                    }
+                }
+            } else {
+                condition0.setCoNames(colNames);
+                output.push(condition0);
+            }
+        }
+        return booleans.pop();
+    }
+
+    public boolean isInterpretError() {
+        return this.interpretError;
     }
 }
 
