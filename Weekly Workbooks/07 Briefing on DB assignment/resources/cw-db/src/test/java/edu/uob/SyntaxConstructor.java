@@ -5,7 +5,12 @@ import java.util.List;
 import java.util.Random;
 
 public class SyntaxConstructor {
-    Random random = new Random();
+    Random random;
+
+    public SyntaxConstructor() {
+        random = new Random();
+    }
+
     String arbitraryWhiteSpaceGenerator() {
         int r = random.nextInt(10);
         return " ".repeat(r);
@@ -39,13 +44,15 @@ public class SyntaxConstructor {
         List<String> strings = new ArrayList<>();
         strings.add(arbitraryCaseGenerator("USE "));
         strings.add(arbitraryCaseGenerator(databaseName));
+        strings.add(";");
         return insertArbitraryWhiteSpaces(strings);
     }
 
     public String createDataBaseCommand(String databaseName) {
         List<String> strings = new ArrayList<>();
-        strings.add(arbitraryCaseGenerator("CREATE "));
-        strings.add(arbitraryCaseGenerator(databaseName));
+        strings.add(arbitraryCaseGenerator("CREATE DATABASE "));
+        strings.add(databaseName);
+        strings.add(";");
         return insertArbitraryWhiteSpaces(strings);
     }
 
@@ -53,6 +60,7 @@ public class SyntaxConstructor {
         List<String> strings = new ArrayList<>();
         strings.add(arbitraryCaseGenerator("CREATE TABLE "));
         strings.add(arbitraryCaseGenerator(tableName));
+        strings.add(";");
         return insertArbitraryWhiteSpaces(strings);
     }
 
@@ -63,6 +71,7 @@ public class SyntaxConstructor {
         strings.add("(");
         strings.add(attributeList);
         strings.add(")");
+        strings.add(";");
         return insertArbitraryWhiteSpaces(strings);
     }
 
@@ -70,6 +79,7 @@ public class SyntaxConstructor {
         List<String> strings = new ArrayList<>();
         strings.add(arbitraryCaseGenerator("DROP DATABASE "));
         strings.add(arbitraryCaseGenerator(databaseName));
+        strings.add(";");
         return insertArbitraryWhiteSpaces(strings);
     }
 
@@ -77,25 +87,30 @@ public class SyntaxConstructor {
         List<String> strings = new ArrayList<>();
         strings.add(arbitraryCaseGenerator("DROP TABLE "));
         strings.add(arbitraryCaseGenerator(tableName));
+        strings.add(";");
         return insertArbitraryWhiteSpaces(strings);
     }
 
     public String alterCommand(String tableName, String alterationType, String attributeName) {
         List<String> strings = new ArrayList<>();
         strings.add(arbitraryCaseGenerator("ALTER TABLE "));
-        strings.add(arbitraryCaseGenerator(tableName));
+        strings.add(tableName);
+        strings.add(" ");
         strings.add(arbitraryCaseGenerator(alterationType));
-        strings.add(arbitraryCaseGenerator(attributeName));
+        strings.add(" ");
+        strings.add(attributeName);
+        strings.add(";");
         return insertArbitraryWhiteSpaces(strings);
     }
 
     public String insertCommand(String tableName, String valueList) {
         List<String> strings = new ArrayList<>();
         strings.add(arbitraryCaseGenerator("INSERT INTO "));
-        strings.add(arbitraryCaseGenerator(tableName));
+        strings.add(tableName);
         strings.add(arbitraryCaseGenerator(" VALUES("));
-        strings.add(arbitraryCaseGenerator(valueList));
-        strings.add(arbitraryCaseGenerator(")"));
+        strings.add(valueList);
+        strings.add(")");
+        strings.add(";");
         return insertArbitraryWhiteSpaces(strings);
     }
 
@@ -105,6 +120,7 @@ public class SyntaxConstructor {
         strings.add(arbitraryCaseGenerator(wildAttribLit));
         strings.add(arbitraryCaseGenerator(" FROM "));
         strings.add(arbitraryCaseGenerator(tableName));
+        strings.add(";");
         return insertArbitraryWhiteSpaces(strings);
     }
 
@@ -115,18 +131,20 @@ public class SyntaxConstructor {
         strings.add(arbitraryCaseGenerator(" FROM "));
         strings.add(arbitraryCaseGenerator(tableName));
         strings.add(arbitraryCaseGenerator(" WHERE "));
-        strings.add(arbitraryCaseGenerator(condition));
+        strings.add(condition);
+        strings.add(";");
         return insertArbitraryWhiteSpaces(strings);
     }
 
-    public String updateCommand(String tableName, String nameValueLit, String condition) {
+    public String updateCommand(String tableName, String nameValueList, String condition) {
         List<String> strings = new ArrayList<>();
         strings.add(arbitraryCaseGenerator("UPDATE "));
         strings.add(arbitraryCaseGenerator(tableName));
         strings.add(arbitraryCaseGenerator(" SET "));
-        strings.add(arbitraryCaseGenerator(nameValueLit));
+        strings.add(nameValueList);
         strings.add(arbitraryCaseGenerator(" WHERE "));
-        strings.add(arbitraryCaseGenerator(condition));
+        strings.add(condition);
+        strings.add(";");
         return insertArbitraryWhiteSpaces(strings);
     }
 
@@ -135,7 +153,8 @@ public class SyntaxConstructor {
         strings.add(arbitraryCaseGenerator("DELETE FROM "));
         strings.add(arbitraryCaseGenerator(tableName));
         strings.add(arbitraryCaseGenerator(" WHERE "));
-        strings.add(arbitraryCaseGenerator(condition));
+        strings.add(condition);
+        strings.add(";");
         return insertArbitraryWhiteSpaces(strings);
     }
 
@@ -149,6 +168,19 @@ public class SyntaxConstructor {
         strings.add(arbitraryCaseGenerator(attributeName1));
         strings.add(arbitraryCaseGenerator(" AND "));
         strings.add(arbitraryCaseGenerator(attributeName2));
+        strings.add(";");
         return insertArbitraryWhiteSpaces(strings);
+    }
+
+    public String randomNameGenerator() {
+        StringBuilder randomName = new StringBuilder();
+        for(int i = 0; i < 10 ;i++) {
+            randomName.append((char) (97 + (Math.random() * 25.0)));
+        }
+        return randomName.toString();
+    }
+
+    public boolean stringContainsCaseInsensitively(String s1, String s2) {
+        return s1.toLowerCase().contains(s2.toLowerCase());
     }
 }
