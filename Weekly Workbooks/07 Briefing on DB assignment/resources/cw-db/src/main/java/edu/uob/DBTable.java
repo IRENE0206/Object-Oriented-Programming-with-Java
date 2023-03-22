@@ -111,9 +111,11 @@ public class DBTable {
         this.colNum = colNames.size();
     }
 
-    public boolean addCol(String colName) {
+    public String addCol(String colName) {
         if (containsAttribute(colName)) {
-            return false;
+            return colName + " already exists in " + this.tableName;
+        } else if (compareStringsCaseInsensitively(colName, "id")) {
+            return "id cannot be added by user manually";
         }
         if (this.colNum == 0) {
             colNames.add("id");
@@ -122,14 +124,14 @@ public class DBTable {
             int index = colName.indexOf('.');
             String tbName = colName.substring(0, index);
             if (!compareStringsCaseInsensitively(tbName, this.tableName)) {
-                return false;
+                return tbName + " does not match table name " + this.tableName;
             }
             colName = colName.substring(index + 1);
         }
         colNames.add(colName);
         this.rows.forEach(row -> row.add("NULL"));
         this.colNum += 1;
-        return true;
+        return null;
     }
 
     public boolean containsAttribute(String colName) {

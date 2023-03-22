@@ -21,8 +21,9 @@ public class AlterAddCMD extends AlterCMD {
         } else if (this.dbTable.containsAttribute(this.attributeName)) {
             return errorMessage(this.attributeName + " already exists in table " + this.tableName);
         }
-        if (!this.dbTable.addCol(this.attributeName)) {
-            return errorMessage("Failed to add " + this.attributeName + " to table " + this.tableName);
+        String error2 = this.dbTable.addCol(this.attributeName);
+        if (error2 != null) {
+            return errorMessage(error2);
         }
         if (this.dbTable.failToFile(this.tableFilePath)) {
             return errorMessage("Failed to change table " + this.tableName);

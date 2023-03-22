@@ -218,7 +218,7 @@ public class Parser {
     }
 
     private boolean invalidAttributeName(String s) {
-        if (isPlainText(s)) {
+        if (isPlainText(s) && !isReservedKeyword(s)) {
             return false;
         } else if (!s.contains(".")) {
             return true;
@@ -234,7 +234,7 @@ public class Parser {
     }
 
     private boolean invalidPlainText(String plainText) {
-        if (isPlainText(plainText)) {
+        if (isPlainText(plainText) && !isReservedKeyword(plainText)) {
             return false;
         }
         setErrorMessage(plainText + " is not valid [PlainText]");
@@ -928,8 +928,7 @@ public class Parser {
 
     private boolean isReservedKeyword(String s) {
         String[] reservedKeywords = {"USE", "CREATE", "DATABASE", "TABLE", "DROP", "ALTER", "INSERT", "INTO", "VALUES",
-                "SELECT", "FROM", "UPDATE", "SET", "WHERE", "DELETE", "JOIN", "ON",
-                "AND", "ADD", "TRUE", "FALSE", "OR", "LIKE"};
+                "SELECT", "FROM", "UPDATE", "SET", "WHERE", "DELETE", "JOIN", "ON", "AND", "ADD", "TRUE", "FALSE", "OR", "LIKE"};
         return arrayContains(reservedKeywords, s);
     }
 

@@ -52,14 +52,19 @@ public class AtomicCondition extends Condition {
         setAttributeIndex(tableName);
         if (this.errorMessage == null) {
             String attribute = row.get(this.attributeIndex);
-            if (isBooleanLiteral(attribute)) {
+            if (likeCompare()) {
+                return stringValueCompare(attribute);
+            } else if (smallerThanComparator() || smallerThanOrEqualComparator()
+                    || biggerThanOrEqualComparator() || biggerThanComparator()) {
+                if (isIntegerLiteral(attribute)) {
+                    return integerLiteralCompare(attribute);
+                } else if (isFloatLiteral(attribute)) {
+                    return floatLiteralCompare(attribute);
+                }
+            } else if (isBooleanLiteral(attribute)) {
                 return boolValueCompare(attribute);
             } else if (isNull(attribute)) {
                 return nullValueCompare();
-            } else if (isIntegerLiteral(attribute)) {
-                return integerLiteralCompare(attribute);
-            } else if (isFloatLiteral(attribute)) {
-                return floatLiteralCompare(attribute);
             }
             return stringValueCompare(attribute);
         }

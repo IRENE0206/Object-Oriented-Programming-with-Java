@@ -55,7 +55,7 @@ public abstract class DBCmd {
     }
 
     String getTableFilePath(String tbName) {
-        return this.databasePath + File.separator + tbName + tabFileExtension;
+        return this.databasePath + File.separator + tbName.toLowerCase() + tabFileExtension;
     }
 
     String tableFileToDBTable(String tbFilePath, DBTable table) {
