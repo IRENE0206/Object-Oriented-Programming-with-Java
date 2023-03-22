@@ -7,7 +7,7 @@ import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class invalidAdditionalWhitespaceTests {
+public class InvalidAdditionalWhitespaceTests {
     /*
     Symbols with angle brackets <name> denote rules which MAY contain arbitrary additional whitespace
     whereas [name] indicates a rule that cannot contain additional whitespace
@@ -29,7 +29,8 @@ public class invalidAdditionalWhitespaceTests {
     }
 
     private String sendCommandToServer(String command) {
-        return assertTimeoutPreemptively(Duration.ofMillis(1000), () -> { return server.handleCommand(command);},
+        return assertTimeoutPreemptively(Duration.ofMillis(1000), () -> {
+            return server.handleCommand(command); },
                 "Server took too long to respond (probably stuck in an infinite loop)");
     }
 
@@ -46,18 +47,23 @@ public class invalidAdditionalWhitespaceTests {
         response = sendCommandToServer(syntaxConstructor.insertCommand("marks", "' Dave', 55, TRUE"));
         assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
         response = sendCommandToServer(syntaxConstructor.selectCommand("*", "marks", "name == 'Dave'"));
-        assertFalse(syntaxConstructor.stringContainsCaseInsensitively(response, "Dave"), "White space in single quotes should be preserved");
+        assertFalse(syntaxConstructor.stringContainsCaseInsensitively(response, "Dave"),
+                "White space in single quotes should be preserved");
         response = sendCommandToServer(syntaxConstructor.selectCommand("*", "marks", "name == ' Dave'"));
         assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
-        assertTrue(syntaxConstructor.stringContainsCaseInsensitively(response, "Dave"), "White space in single quotes should be preserved");
+        assertTrue(syntaxConstructor.stringContainsCaseInsensitively(response, "Dave"),
+                "White space in single quotes should be preserved");
 
         response = sendCommandToServer(syntaxConstructor.insertCommand("marks", "'Bob ', 35, FALSE"));
         assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
         response = sendCommandToServer(syntaxConstructor.selectCommand("*", "marks", "name == 'Bob'"));
-        assertFalse(syntaxConstructor.stringContainsCaseInsensitively(response, "Bob"), "White space in single quotes should be preserved");
-        response = sendCommandToServer(syntaxConstructor.selectCommand("*", "marks", "name == 'Bob '"));
+        assertFalse(syntaxConstructor.stringContainsCaseInsensitively(response, "Bob"),
+                "White space in single quotes should be preserved");
+        response = sendCommandToServer(syntaxConstructor.selectCommand("*",
+                "marks", "name == 'Bob '"));
         assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
-        assertTrue(syntaxConstructor.stringContainsCaseInsensitively(response, "Bob"), "White space in single quotes should be preserved");
+        assertTrue(syntaxConstructor.stringContainsCaseInsensitively(response, "Bob"),
+                "White space in single quotes should be preserved");
 
         response = sendCommandToServer(syntaxConstructor.insertCommand("marks", "'Clive', + 20, FALSE"));
         assertTrue(response.contains("[ERROR]"), "[IntegerLiteral]  cannot have additional whitespace");

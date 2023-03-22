@@ -9,7 +9,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class SelectRecordsTests {
     /*
-    <Select> ::=  "SELECT " <WildAttribList> " FROM " [TableName] | "SELECT " <WildAttribList> " FROM " [TableName] " WHERE " <Condition>
+    <Select> ::=  "SELECT " <WildAttribList> " FROM " [TableName] |
+    "SELECT " <WildAttribList> " FROM " [TableName] " WHERE " <Condition>
      */
 
     private DBServer server;
@@ -28,7 +29,8 @@ public class SelectRecordsTests {
     }
 
     private String sendCommandToServer(String command) {
-        return assertTimeoutPreemptively(Duration.ofMillis(1000), () -> { return server.handleCommand(command);},
+        return assertTimeoutPreemptively(Duration.ofMillis(1000), () -> {
+            return server.handleCommand(command); },
                 "Server took too long to respond (probably stuck in an infinite loop)");
     }
 

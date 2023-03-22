@@ -1,6 +1,5 @@
 package edu.uob;
 
-import java.util.Iterator;
 import java.util.List;
 
 public class AtomicCondition extends Condition {
@@ -185,7 +184,7 @@ public class AtomicCondition extends Condition {
             return compareResult != 0;
         } else if (this.isLiteralValue && likeCompare()) {
             return s.contains(this.value);
-        } else if (likeCompare()){
+        } else if (likeCompare()) {
             return s.toLowerCase().contains(this.value.toLowerCase());
         }
         return false;

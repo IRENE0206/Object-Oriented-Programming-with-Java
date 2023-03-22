@@ -72,10 +72,10 @@ public abstract class DBCmd {
             if (firstLine.length() > 0) {
                 String[] firstLineSplit = firstLine.split("\t");
                 table.setColNamesNoNeedToAddId(Arrays.stream(firstLineSplit).toList());
-                buffReader
-                        .lines()
-                        .filter(s -> s.length() > 0)
-                        .forEachOrdered(s -> table.setRows(new LinkedList<>(Arrays.asList(s.split("\t")))));
+                buffReader.
+                        lines().
+                        filter(s -> s.length() > 0).
+                        forEachOrdered(s -> table.setRows(new LinkedList<>(Arrays.asList(s.split("\t")))));
             }
             buffReader.close();
             return null;

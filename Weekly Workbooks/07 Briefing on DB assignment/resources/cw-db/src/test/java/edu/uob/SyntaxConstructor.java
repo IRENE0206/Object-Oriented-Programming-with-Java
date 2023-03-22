@@ -174,7 +174,7 @@ public class SyntaxConstructor {
 
     public String randomNameGenerator() {
         StringBuilder randomName = new StringBuilder();
-        for(int i = 0; i < 10 ;i++) {
+        for (int i = 0; i < 10; i++) {
             randomName.append((char) (97 + (Math.random() * 25.0)));
         }
         return randomName.toString();

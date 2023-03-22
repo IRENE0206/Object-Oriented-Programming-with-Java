@@ -30,20 +30,22 @@ public class JoinTablesTests {
     }
 
     private String sendCommandToServer(String command) {
-        return assertTimeoutPreemptively(Duration.ofMillis(1000), () -> { return server.handleCommand(command);},
+        return assertTimeoutPreemptively(Duration.ofMillis(1000), () -> {
+            return server.handleCommand(command); },
                 "Server took too long to respond (probably stuck in an infinite loop)");
     }
 
     @Test
     public void testJoinTables() {
-
         sendCommandToServer(syntaxConstructor.createTableCommand(randomTableName1, "name, mark, pass"));
         sendCommandToServer(syntaxConstructor.insertCommand(randomTableName1, "'Steve', 65, TRUE"));
         sendCommandToServer(syntaxConstructor.insertCommand(randomTableName1, "'Dave', 55, TRUE"));
         sendCommandToServer(syntaxConstructor.insertCommand(randomTableName1, "'Bob', 35, FALSE"));
         sendCommandToServer(syntaxConstructor.insertCommand(randomTableName1, "'Clive', 20, FALSE"));
 
-        String response = sendCommandToServer(syntaxConstructor.joinCommand(randomTableName1, randomTableName2, "id", "id"));
+        String response = sendCommandToServer(
+                syntaxConstructor.joinCommand(
+                        randomTableName1, randomTableName2, "id", "id"));
         assertTrue(response.contains("[ERROR]"), "Non-existing table");
 
         sendCommandToServer(syntaxConstructor.createTableCommand(randomTableName2, "tutor, studentID"));
@@ -52,9 +54,13 @@ public class JoinTablesTests {
         sendCommandToServer(syntaxConstructor.insertCommand(randomTableName2, "'Jessica', 3"));
         sendCommandToServer(syntaxConstructor.insertCommand(randomTableName2, "'Emily', 5"));
 
-        response = sendCommandToServer(syntaxConstructor.joinCommand(randomTableName1, randomTableName2, "id", "tuition"));
+        response = sendCommandToServer(
+                syntaxConstructor.joinCommand(
+                        randomTableName1, randomTableName2, "id", "tuition"));
         assertTrue(response.contains("[ERROR]"), "Non-existing attribute");
-        response = sendCommandToServer(syntaxConstructor.joinCommand(randomTableName1, randomTableName2, "id", "studentID"));
+        response = sendCommandToServer(
+                syntaxConstructor.joinCommand(
+                        randomTableName1, randomTableName2, "id", "studentID"));
         assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
         assertFalse(syntaxConstructor.stringContainsCaseInsensitively(response, randomTableName1 + ".id"),
                 "The table returned by a JOIN should not contain the columns joined on");
@@ -78,7 +84,9 @@ public class JoinTablesTests {
         assertTrue(syntaxConstructor.stringContainsCaseInsensitively(response, "Olivia"), "Wrong join results");
         assertTrue(syntaxConstructor.stringContainsCaseInsensitively(response, "Jessica"), "Wrong join results");
 
-        response = sendCommandToServer(syntaxConstructor.joinCommand(randomTableName1, randomTableName2, randomTableName1 + "." + "id", "studentID"));
+        response = sendCommandToServer(
+                syntaxConstructor.joinCommand(
+                        randomTableName1, randomTableName2, randomTableName1 + "." + "id", "studentID"));
         assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
         assertFalse(syntaxConstructor.stringContainsCaseInsensitively(response, randomTableName1 + ".id"),
                 "The table returned by a JOIN should not contain the columns joined on");
@@ -103,7 +111,10 @@ public class JoinTablesTests {
         assertTrue(syntaxConstructor.stringContainsCaseInsensitively(response, "Jessica"), "Wrong join results");
 
 
-        response = sendCommandToServer(syntaxConstructor.joinCommand(randomTableName1, randomTableName2, randomTableName1 + "." + "id", randomTableName2 + "." + "studentID"));
+        response = sendCommandToServer(
+                syntaxConstructor.joinCommand(
+                        randomTableName1, randomTableName2,
+                        randomTableName1 + "." + "id", randomTableName2 + "." + "studentID"));
         assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
         assertFalse(syntaxConstructor.stringContainsCaseInsensitively(response, randomTableName1 + ".id"),
                 "The table returned by a JOIN should not contain the columns joined on");
@@ -127,7 +138,9 @@ public class JoinTablesTests {
         assertTrue(syntaxConstructor.stringContainsCaseInsensitively(response, "Olivia"), "Wrong join results");
         assertTrue(syntaxConstructor.stringContainsCaseInsensitively(response, "Jessica"), "Wrong join results");
 
-        response = sendCommandToServer(syntaxConstructor.joinCommand(randomTableName1, randomTableName2, "id", randomTableName2 + "." + "studentID"));
+        response = sendCommandToServer(
+                syntaxConstructor.joinCommand(
+                        randomTableName1, randomTableName2, "id", randomTableName2 + "." + "studentID"));
         assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
         assertFalse(syntaxConstructor.stringContainsCaseInsensitively(response, randomTableName1 + ".id"),
                 "The table returned by a JOIN should not contain the columns joined on");

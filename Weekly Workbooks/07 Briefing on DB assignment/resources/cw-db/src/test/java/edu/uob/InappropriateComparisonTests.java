@@ -9,7 +9,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class InappropriateComparisonTests {
     /*
-    In situations where no appropriate comparison is possible (e.g. TRUE > FALSE) just return no data in the results table.
+    In situations where no appropriate comparison is possible (e.g. TRUE > FALSE)
+     just return no data in the results table.
     Errors should NOT be returned
      */
 
@@ -29,7 +30,8 @@ public class InappropriateComparisonTests {
     }
 
     private String sendCommandToServer(String command) {
-        return assertTimeoutPreemptively(Duration.ofMillis(1000), () -> { return server.handleCommand(command);},
+        return assertTimeoutPreemptively(Duration.ofMillis(1000), () -> {
+            return server.handleCommand(command); },
                 "Server took too long to respond (probably stuck in an infinite loop)");
     }
 

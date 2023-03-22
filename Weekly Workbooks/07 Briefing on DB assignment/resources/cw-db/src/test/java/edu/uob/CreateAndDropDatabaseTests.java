@@ -25,7 +25,8 @@ public class CreateAndDropDatabaseTests {
     }
 
     private String sendCommandToServer(String command) {
-        return assertTimeoutPreemptively(Duration.ofMillis(1000), () -> { return server.handleCommand(command);},
+        return assertTimeoutPreemptively(Duration.ofMillis(1000), () -> {
+            return server.handleCommand(command); },
                 "Server took too long to respond (probably stuck in an infinite loop)");
     }
 
@@ -35,7 +36,8 @@ public class CreateAndDropDatabaseTests {
 
         String response = sendCommandToServer(syntaxConstructor.createDataBaseCommand(randomDatabaseName));
         assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
-        response = sendCommandToServer(syntaxConstructor.createDataBaseCommand(syntaxConstructor.arbitraryCaseGenerator(randomDatabaseName)));
+        response = sendCommandToServer(syntaxConstructor.createDataBaseCommand(
+                syntaxConstructor.arbitraryCaseGenerator(randomDatabaseName)));
         assertTrue(response.contains("[ERROR]"), "Cannot create a database that already exists");
         response = sendCommandToServer(syntaxConstructor.useCommand(randomDatabaseName));
         assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");

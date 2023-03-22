@@ -1,7 +1,6 @@
 package edu.uob;
 
 import java.util.*;
-import java.util.concurrent.SynchronousQueue;
 
 public class Parser {
     private final Tokeniser tokeniser;
@@ -478,7 +477,6 @@ public class Parser {
             }
         }
         if (failToEndWithSemicolonProperly()) {
-
             return null;
         }
         while (!operators.isEmpty()) {
@@ -603,7 +601,7 @@ public class Parser {
         String tableName = tokeniser.getToken();
         if (invalidTableName(tableName)) {
             return null;
-        }else if (failToMoveToNextToken()) {
+        } else if (failToMoveToNextToken()) {
             setMissingSemiColonErrorMessage();
             return null;
         } else if (failToEndWithSemicolonProperly()) {
@@ -694,88 +692,96 @@ public class Parser {
         return false;
     }
 
-    private SelectCMD select() {
-        if (isWildCard()) {
+    private SelectCMD selectWildCard() {
+        if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            return null;
+        }
+        String from = tokeniser.getToken();
+        if (isNotFrom(from)) {
+            setErrorMessage(from + " is invalid. Should be FROM");
+            return null;
+        } else if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            return null;
+        }
+        String tableName = tokeniser.getToken();
+        if (invalidTableName(tableName)) {
+            return null;
+        } else if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            return null;
+        }
+        String token = tokeniser.getToken();
+        if (isSemiColon(token)) {
+            if (failToEndWithSemicolonProperly()) {
+                return null;
+            }
+            setParsedOK();
+            return new SelectCMD(tableName);
+        } else if (isWhere(token)) {
             if (failToMoveToNextToken()) {
                 setLackMoreTokensErrorMessage();
                 return null;
             }
-            String from = tokeniser.getToken();
-            if (isNotFrom(from)) {
-                setErrorMessage(from + " is invalid. Should be FROM");
-                return null;
-            } else if (failToMoveToNextToken()) {
-                setLackMoreTokensErrorMessage();
+            List<Condition> conditions = buildCondition();
+            if (conditions == null) {
                 return null;
             }
-            String tableName = tokeniser.getToken();
-            if (invalidTableName(tableName)) {
-                return null;
-            } else if (failToMoveToNextToken()) {
-                setLackMoreTokensErrorMessage();
-                return null;
-            }
-            String token = tokeniser.getToken();
-            if (isSemiColon(token)) {
-                if (failToEndWithSemicolonProperly()) {
-                    return null;
-                }
-                setParsedOK();
-                return new SelectCMD(tableName);
-            } else if (isWhere(token)) {
-                if (failToMoveToNextToken()) {
-                    setLackMoreTokensErrorMessage();
-                    return null;
-                }
-                List<Condition> conditions = buildCondition();
-                if (conditions == null) {
-                    return null;
-                }
-                setParsedOK();
-                return new SelectCMD(tableName, conditions, true);
-            }
-            setErrorMessage(token + " is not valid keyword");
-        } else {
-            List<String> accumulator = new ArrayList<>();
-            if (!getAttributeList(accumulator)) {
-                return null;
-            }
-            String from = tokeniser.getToken();
-            if (isNotFrom(from)) {
-                setErrorMessage(from + " is invalid. Should be FROM");
-                return null;
-            } else if (failToMoveToNextToken()) {
-                setLackMoreTokensErrorMessage();
-                return null;
-            }
-            String tableName = tokeniser.getToken();
-            if (invalidTableName(tableName)) {
-                return null;
-            } else if (failToMoveToNextToken()) {
-                setLackMoreTokensErrorMessage();
-                return null;
-            }
-            String token = tokeniser.getToken();
-            if (isSemiColon(token)) {
-                if (failToEndWithSemicolonProperly()) {
-                    return null;
-                }
-                setParsedOK();
-                return new SelectCMD(tableName, accumulator);
-            } else if (isWhere(token)) {
-                if (failToMoveToNextToken()) {
-                    setLackMoreTokensErrorMessage();
-                    return null;
-                }
-                List<Condition> conditions = buildCondition();
-                if (conditions == null) {
-                    return null;
-                }
-                setParsedOK();
-                return new SelectCMD(tableName, accumulator, conditions);
-            }
-            setErrorMessage(token + " is not valid keyword");
+            setParsedOK();
+            return new SelectCMD(tableName, conditions, true);
         }
+        setErrorMessage(token + " is not valid keyword");
+        return null;
+    }
+
+    private SelectCMD select() {
+        if (isWildCard()) {
+            return selectWildCard();
+        }
+        return selectSpecified();
+    }
+
+    private SelectCMD selectSpecified() {
+        List<String> accumulator = new ArrayList<>();
+        if (!getAttributeList(accumulator)) {
+            return null;
+        }
+        String from = tokeniser.getToken();
+        if (isNotFrom(from)) {
+            setErrorMessage(from + " is invalid. Should be FROM");
+            return null;
+        } else if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            return null;
+        }
+        String tableName = tokeniser.getToken();
+        if (invalidTableName(tableName)) {
+            return null;
+        } else if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            return null;
+        }
+        String token = tokeniser.getToken();
+        if (isSemiColon(token)) {
+            if (failToEndWithSemicolonProperly()) {
+                return null;
+            }
+            setParsedOK();
+            return new SelectCMD(tableName, accumulator);
+        } else if (isWhere(token)) {
+            if (failToMoveToNextToken()) {
+                setLackMoreTokensErrorMessage();
+                return null;
+            }
+            List<Condition> conditions = buildCondition();
+            if (conditions == null) {
+                return null;
+            }
+            setParsedOK();
+            return new SelectCMD(tableName, accumulator, conditions);
+        }
+        setErrorMessage(token + " is not valid keyword");
         return null;
     }
 
@@ -928,7 +934,8 @@ public class Parser {
 
     private boolean isReservedKeyword(String s) {
         String[] reservedKeywords = {"USE", "CREATE", "DATABASE", "TABLE", "DROP", "ALTER", "INSERT", "INTO", "VALUES",
-                "SELECT", "FROM", "UPDATE", "SET", "WHERE", "DELETE", "JOIN", "ON", "AND", "ADD", "TRUE", "FALSE", "OR", "LIKE"};
+            "SELECT", "FROM", "UPDATE", "SET", "WHERE", "DELETE", "JOIN", "ON",
+            "AND", "ADD", "TRUE", "FALSE", "OR", "LIKE"};
         return arrayContains(reservedKeywords, s);
     }
 
@@ -963,9 +970,8 @@ public class Parser {
     }
 
     private boolean isSymbol(String s) {
-        String[] symbols =
-                {"!", "#", "$", "%", "&", "(", ")", "*", "+", ",",
-                "-", ".", "/", ":", ";", ">", "=", "<", "?", "@", "[", "\\", "]", "^", "_", "`", "{", "}", "~"};
+        String[] symbols = {"!", "#", "$", "%", "&", "(", ")", "*", "+", ",",
+            "-", ".", "/", ":", ";", ">", "=", "<", "?", "@", "[", "\\", "]", "^", "_", "`", "{", "}", "~"};
         return arrayContains(symbols, s);
     }
 

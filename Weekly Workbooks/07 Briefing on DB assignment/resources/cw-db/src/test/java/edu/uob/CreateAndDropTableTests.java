@@ -29,7 +29,8 @@ public class CreateAndDropTableTests {
     }
 
     private String sendCommandToServer(String command) {
-        return assertTimeoutPreemptively(Duration.ofMillis(1000), () -> { return server.handleCommand(command);},
+        return assertTimeoutPreemptively(Duration.ofMillis(1000), () -> {
+            return server.handleCommand(command); },
                 "Server took too long to respond (probably stuck in an infinite loop)");
     }
 
@@ -59,10 +60,14 @@ public class CreateAndDropTableTests {
         response = sendCommandToServer(syntaxConstructor.createTableCommand(randomTableName, "name, mark, pass"));
         assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
         response = sendCommandToServer(syntaxConstructor.selectCommand("*", randomTableName));
-        assertTrue(syntaxConstructor.stringContainsCaseInsensitively(response, "id"), "ID is not automatically added when creating table");
-        assertTrue(syntaxConstructor.stringContainsCaseInsensitively(response, "name"), "Column names are not added when creating table");
-        assertTrue(syntaxConstructor.stringContainsCaseInsensitively(response, "mark"), "Column names are not added when creating table");
-        assertTrue(syntaxConstructor.stringContainsCaseInsensitively(response, "pass"), "Column names are not added when creating table");
+        assertTrue(syntaxConstructor.stringContainsCaseInsensitively(response, "id"),
+                "ID is not automatically added when creating table");
+        assertTrue(syntaxConstructor.stringContainsCaseInsensitively(response, "name"),
+                "Column names are not added when creating table");
+        assertTrue(syntaxConstructor.stringContainsCaseInsensitively(response, "mark"),
+                "Column names are not added when creating table");
+        assertTrue(syntaxConstructor.stringContainsCaseInsensitively(response, "pass"),
+                "Column names are not added when creating table");
         response = sendCommandToServer(syntaxConstructor.dropTableCommand(randomTableName));
         assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
 

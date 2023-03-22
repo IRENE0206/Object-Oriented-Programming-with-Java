@@ -51,7 +51,6 @@ public class JoinCMD extends DBCmd {
         if (error3 != null) {
             return errorMessage(error3);
         }
-        newAttributeList.forEach(System.out::println);
         for (List<String> row : dbTable1.getRows()) {
             List<String> matchedRow = getMatchedRowFromTableRows(row.get(index1), dbTable2.getRows(), index2);
             if (matchedRow != null) {
