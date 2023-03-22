@@ -16,7 +16,7 @@ public class DropTableCMD extends DropCMD {
             return errorMessage("Table " + this.tableName + " does not exist");
         }
         if (fileToDrop.delete()) {
-            return getQueryResults("");
+            return getQueryResults(null);
         }
         return errorMessage("Failed to delete database " + this.tableName);
     }

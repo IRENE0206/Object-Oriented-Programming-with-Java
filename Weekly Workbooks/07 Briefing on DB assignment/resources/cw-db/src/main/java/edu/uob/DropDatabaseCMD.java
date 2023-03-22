@@ -17,7 +17,7 @@ public class DropDatabaseCMD extends DropCMD {
         } else if (failToDeleteFileRecursively(fileToDrop)) {
             return errorMessage("Failed to drop " + this.databaseName);
         }
-        return getQueryResults("");
+        return getQueryResults(null);
     }
 
     private boolean failToDeleteFileRecursively(File fileToDelete) {

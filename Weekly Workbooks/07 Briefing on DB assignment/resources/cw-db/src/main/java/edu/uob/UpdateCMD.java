@@ -18,15 +18,15 @@ public class UpdateCMD extends DBCmd {
         setDatabasePathFromCurrentDatabasePath(dbServer.getDatabasePath());
         setTableFilePath();
         String error1 = tableFileToDBTable(this.tableFilePath, this.dbTable);
-        if (!error1.isEmpty()) {
+        if (error1 != null) {
             return error1;
         }
-        if (!this.dbTable.update(this.nameValueList, this.conditions, this)) {
-            return this.errorTag;
+        if (!this.dbTable.update(this.nameValueList, this)) {
+            return this.errorMessage;
         }
         if (this.dbTable.failToFile(this.tableFilePath)) {
             return errorMessage("Failed to update " + this.tableName);
         }
-        return getQueryResults("");
+        return getQueryResults(null);
     }
 }

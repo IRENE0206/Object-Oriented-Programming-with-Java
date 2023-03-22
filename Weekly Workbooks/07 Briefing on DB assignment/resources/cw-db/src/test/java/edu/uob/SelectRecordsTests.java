@@ -1,2 +1,4 @@
-package edu.uob;public class SelectRecordsTests {
+package edu.uob;
+
+public class SelectRecordsTests {
 }

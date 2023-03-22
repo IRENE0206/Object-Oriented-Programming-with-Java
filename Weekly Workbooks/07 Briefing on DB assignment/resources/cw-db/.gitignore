@@ -154,4 +154,8 @@ typings
 # Optional REPL history
 .node_repl_history
 
-databases
+databases/*
+
+src/test/java/edu/uob/Wang*.java
+src/test/java/edu/uob/KeyWords.java
+src/test/java/edu/uob/ExampleScriptTests.java

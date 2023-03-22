@@ -27,7 +27,7 @@ public class CreateTableCMD extends CreateCMD {
         }
         DBTable dbTable = new DBTable(this.tableName);
         if (this.attributeList.size() > 0) {
-            String error = dbTable.setColNames(attributeList);
+            String error = dbTable.setColNames(attributeList, false);
             if (error != null) {
                 return errorMessage(error);
             }
@@ -35,6 +35,6 @@ public class CreateTableCMD extends CreateCMD {
         if (dbTable.failToFile(this.tableFilePath)) {
             return errorMessage("Failed to create table " + this.tableName);
         }
-        return getQueryResults("");
+        return getQueryResults(null);
     }
 }

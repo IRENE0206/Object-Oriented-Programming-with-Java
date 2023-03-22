@@ -9,18 +9,18 @@ public class BoolOperator extends Condition {
     }
 
     @Override
-    boolean evaluate(List<String> row) {
+    boolean evaluate(String tableName, List<String> row) {
         return false;
     }
 
     @Override
-    public void setCoNames(List<String> colNames) {
+    public void setColNames(List<String> colNames) {
         return;
     }
 
     @Override
-    public void setResult(List<String> row) {
-        this.result = evaluate(row);
+    public void setResult(String tableName, List<String> row) {
+        this.result = evaluate(tableName, row);
     }
 
     @Override

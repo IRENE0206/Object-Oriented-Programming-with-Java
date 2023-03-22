@@ -43,25 +43,31 @@ public class SelectCMD extends DBCmd {
         setDatabasePathFromCurrentDatabasePath(dbServer.getDatabasePath());
         setTableFilePath();
         String error1 = tableFileToDBTable(this.tableFilePath, this.dbTable);
-        System.out.println("0HEY");
-        if (!error1.isEmpty()) {
+        if (error1 != null) {
             return error1;
         }
         if (this.selectAll && this.unconditional) {
-            System.out.println("1HEY");
             return getQueryResults(this.dbTable.toString());
         } else if (!this.selectAll && !this.dbTable.containsQueriedAttributes(this.attributeList)) {
-            System.out.println("2HEY");
             return errorMessage("Invalid attribute list for " + tableName);
         } else if (!this.selectAll && this.unconditional) {
-            System.out.println("3HEY");
-            return this.dbTable.selectedContentToString(this.attributeList);
+            String contents = this.dbTable.selectedContentToString(this.attributeList);
+            if (this.hasInterpretError()) {
+                return this.errorMessage;
+            }
+            return getQueryResults(contents);
         } else if (this.selectAll && !this.unconditional) {
-            System.out.println("4HEY");
-            return this.dbTable.selectedContentToString(this);
+            String contents = this.dbTable.selectedContentToString(this);
+            if (this.hasInterpretError()) {
+                return this.errorMessage;
+            }
+            return getQueryResults(contents);
         } else {
-            System.out.println("5HEY");
-            return this.dbTable.selectedContentToString(this.attributeList, this);
+            String contents = this.dbTable.selectedContentToString(this.attributeList, this);
+            if (this.hasInterpretError()) {
+                return this.errorMessage;
+            }
+            return getQueryResults(contents);
         }
     }
 }

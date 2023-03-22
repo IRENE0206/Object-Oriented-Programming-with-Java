@@ -1,2 +1,4 @@
-package edu.uob;public class InsertTooManyOrTooFewIntoTableTests {
+package edu.uob;
+
+public class InsertTooManyOrTooFewIntoTableTests {
 }

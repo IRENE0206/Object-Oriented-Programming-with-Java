@@ -16,7 +16,7 @@ public class AlterDropCMD extends AlterCMD {
             return errorMessage(tableName + " doesn't exist");
         }
         String error = tableFileToDBTable(this.tableFilePath, this.dbTable);
-        if (!error.isEmpty()) {
+        if (error != null) {
             return error;
         }
         if (!this.dbTable.containsAttribute(this.attributeName)) {
@@ -28,6 +28,6 @@ public class AlterDropCMD extends AlterCMD {
         if (this.dbTable.failToFile(this.tableFilePath)) {
             return errorMessage("Failed to change table " + this.tableName);
         }
-        return getQueryResults("");
+        return getQueryResults(null);
     }
 }

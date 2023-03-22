@@ -1,6 +1,7 @@
 package edu.uob;
 
 import java.util.*;
+import java.util.concurrent.SynchronousQueue;
 
 public class Parser {
     private final Tokeniser tokeniser;
@@ -161,7 +162,7 @@ public class Parser {
     }
 
     private boolean invalidTableName(String tableName) {
-        if (isPlainText(tableName) || !isReservedKeyword(tableName)) {
+        if (isPlainText(tableName) && !isReservedKeyword(tableName)) {
             return false;
         }
         setTableNameErrorMessage(tableName);
@@ -406,10 +407,11 @@ public class Parser {
     private List<Condition> buildCondition() {
         List<Condition> conditions = new ArrayList<>();
         Stack<String> operators = new Stack<>();
-        String token1 = tokeniser.getToken();
         int openBracketCount = 0;
-        while (tokeniser.hasNextToken()) {
+        while (!isSemiColon(tokeniser.getToken())) {
+            String token1 = tokeniser.getToken();
             if (isOpenBracket(token1)) {
+                openBracketCount += 1;
                 if (failToMoveToNextToken()) {
                     setLackMoreTokensErrorMessage();
                     return null;
@@ -425,23 +427,26 @@ public class Parser {
                     }
                     String token3 = tokeniser.getToken();
                     if (isCloseBracket(token3)) {
+                        openBracketCount -= 1;
                         if (failToMoveToNextToken()) {
                             setLackMoreTokensErrorMessage();
                             return null;
                         }
                         conditions.add(atomicCondition);
                     } else {
-                        openBracketCount += 1;
                         operators.push(token1);
                         conditions.add(atomicCondition);
                     }
                 } else {
-                    openBracketCount += 1;
                     operators.push(token1);
                 }
             } else if (isCloseBracket(token1)) {
                 openBracketCount -= 1;
                 if (openBracketCount < 0) {
+                    return null;
+                }
+                if (failToMoveToNextToken()) {
+                    setLackMoreTokensErrorMessage();
                     return null;
                 }
                 while (!operators.isEmpty() && !isOpenBracket(operators.peek())) {
@@ -457,7 +462,10 @@ public class Parser {
                     }
                     operators.push(token1);
                 }
-                return null;
+                if (failToMoveToNextToken()) {
+                    setLackMoreTokensErrorMessage();
+                    return null;
+                }
             } else {
                 if (invalidAttributeName(token1)) {
                     return null;
@@ -470,12 +478,16 @@ public class Parser {
             }
         }
         if (failToEndWithSemicolonProperly()) {
+
             return null;
         }
         while (!operators.isEmpty()) {
             conditions.add(new BoolOperator(operators.pop()));
         }
-        return conditions;
+        if (!conditions.isEmpty()) {
+            return conditions;
+        }
+        return null;
     }
 
     private int getPrecedence(String operator) {
@@ -519,7 +531,8 @@ public class Parser {
             setLackMoreTokensErrorMessage();
             return null;
         }
-        return new AtomicCondition(comparator, attributeName, getRidOfSingleQuote(value));
+        boolean isStringLiteral = isStringLiteral(value);
+        return new AtomicCondition(comparator, attributeName, getRidOfSingleQuote(value), isStringLiteral);
     }
 
     private boolean isComma(String s) {
@@ -917,7 +930,7 @@ public class Parser {
         String[] reservedKeywords = {"USE", "CREATE", "DATABASE", "TABLE", "DROP", "ALTER", "INSERT", "INTO", "VALUES",
                 "SELECT", "FROM", "UPDATE", "SET", "WHERE", "DELETE", "JOIN", "ON",
                 "AND", "ADD", "TRUE", "FALSE", "OR", "LIKE"};
-        return arrayContains(reservedKeywords, s.toUpperCase());
+        return arrayContains(reservedKeywords, s);
     }
 
     private boolean isPlainText(String s) {
@@ -931,7 +944,7 @@ public class Parser {
     }
 
     private boolean isLetter(Character c) {
-        return Character.isUpperCase(c) || Character.isLowerCase(c);
+        return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
     }
 
     private boolean isLetter(String s) {
@@ -939,8 +952,7 @@ public class Parser {
     }
 
     private boolean isDigit(Character c) {
-        int i = Character.getNumericValue(c);
-        return 0 <= i && i <= 9;
+        return '0' <= c && c <= '9';
     }
 
     private boolean isDigit(String s) {
@@ -963,7 +975,7 @@ public class Parser {
     }
 
     private boolean isDrop(String s) {
-        return stringsEqualCaseInsensitively(s, "ADD");
+        return stringsEqualCaseInsensitively(s, "DROP");
     }
 
     private boolean isNull(String s) {
@@ -984,7 +996,7 @@ public class Parser {
 
     private boolean isComparator(String s) {
         String[] comparators = {"==", ">", "<", ">=", "<=", "!=", "LIKE"};
-        return arrayContains(comparators, s.toUpperCase());
+        return arrayContains(comparators, s);
     }
 
     private boolean isCharLiteral(String s) {

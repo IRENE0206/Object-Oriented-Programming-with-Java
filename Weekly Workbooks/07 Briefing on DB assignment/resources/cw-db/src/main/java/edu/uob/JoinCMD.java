@@ -22,35 +22,36 @@ public class JoinCMD extends DBCmd {
         String tableFilePath1 = getTableFilePath(tableName1);
         DBTable dbTable1 = new DBTable(tableName1);
         String error1 = tableFileToDBTable(tableFilePath1, dbTable1);
-        if (!error1.isEmpty()) {
+        if (error1 != null) {
             return error1;
         }
         String tableName2 = tableNames.get(1);
         String tableFilePath2 = getTableFilePath(tableName2);
         DBTable dbTable2 = new DBTable(tableName2);
         String error2 = tableFileToDBTable(tableFilePath2, dbTable2);
-        if (!error2.isEmpty()) {
+        if (error2 != null) {
             return error2;
         }
         List<String> attributeList1 = dbTable1.getColNames();
         String attribute1 = this.attributeList.get(0);
-        if (!stringListContainsStringCaseInsensitively(attributeList1, attribute1)) {
+        if (!dbTable1.containsAttribute(attribute1)) {
             return errorMessage("Table " + tableName1 + " does not have attribute " + attribute1);
         }
-        int index1 = attributeList1.indexOf(attribute1);
+        int index1 = dbTable1.getIndexOfAttribute(attribute1);
         List<String> attributeList2 = dbTable2.getColNames();
         String attribute2 = this.attributeList.get(1);
-        if (!stringListContainsStringCaseInsensitively(attributeList2, attribute2)) {
+        if (!dbTable2.containsAttribute(attribute2)) {
             return errorMessage("Table " + tableName2 + " does not have attribute " + attribute2);
         }
-        int index2 = attributeList2.indexOf(attribute2);
+        int index2 = dbTable2.getIndexOfAttribute(attribute2);
         DBTable tmp = new DBTable("tmp");
         List<String> newAttributeList = new ArrayList<>(addColNames(attributeList1, tableName1, index1));
         newAttributeList.addAll(addColNames(attributeList2, tableName2, index2));
-        String error3 = tmp.setColNames(newAttributeList);
+        String error3 = tmp.setColNames(newAttributeList, true);
         if (error3 != null) {
             return errorMessage(error3);
         }
+        newAttributeList.forEach(System.out::println);
         for (List<String> row : dbTable1.getRows()) {
             List<String> matchedRow = getMatchedRowFromTableRows(row.get(index1), dbTable2.getRows(), index2);
             if (matchedRow != null) {

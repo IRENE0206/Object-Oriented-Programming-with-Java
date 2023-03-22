@@ -16,17 +16,18 @@ public class AlterAddCMD extends AlterCMD {
             return errorMessage(tableName + " doesn't exist");
         }
         String error = tableFileToDBTable(this.tableFilePath, this.dbTable);
-        if (!error.isEmpty()) {
+        if (error != null) {
             return error;
-        }
-        if (this.dbTable.containsAttribute(this.attributeName)) {
+        } else if (this.dbTable.containsAttribute(this.attributeName)) {
             return errorMessage(this.attributeName + " already exists in table " + this.tableName);
         }
-        this.dbTable.addCol(this.attributeName);
+        if (!this.dbTable.addCol(this.attributeName)) {
+            return errorMessage("Failed to add " + this.attributeName + " to table " + this.tableName);
+        }
         if (this.dbTable.failToFile(this.tableFilePath)) {
             return errorMessage("Failed to change table " + this.tableName);
         }
-        return getQueryResults("");
+        return getQueryResults(null);
     }
 
 }

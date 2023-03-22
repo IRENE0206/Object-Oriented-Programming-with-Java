@@ -8,9 +8,9 @@ public abstract class Condition {
     String operator;
     boolean result;
 
-    abstract boolean evaluate(List<String> row);
-    public abstract void setCoNames(List<String> colNames);
-    public abstract void setResult(List<String> row);
+    abstract boolean evaluate(String tableName, List<String> row);
+    public abstract void setColNames(List<String> colNames);
+    public abstract void setResult(String tableName, List<String> row);
     public abstract boolean getResult();
     public String getOperator() {
         return this.operator;

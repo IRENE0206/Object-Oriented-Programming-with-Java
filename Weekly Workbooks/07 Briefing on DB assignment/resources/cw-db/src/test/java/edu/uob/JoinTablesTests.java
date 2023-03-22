@@ -1,2 +1,5 @@
-package edu.uob;public class JoinTablesTests {
+package edu.uob;
+
+public class JoinTablesTests {
+    // TODO
 }

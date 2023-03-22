@@ -1,2 +1,4 @@
-package edu.uob;public class RemoveIDFromTableTests {
+package edu.uob;
+
+public class RemoveIDFromTableTests {
 }

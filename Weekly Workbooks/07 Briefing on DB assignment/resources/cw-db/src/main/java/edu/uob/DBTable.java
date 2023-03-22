@@ -38,7 +38,7 @@ public class DBTable {
         row.addAll(line);
         this.rows.add(row);
         this.rowNum += 1;
-        return "";
+        return null;
     }
 
     public boolean isEmpty() {
@@ -59,10 +59,10 @@ public class DBTable {
     }
 
     public boolean deleteRow(List<Condition> conditions, DBCmd dbCmd) {
-        return this.rows.removeIf(row -> dbCmd.evaluateConditions(row, this.colNames)) && !dbCmd.isInterpretError();
+        return this.rows.removeIf(row -> dbCmd.evaluateConditions(row, this.colNames)) && !dbCmd.hasInterpretError();
     }
 
-    public String setColNames(List<String> line) {
+    public String setColNames(List<String> line, boolean isJoin) {
         this.colNames.add("id");
         for (String l : line) {
             if (containsAttribute(l)) {
@@ -70,6 +70,9 @@ public class DBTable {
             }
             if (l.startsWith("'") && l.endsWith("'")) {
                 this.colNames.add(l.substring(1, l.length() - 1));
+            } else if (l.contains(".") && !isJoin) {
+                int index = l.indexOf('.');
+                this.colNames.add(l.substring(index + 1));
             } else {
                 this.colNames.add(l);
             }
@@ -102,37 +105,59 @@ public class DBTable {
         if (!containsAttribute(colName)) {
             return;
         }
-        int colIndex = colNames.indexOf(colName) + 1;
-        colNames.remove(colName);
+        int colIndex = getIndexOfAttribute(colName);
+        this.colNames.remove(colIndex);
         this.rows.forEach(row -> row.remove(colIndex));
-        this.colNum -= 1;
+        this.colNum = colNames.size();
     }
 
-    public void addCol(String colName) {
+    public boolean addCol(String colName) {
         if (containsAttribute(colName)) {
-            return;
+            return false;
+        }
+        if (this.colNum == 0) {
+            colNames.add("id");
+        }
+        if (colName.contains(".")) {
+            int index = colName.indexOf('.');
+            String tbName = colName.substring(0, index);
+            if (!compareStringsCaseInsensitively(tbName, this.tableName)) {
+                return false;
+            }
+            colName = colName.substring(index + 1);
         }
         colNames.add(colName);
-        this.rows.forEach(row -> row.add(""));
+        this.rows.forEach(row -> row.add("NULL"));
         this.colNum += 1;
+        return true;
     }
 
     public boolean containsAttribute(String colName) {
-        return listContainsString(this.colNames, colName);
-    }
-
-    private boolean listContainsString(List<String> stringList, String s) {
-        return stringList.stream().map(String::toLowerCase).toList().contains(s.toLowerCase());
+        if (colName.contains(".")) {
+            int index = colName.indexOf('.');
+            String tbName = colName.substring(0, index);
+            String attributeName = colName.substring(index + 1);
+            if (!compareStringsCaseInsensitively(tbName, this.tableName)) {
+                return false;
+            }
+            colName = attributeName;
+        }
+        for (String name : this.colNames) {
+            if (compareStringsCaseInsensitively(name, colName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean compareStringsCaseInsensitively(String s1, String s2) {
         return s1.toLowerCase().compareTo(s2.toLowerCase()) == 0;
     }
 
-    public boolean update(Map<String, String> nameValueList, List<Condition> conditions, DBCmd dbCmd) {
+    public boolean update(Map<String, String> nameValueList, DBCmd dbCmd) {
         String error = namesExist(nameValueList);
-        if (!error.isEmpty()) {
-            dbCmd.setError(error);
+        if (error != null) {
+            dbCmd.setErrorMessage(error);
             return false;
         }
         for (List<String> row : this.rows) {
@@ -140,9 +165,13 @@ public class DBTable {
                 for (String key : nameValueList.keySet()) {
                     int index = getIndexOfAttribute(key);
                     row.set(index, nameValueList.get(key));
+                    if (compareStringsCaseInsensitively(key, "id")) {
+                        dbCmd.setErrorMessage("id cannot be changed");
+                        return false;
+                    }
                 }
             }
-            if (dbCmd.isInterpretError()) {
+            if (dbCmd.hasInterpretError()) {
                 return false;
             }
         }
@@ -151,11 +180,11 @@ public class DBTable {
 
     private String namesExist(Map<String, String> nameValueList) {
         for (String key : nameValueList.keySet()) {
-            if (!listContainsString(this.colNames, key)) {
+            if (!containsAttribute(key)) {
                 return "Table " + this.tableName + " does not have a column name " + key;
             }
         }
-        return "";
+        return null;
     }
 
     public boolean failToFile(String fileToWrite) {
@@ -199,7 +228,11 @@ public class DBTable {
         return matches;
     }
 
-    private int getIndexOfAttribute(String attribute) {
+    public int getIndexOfAttribute(String attribute) {
+        if (attribute.contains(".")) {
+            int index = attribute.indexOf('.');
+            attribute = attribute.substring(index + 1);
+        }
         for (int i = 0; i < this.colNames.size(); i++) {
             if (compareStringsCaseInsensitively(this.colNames.get(i), attribute)) {
                 return i;
@@ -228,8 +261,8 @@ public class DBTable {
         StringBuilder accumulator = new StringBuilder();
         for (List<String> row : this.rows) {
             if (dbCmd.evaluateConditions(row, this.colNames)) {
-                if (dbCmd.isInterpretError()) {
-                    return "";
+                if (dbCmd.hasInterpretError()) {
+                    return null;
                 }
                 for (String s : row) {
                     accumulator.append(s).append("\t");
@@ -247,7 +280,8 @@ public class DBTable {
     private String selectedRowsAttributesToString(List<Integer> indexOfQueriedAttributes) {
         StringBuilder accumulator = new StringBuilder();
         for (List<String> row : this.rows) {
-            accumulator.append(selectedStringFromList(row, indexOfQueriedAttributes)).append("\n");
+            accumulator.append(selectedStringFromList(row, indexOfQueriedAttributes));
+            accumulator.append("\n");
         }
         return accumulator.toString().trim();
     }
@@ -256,8 +290,8 @@ public class DBTable {
         StringBuilder accumulator = new StringBuilder();
         for (List<String> row : this.rows) {
             if (dbCmd.evaluateConditions(row, this.colNames)) {
-                if (dbCmd.isInterpretError()) {
-                    return "";
+                if (dbCmd.hasInterpretError()) {
+                    return null;
                 }
                 accumulator.append(selectedStringFromList(row, indexOfQueriedAttributes)).append("\n");
             }
@@ -267,8 +301,9 @@ public class DBTable {
 
     private String selectedStringFromList(List<String> stringList, List<Integer> indexOfQueriedAttributes) {
         StringBuilder accumulator = new StringBuilder();
-        for (Integer index : indexOfQueriedAttributes) {
-            accumulator.append(stringList.get(index)).append("\t");
+        for (Integer indexOfQueriedAttribute : indexOfQueriedAttributes) {
+            accumulator.append(stringList.get(indexOfQueriedAttribute));
+            accumulator.append("\t");
         }
         return accumulator.toString().trim();
     }

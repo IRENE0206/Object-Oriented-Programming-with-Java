@@ -9,6 +9,7 @@ import java.util.Stack;
 public abstract class DBCmd {
     String errorTag = "[ERROR] ";
     String okTag = "[OK]\n";
+    String errorMessage;
     String tabFileExtension = ".tab";
     String commandType;
     String databaseName;
@@ -25,7 +26,7 @@ public abstract class DBCmd {
     public abstract String query(DBServer dbServer);
 
     void setDatabasePathFromStorageFolderPath(String storageFolderPath) {
-        this.databasePath = storageFolderPath + File.separator + this.databaseName;
+        this.databasePath = storageFolderPath + File.separator + this.databaseName.toLowerCase();
     }
 
     void setDatabasePathFromCurrentDatabasePath(String currentDatabasePath) {
@@ -37,17 +38,20 @@ public abstract class DBCmd {
         return errorTag + message;
     }
 
-    public void setError(String message) {
+    public void setErrorMessage(String message) {
         this.interpretError = true;
-        this.errorTag += message;
+        this.errorMessage = errorTag + message;
     }
 
     String getQueryResults(String results) {
-        return okTag + results;
+        if (results != null) {
+            return okTag + results;
+        }
+        return okTag;
     }
 
     void setTableFilePath() {
-        this.tableFilePath = getTableFilePath(this.tableName);
+        this.tableFilePath = getTableFilePath(this.tableName.toLowerCase());
     }
 
     String getTableFilePath(String tbName) {
@@ -68,15 +72,13 @@ public abstract class DBCmd {
             if (firstLine.length() > 0) {
                 String[] firstLineSplit = firstLine.split("\t");
                 table.setColNamesNoNeedToAddId(Arrays.stream(firstLineSplit).toList());
-                // System.out.println("New: ");
-                // dbTable.getColNames().forEach(System.out::println);
                 buffReader
                         .lines()
                         .filter(s -> s.length() > 0)
                         .forEachOrdered(s -> table.setRows(new LinkedList<>(Arrays.asList(s.split("\t")))));
             }
             buffReader.close();
-            return "";
+            return null;
         } catch (IOException e) {
             return errorMessage("Failed to read table " + tbFilePath);
         }
@@ -98,7 +100,6 @@ public abstract class DBCmd {
     public boolean evaluateConditions(List<String> row, List<String> colNames) {
         Stack<Boolean> booleans = new Stack<>();
         for (Condition condition : conditions) {
-            System.out.println("look");
             if (condition.isBoolOperator()) {
                 String boolOperator = condition.getOperator();
                 boolean bool1 = booleans.pop();
@@ -117,15 +118,21 @@ public abstract class DBCmd {
                     }
                 }
             } else {
-                condition.setCoNames(colNames);
-                condition.setResult(row);
+                condition.setColNames(colNames);
+                condition.setResult(tableName, row);
+                String error = condition.getErrorMessage();
+                if (error != null) {
+                    this.interpretError = true;
+                    this.setErrorMessage(error);
+                    return false;
+                }
                 booleans.push(condition.getResult());
             }
         }
         return booleans.pop();
     }
 
-    public boolean isInterpretError() {
+    public boolean hasInterpretError() {
         return this.interpretError;
     }
 }

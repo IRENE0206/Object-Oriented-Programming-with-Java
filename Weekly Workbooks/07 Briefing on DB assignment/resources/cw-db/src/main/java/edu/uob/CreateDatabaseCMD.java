@@ -15,7 +15,7 @@ public class CreateDatabaseCMD extends CreateCMD {
         if (databaseToCreate.isDirectory()) {
             return errorMessage("Database " + this.databaseName + " already exists");
         } else if (databaseToCreate.mkdir()) {
-            return getQueryResults("");
+            return getQueryResults(null);
         }
         return errorMessage("Failed to create database " + this.databaseName);
     }
