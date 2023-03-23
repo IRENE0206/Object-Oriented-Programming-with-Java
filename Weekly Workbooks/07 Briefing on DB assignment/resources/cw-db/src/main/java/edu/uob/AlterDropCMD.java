@@ -2,9 +2,12 @@ package edu.uob;
 
 import java.io.File;
 
-public class AlterDropCMD extends AlterCMD {
-    public AlterDropCMD(String tableName, String alterType, String attributeName) {
-        super(tableName, alterType, attributeName);
+public class AlterDropCMD extends DBCmd {
+    private final String attributeName;
+    public AlterDropCMD(String tableName, String attrName) {
+        this.tableName = tableName;
+        this.dbTable = new DBTable(this.tableName);
+        this.attributeName = attrName;
     }
 
     @Override

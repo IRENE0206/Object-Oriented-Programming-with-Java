@@ -5,8 +5,7 @@ import java.io.IOException;
 import java.util.*;
 
 public class DBTable {
-    private String tableName;
-    private int rowNum;
+    private final String tableName;
     private int colNum;
     private List<String> colNames;
     private List<Integer> idUsed;
@@ -15,7 +14,6 @@ public class DBTable {
 
     public DBTable(String name) {
         this.tableName = name;
-        this.rowNum = 0;
         this.colNum = 0;
         this.idUsed = new LinkedList<>();
         this.colNames = new LinkedList<>();
@@ -37,12 +35,7 @@ public class DBTable {
         }
         row.addAll(line);
         this.rows.add(row);
-        this.rowNum += 1;
         return null;
-    }
-
-    public boolean isEmpty() {
-        return this.colNum == 0;
     }
 
     private void addUsedID(Integer id) {
@@ -58,7 +51,7 @@ public class DBTable {
         addUsedID(Integer.valueOf(row.get(0)));
     }
 
-    public boolean deleteRow(List<Condition> conditions, DBCmd dbCmd) {
+    public boolean deleteRow(DBCmd dbCmd) {
         return this.rows.removeIf(row -> dbCmd.evaluateConditions(row, this.colNames)) && !dbCmd.hasInterpretError();
     }
 
@@ -112,40 +105,42 @@ public class DBTable {
     }
 
     public String addCol(String colName) {
-        if (containsAttribute(colName)) {
-            return colName + " already exists in " + this.tableName;
-        } else if (compareStringsCaseInsensitively(colName, "id")) {
+        String name = colName;
+        if (containsAttribute(name)) {
+            return name + " already exists in " + this.tableName;
+        } else if (compareStringsCaseInsensitively(name, "id")) {
             return "id cannot be added by user manually";
         }
         if (this.colNum == 0) {
             colNames.add("id");
         }
-        if (colName.contains(".")) {
-            int index = colName.indexOf('.');
-            String tbName = colName.substring(0, index);
+        if (name.contains(".")) {
+            int index = name.indexOf('.');
+            String tbName = name.substring(0, index);
             if (!compareStringsCaseInsensitively(tbName, this.tableName)) {
                 return tbName + " does not match table name " + this.tableName;
             }
-            colName = colName.substring(index + 1);
+            name = name.substring(index + 1);
         }
-        colNames.add(colName);
+        colNames.add(name);
         this.rows.forEach(row -> row.add("NULL"));
         this.colNum += 1;
         return null;
     }
 
     public boolean containsAttribute(String colName) {
-        if (colName.contains(".")) {
-            int index = colName.indexOf('.');
-            String tbName = colName.substring(0, index);
-            String attributeName = colName.substring(index + 1);
+        String name = colName;
+        if (name.contains(".")) {
+            int index = name.indexOf('.');
+            String tbName = name.substring(0, index);
+            String attributeName = name.substring(index + 1);
             if (!compareStringsCaseInsensitively(tbName, this.tableName)) {
                 return false;
             }
-            colName = attributeName;
+            name = attributeName;
         }
-        for (String name : this.colNames) {
-            if (compareStringsCaseInsensitively(name, colName)) {
+        for (String n : this.colNames) {
+            if (compareStringsCaseInsensitively(n, name)) {
                 return true;
             }
         }
@@ -231,12 +226,13 @@ public class DBTable {
     }
 
     public int getIndexOfAttribute(String attribute) {
-        if (attribute.contains(".")) {
-            int index = attribute.indexOf('.');
-            attribute = attribute.substring(index + 1);
+        String attr = attribute;
+        if (attr.contains(".")) {
+            int index = attr.indexOf('.');
+            attr = attr.substring(index + 1);
         }
         for (int i = 0; i < this.colNames.size(); i++) {
-            if (compareStringsCaseInsensitively(this.colNames.get(i), attribute)) {
+            if (compareStringsCaseInsensitively(this.colNames.get(i), attr)) {
                 return i;
             }
         }

@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CreateTableCMD extends CreateCMD {
+public class CreateTableCMD extends DBCmd {
 
     public CreateTableCMD(String tableName) {
         super();

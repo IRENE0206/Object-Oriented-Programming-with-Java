@@ -2,9 +2,12 @@ package edu.uob;
 
 import java.io.File;
 
-public class AlterAddCMD extends AlterCMD {
-    public AlterAddCMD(String tableName, String alterType, String attributeName) {
-        super(tableName, alterType, attributeName);
+public class AlterAddCMD extends DBCmd {
+    private final String attributeName;
+    public AlterAddCMD(String tableName, String attrName) {
+        this.tableName = tableName;
+        this.dbTable = new DBTable(this.tableName);
+        this.attributeName = attrName;
     }
 
     @Override

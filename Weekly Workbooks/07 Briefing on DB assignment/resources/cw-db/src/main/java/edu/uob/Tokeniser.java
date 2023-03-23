@@ -6,7 +6,7 @@ import java.util.List;
 public class Tokeniser {
     private final String[] specialCharacters = {"(", ")", ",", ";", "<=", ">=", "!=", "=="};
     private final String[] otherSpecialCharacters = {"<", ">", "="};
-    private List<String> tokens = new ArrayList<String>();
+    private List<String> tokens = new ArrayList<>();
     private int currentToken;
 
     public Tokeniser(String query) {
@@ -14,8 +14,8 @@ public class Tokeniser {
     }
 
     private void setup(String query) {
-        query = query.trim();
-        String[] fragments = query.split("'");
+        String queryString = query.trim();
+        String[] fragments = queryString.split("'");
         for (int i = 0; i < fragments.length; i++) {
             if (i % 2 != 0) {
                 tokens.add("'" + fragments[i] + "'");
@@ -28,14 +28,15 @@ public class Tokeniser {
     }
 
     private String[] tokenize(String input) {
+        String inputString = input;
         for (String specialCharacter : specialCharacters) {
-            input = input.replace(specialCharacter, " " + specialCharacter + " ");
+            inputString = inputString.replace(specialCharacter, " " + specialCharacter + " ");
         }
-        while (input.contains("  ")) {
-            input = input.replaceAll("  ", " ");
+        while (inputString.contains("  ")) {
+            inputString = inputString.replaceAll("  ", " ");
         }
-        input = input.trim();
-        return input.split(" ");
+        inputString = inputString.trim();
+        return inputString.split(" ");
     }
 
     private List<String> furtherTokenize(String[] strings) {

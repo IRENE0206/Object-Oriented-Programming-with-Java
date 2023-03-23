@@ -6,7 +6,6 @@ import java.util.List;
 public class JoinCMD extends DBCmd {
 
     public JoinCMD(String tableName1, String tableName2, String attributeName1, String attributeName2) {
-        this.commandType = "JOIN";
         this.tableNames = new ArrayList<>();
         tableNames.add(tableName1);
         tableNames.add(tableName2);

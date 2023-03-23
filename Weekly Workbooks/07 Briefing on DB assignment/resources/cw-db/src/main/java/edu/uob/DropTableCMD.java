@@ -2,7 +2,7 @@ package edu.uob;
 
 import java.io.File;
 
-public class DropTableCMD extends DropCMD {
+public class DropTableCMD extends DBCmd {
     public DropTableCMD(String tableName) {
         super();
         this.tableName = tableName;

@@ -3,8 +3,8 @@ package edu.uob;
 import java.util.List;
 
 public class SelectCMD extends DBCmd {
-    boolean selectAll;
-    boolean unconditional;
+    private final boolean selectAll;
+    private final boolean unconditional;
 
     public SelectCMD(String tableName) {
         this.tableName = tableName;
@@ -13,9 +13,9 @@ public class SelectCMD extends DBCmd {
         this.dbTable = new DBTable(this.tableName);
     }
 
-    public SelectCMD(String tableName, List<Condition> conditions, boolean selectAll) {
+    public SelectCMD(String tableName, List<Condition> conditions, boolean all) {
         this.tableName = tableName;
-        this.selectAll = selectAll;
+        this.selectAll = all;
         this.unconditional = false;
         this.conditions = conditions;
         this.dbTable = new DBTable(this.tableName);
@@ -52,22 +52,19 @@ public class SelectCMD extends DBCmd {
             return generateErrorMessage("Invalid attribute list for " + tableName);
         } else if (!this.selectAll && this.unconditional) {
             String contents = this.dbTable.selectedContentToString(this.attributeList);
-            if (this.hasInterpretError()) {
-                return this.errorMessage;
-            }
-            return getQueryResults(contents);
-        } else if (this.selectAll && !this.unconditional) {
+            return interpretErrorOrResults(contents);
+        } else if (this.selectAll) {
             String contents = this.dbTable.selectedContentToString(this);
-            if (this.hasInterpretError()) {
-                return this.errorMessage;
-            }
-            return getQueryResults(contents);
-        } else {
-            String contents = this.dbTable.selectedContentToString(this.attributeList, this);
-            if (this.hasInterpretError()) {
-                return this.errorMessage;
-            }
-            return getQueryResults(contents);
+            return interpretErrorOrResults(contents);
         }
+        String contents = this.dbTable.selectedContentToString(this.attributeList, this);
+        return interpretErrorOrResults(contents);
+    }
+
+    private String interpretErrorOrResults(String contents) {
+        if (this.hasInterpretError()) {
+            return this.errorMessage;
+        }
+        return getQueryResults(contents);
     }
 }

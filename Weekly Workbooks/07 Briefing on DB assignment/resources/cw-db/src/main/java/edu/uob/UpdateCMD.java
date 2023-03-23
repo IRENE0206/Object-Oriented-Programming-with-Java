@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.Map;
 
 public class UpdateCMD extends DBCmd {
-    private Map<String, String> nameValueList;
+    private final Map<String, String> nameValueList;
 
-    public UpdateCMD(String tableName, Map<String, String> nameValueList, List<Condition> conditions) {
+    public UpdateCMD(String tableName, Map<String, String> nameVals, List<Condition> conditions) {
         this.tableName = tableName;
-        this.nameValueList = nameValueList;
+        this.nameValueList = nameVals;
         this.conditions = conditions;
         this.dbTable = new DBTable(this.tableName);
     }

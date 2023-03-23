@@ -2,7 +2,7 @@ package edu.uob;
 
 import java.io.File;
 
-public class CreateDatabaseCMD extends CreateCMD {
+public class CreateDatabaseCMD extends DBCmd {
     public CreateDatabaseCMD(String databaseName) {
         super();
         this.databaseName = databaseName;

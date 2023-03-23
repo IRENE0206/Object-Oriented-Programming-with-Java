@@ -7,29 +7,28 @@ import java.util.List;
 import java.util.Stack;
 
 public abstract class DBCmd {
-    String errorTag = "[ERROR] ";
-    String okTag = "[OK]\n";
-    String errorMessage;
-    String tabFileExtension = ".tab";
-    String commandType;
-    String databaseName;
-    String databasePath;
-    String tableName;
-    String tableFilePath;
-    List<String> attributeList;
-    List<String> tableNames;
-    List<Condition> conditions;
-    DBTable dbTable;
+    protected String errorTag = "[ERROR] ";
+    protected String okTag = "[OK]\n";
+    protected String errorMessage;
+    protected String tabFileExtension = ".tab";
+    protected String databaseName;
+    protected String databasePath;
+    protected String tableName;
+    protected String tableFilePath;
+    protected List<String> attributeList;
+    protected List<String> tableNames;
+    protected List<Condition> conditions;
+    protected DBTable dbTable;
 
-    boolean interpretError;
+    protected boolean interpretError;
 
     public abstract String query(DBServer dbServer);
 
-    void setDatabasePathFromStorageFolderPath(String storageFolderPath) {
+    protected void setDatabasePathFromStorageFolderPath(String storageFolderPath) {
         this.databasePath = storageFolderPath + File.separator + this.databaseName.toLowerCase();
     }
 
-    void setDatabasePathFromCurrentDatabasePath(String currentDatabasePath) {
+    protected void setDatabasePathFromCurrentDatabasePath(String currentDatabasePath) {
         this.databasePath = currentDatabasePath;
     }
 
@@ -43,22 +42,22 @@ public abstract class DBCmd {
         this.errorMessage = errorTag + message;
     }
 
-    String getQueryResults(String results) {
+    protected String getQueryResults(String results) {
         if (results != null) {
             return okTag + results;
         }
         return okTag;
     }
 
-    void setTableFilePath() {
+    protected void setTableFilePath() {
         this.tableFilePath = getTableFilePath(this.tableName.toLowerCase());
     }
 
-    String getTableFilePath(String tbName) {
+    protected String getTableFilePath(String tbName) {
         return this.databasePath + File.separator + tbName.toLowerCase() + tabFileExtension;
     }
 
-    String loadTabFileToDBTable(String tbFilePath, DBTable table) {
+    protected String loadTabFileToDBTable(String tbFilePath, DBTable table) {
         File fileToRead = new File(tbFilePath);
         FileReader reader;
         try {
@@ -78,13 +77,14 @@ public abstract class DBCmd {
                         forEachOrdered(s -> table.setRows(new LinkedList<>(Arrays.asList(s.split("\t")))));
             }
             buffReader.close();
+            reader.close();
             return null;
         } catch (IOException e) {
             return generateErrorMessage("Failed to read table " + tbFilePath);
         }
     }
 
-    boolean stringsEqualCaseInsensitively(String s1, String s2) {
+    protected boolean stringsEqualCaseInsensitively(String s1, String s2) {
         return s1.toLowerCase().compareTo(s2.toLowerCase()) == 0;
     }
 

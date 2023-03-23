@@ -5,7 +5,7 @@ import java.util.*;
 public class Parser {
     private final Tokeniser tokeniser;
     private Boolean parsedOK;
-    private StringBuilder errorMessage;
+    private final StringBuilder errorMessage;
 
     public Parser(String query) {
         this.tokeniser = new Tokeniser(query);
@@ -123,7 +123,7 @@ public class Parser {
         return s.compareTo(";") == 0;
     }
 
-    private CreateCMD createDatabaseOrTable() {
+    private DBCmd createDatabaseOrTable() {
         String databaseOrTable = tokeniser.getToken();
         if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
@@ -188,7 +188,12 @@ public class Parser {
         if (isSemiColon(currToken) && !tokeniser.hasNextToken()) {
             setParsedOK();
             return new CreateTableCMD(tableName);
-        } else if (missingOpenBracket()) {
+        }
+        return createTableWithAttributeList(tableName);
+    }
+
+    private CreateTableCMD createTableWithAttributeList(String tableName) {
+        if (missingOpenBracket()) {
             return null;
         } else if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
@@ -223,7 +228,7 @@ public class Parser {
             return true;
         }
         int strLength = s.length();
-        int index = s.indexOf(".");
+        int index = s.indexOf('.');
         if (index == strLength - 1) {
             return true;
         }
@@ -287,6 +292,30 @@ public class Parser {
     }
 
     private JoinCMD joinTwoTables() {
+        String tableName1 = getFirstTableName();
+        if (tableName1 == null) {
+            return null;
+        }
+        String tableName2 = getSecondTableName();
+        if (tableName2 == null) {
+            return null;
+        }
+        String attributeName1 = getFirstAttributeList();
+        String and2 = tokeniser.getToken();
+        if (!isAnd(and2)) {
+            setErrorMessage("Should be 'AND' not " + and2);
+            return null;
+        }
+        if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            return null;
+        }
+        String attributeName2 = getSecondAttributeList();
+        setParsedOK();
+        return new JoinCMD(tableName1, tableName2, attributeName1, attributeName2);
+    }
+
+    private String getFirstTableName() {
         String tableName1 = tokeniser.getToken();
         if (invalidTableName(tableName1)) {
             return null;
@@ -304,6 +333,10 @@ public class Parser {
             setLackMoreTokensErrorMessage();
             return null;
         }
+        return tableName1;
+    }
+
+    private String getSecondTableName() {
         String tableName2 = tokeniser.getToken();
         if (invalidTableName(tableName2)) {
             return null;
@@ -321,6 +354,10 @@ public class Parser {
             setLackMoreTokensErrorMessage();
             return null;
         }
+        return tableName2;
+    }
+
+    private String getFirstAttributeList() {
         String attributeName1 = tokeniser.getToken();
         if (invalidAttributeName(attributeName1)) {
             return null;
@@ -329,15 +366,10 @@ public class Parser {
             setLackMoreTokensErrorMessage();
             return null;
         }
-        String and2 = tokeniser.getToken();
-        if (!isAnd(and2)) {
-            setErrorMessage("Should be 'AND' not " + and2);
-            return null;
-        }
-        if (failToMoveToNextToken()) {
-            setLackMoreTokensErrorMessage();
-            return null;
-        }
+        return attributeName1;
+    }
+
+    private String getSecondAttributeList() {
         String attributeName2 = tokeniser.getToken();
         if (invalidAttributeName(attributeName2)) {
             return null;
@@ -349,8 +381,7 @@ public class Parser {
         if (failToEndWithSemicolonProperly()) {
             return null;
         }
-        setParsedOK();
-        return new JoinCMD(tableName1, tableName2, attributeName1, attributeName2);
+        return attributeName2;
     }
 
     private boolean failToMoveToNextToken() {
@@ -361,46 +392,63 @@ public class Parser {
         return true;
     }
 
-
-    private AlterCMD alterTable() {
-        String secondKeyword = tokeniser.getToken();
+    private boolean failToHandleKeyword(String secondKeyword) {
         if (!toTable(secondKeyword)) {
             setErrorMessage(secondKeyword + " is not valid syntax");
-            return null;
+            return true;
         }
         if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
+            return true;
+        }
+        return false;
+    }
+
+    private boolean failToHandleTableName(String tableName) {
+        if (invalidTableName(tableName)) {
+            return true;
+        } else if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            return true;
+        }
+        return false;
+    }
+
+    private boolean failToHandleAlterType(String alterType) {
+        if (!isAdd(alterType) && !isDrop(alterType)) {
+            setErrorMessage(alterType + " is not valid [AlterationType]");
+            return true;
+        } else if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            return true;
+        }
+        return false;
+    }
+
+    private DBCmd alterTable() {
+        String secondKeyword = tokeniser.getToken();
+        if (failToHandleKeyword(secondKeyword)) {
             return null;
         }
         String tableName = tokeniser.getToken();
-        if (invalidTableName(tableName)) {
-            return null;
-        } else if (failToMoveToNextToken()) {
-            setLackMoreTokensErrorMessage();
+        if (failToHandleTableName(tableName)) {
             return null;
         }
         String alterType = tokeniser.getToken();
-        if (!isAdd(alterType) && !isDrop(alterType)) {
-            setErrorMessage(alterType + " is not valid [AlterationType]");
-            return null;
-        } else if (failToMoveToNextToken()) {
-            setLackMoreTokensErrorMessage();
+        if (failToHandleAlterType(alterType)) {
             return null;
         }
         String attributeName = tokeniser.getToken();
-        if (invalidAttributeName(attributeName)) {
-            return null;
-        } else if (failToMoveToNextToken()) {
-            setMissingSemiColonErrorMessage();
+        if (failToHandleAttributeName(attributeName)) {
             return null;
         } else if (failToEndWithSemicolonProperly()) {
             return null;
         }
         setParsedOK();
         if (isAdd(alterType)) {
-            return new AlterAddCMD(tableName, alterType, attributeName);
+            return new AlterAddCMD(tableName, attributeName);
         }
-        return new AlterDropCMD(tableName, alterType, attributeName);
+        return new AlterDropCMD(tableName, attributeName);
     }
 
     private List<Condition> buildCondition() {
@@ -569,7 +617,7 @@ public class Parser {
         return stringsEqualCaseInsensitively(firstKeyword, "DROP");
     }
 
-    private DropCMD dropDatabaseOrTable() {
+    private DBCmd dropDatabaseOrTable() {
         String databaseOrTable = tokeniser.getToken();
         if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
@@ -629,10 +677,7 @@ public class Parser {
             return null;
         }
         String tableName = tokeniser.getToken();
-        if (invalidTableName(tableName)) {
-            return null;
-        } else if (failToMoveToNextToken()) {
-            setLackMoreTokensErrorMessage();
+        if (failToHandleTableName(tableName)) {
             return null;
         }
         String thirdKeyword = tokeniser.getToken();
@@ -706,10 +751,7 @@ public class Parser {
             return null;
         }
         String tableName = tokeniser.getToken();
-        if (invalidTableName(tableName)) {
-            return null;
-        } else if (failToMoveToNextToken()) {
-            setLackMoreTokensErrorMessage();
+        if (failToHandleTableName(tableName)) {
             return null;
         }
         String token = tokeniser.getToken();
@@ -756,10 +798,7 @@ public class Parser {
             return null;
         }
         String tableName = tokeniser.getToken();
-        if (invalidTableName(tableName)) {
-            return null;
-        } else if (failToMoveToNextToken()) {
-            setLackMoreTokensErrorMessage();
+        if (failToHandleTableName(tableName)) {
             return null;
         }
         String token = tokeniser.getToken();
@@ -830,29 +869,28 @@ public class Parser {
         return null;
     }
 
+    private boolean failToHandleEqualSign(String equalSign) {
+        if (equalSign.compareTo("=") != 0) {
+            setErrorMessage(equalSign + " is invalid. Should be '='");
+            return true;
+        } else if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            return true;
+        }
+        return false;
+    }
+
     private boolean getNameValuePair(Map<String, String> accumulator) {
         String attributeName = tokeniser.getToken();
-        if (invalidAttributeName(attributeName)) {
-            return false;
-        }
-        if (failToMoveToNextToken()) {
-            setLackMoreTokensErrorMessage();
+        if (failToHandleAttributeName(attributeName)) {
             return false;
         }
         String equalSign = tokeniser.getToken();
-        if (equalSign.compareTo("=") != 0) {
-            setErrorMessage(equalSign + " is invalid. Should be '='");
-            return false;
-        } else if (failToMoveToNextToken()) {
-            setLackMoreTokensErrorMessage();
+        if (failToHandleEqualSign(equalSign)) {
             return false;
         }
         String value = tokeniser.getToken();
-        if (!isValue(value)) {
-            setErrorMessage(value + " is not valid [Value]");
-            return false;
-        } else if (failToMoveToNextToken()) {
-            setLackMoreTokensErrorMessage();
+        if (failToHandleValue(value)) {
             return false;
         }
         String next = tokeniser.getToken();
@@ -874,6 +912,28 @@ public class Parser {
             setErrorMessage(next + " is not valid keyword");
             return false;
         }
+    }
+
+    private boolean failToHandleAttributeName(String attributeName) {
+        if (invalidAttributeName(attributeName)) {
+            return true;
+        }
+        if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            return true;
+        }
+        return false;
+    }
+
+    private boolean failToHandleValue(String value) {
+        if (!isValue(value)) {
+            setErrorMessage(value + " is not valid [Value]");
+            return true;
+        } else if (failToMoveToNextToken()) {
+            setLackMoreTokensErrorMessage();
+            return true;
+        }
+        return false;
     }
 
     private boolean isSet(String s) {
@@ -1025,22 +1085,22 @@ public class Parser {
     }
 
     private boolean isFloatLiteral(String s) {
-        if (!s.contains(".") || s.length() < 3) {
+        if (!s.contains(".") || s.length() <= 2) {
             return false;
         }
         int length = s.length();
-        int index = s.indexOf(".");
+        int index = s.indexOf('.');
         if (index == length - 1) {
             return false;
         }
         String substring1 = s.substring(0, index);
         String substring2 = s.substring(index + 1, length);
-        return isDigitalSequence(substring2)
-                &&
-                (isDigitalSequence(substring1)
-                        ||
-                        (substring1.length() > 1 && isPlusOrMinusSign(substring1.charAt(0))
-                                && isDigitalSequence(substring1.substring(1))));
+        return isDigitalSequence(substring2) && (isDigitalSequence(substring1) || isNegativeFloat(substring1));
+    }
+
+    private boolean isNegativeFloat(String stringBeforePoint) {
+        return stringBeforePoint.length() > 1 && isPlusOrMinusSign(stringBeforePoint.charAt(0))
+            && isDigitalSequence(stringBeforePoint.substring(1));
     }
 
     private boolean isStringLiteral(String s) {

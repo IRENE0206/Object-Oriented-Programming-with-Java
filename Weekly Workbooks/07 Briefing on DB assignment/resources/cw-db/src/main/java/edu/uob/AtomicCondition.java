@@ -3,24 +3,24 @@ package edu.uob;
 import java.util.List;
 
 public class AtomicCondition extends Condition {
-    private String attributeName;
+    private final String attributeName;
     private int attributeIndex;
-    private String value;
-    private boolean isLiteralValue;
+    private final String value;
+    private final boolean isLiteralValue;
 
-    public AtomicCondition(String comparator, String attributeName, String value, boolean isLiteralValue) {
+    public AtomicCondition(String comparator, String attrName, String val, boolean isLiteral) {
         this.operator = comparator;
-        this.attributeName = attributeName;
-        this.value = value;
+        this.attributeName = attrName;
+        this.value = val;
         this.errorMessage = null;
-        this.isLiteralValue = isLiteralValue;
+        this.isLiteralValue = isLiteral;
     }
 
     public void setAttributeIndex(String tableName) {
         for (int i = 0; i < this.columnNames.size(); i++) {
             String columnName = this.columnNames.get(i);
             if (columnName.contains(".")) {
-                int index1 = columnName.indexOf(".");
+                int index1 = columnName.indexOf('.');
                 String tbName1 = columnName.substring(0, index1);
                 if (!stringsEqualCaseInsensitively(tableName, tbName1)) {
                     this.errorMessage = columnName + " does not exist in the table " + tableName;
@@ -30,7 +30,7 @@ public class AtomicCondition extends Condition {
             }
             String attrName = this.attributeName;
             if (attrName.contains(".")) {
-                int index2 = attrName.indexOf(".");
+                int index2 = attrName.indexOf('.');
                 String tbName2 = attrName.substring(0, index2);
                 if (!stringsEqualCaseInsensitively(tableName, tbName2)) {
                     this.errorMessage = attrName + " does not exist in the table " + tableName;
@@ -46,8 +46,7 @@ public class AtomicCondition extends Condition {
         this.errorMessage = this.attributeName + " does not exist in the table " + tableName;
     }
 
-    @Override
-    boolean evaluate(String tableName, List<String> row) {
+    private boolean evaluate(String tableName, List<String> row) {
         setAttributeIndex(tableName);
         if (this.errorMessage == null) {
             String attribute = row.get(this.attributeIndex);
@@ -102,35 +101,43 @@ public class AtomicCondition extends Condition {
     private boolean integerLiteralCompare(String s) {
         int i = Integer.parseInt(s);
         if (isIntegerLiteral(this.value)) {
-            int i2 = Integer.parseInt(this.value);
-            if (isEqualSignComparator()) {
-                return i == i2;
-            } else if (isUnequalSignComparator()) {
-                return i != i2;
-            } else if (isBiggerThanComparator()) {
-                return i > i2;
-            } else if (isBiggerThanOrEqualComparator()) {
-                return i >= i2;
-            } else if (isSmallerThanComparator()) {
-                return i < i2;
-            } else if (isSmallerThanOrEqualComparator()) {
-                return i <= i2;
-            }
+            return intComparesInt(i, Integer.parseInt(this.value));
         } else if (isFloatLiteral(this.value)) {
-            float f2 = Float.parseFloat(this.value);
-            if (isEqualSignComparator()) {
-                return i == f2;
-            } else if (isUnequalSignComparator()) {
-                return i != f2;
-            } else if (isBiggerThanComparator()) {
-                return i > f2;
-            } else if (isBiggerThanOrEqualComparator()) {
-                return i >= f2;
-            } else if (isSmallerThanComparator()) {
-                return i < f2;
-            } else if (isSmallerThanOrEqualComparator()) {
-                return i <= f2;
-            }
+            return intComparesFloat(i, Float.parseFloat(this.value));
+        }
+        return false;
+    }
+
+    private boolean intComparesInt(int i1, int i2) {
+        if (isEqualSignComparator()) {
+            return i1 == i2;
+        } else if (isUnequalSignComparator()) {
+            return i1 != i2;
+        } else if (isBiggerThanComparator()) {
+            return i1 > i2;
+        } else if (isBiggerThanOrEqualComparator()) {
+            return i1 >= i2;
+        } else if (isSmallerThanComparator()) {
+            return i1 < i2;
+        } else if (isSmallerThanOrEqualComparator()) {
+            return i1 <= i2;
+        }
+        return false;
+    }
+
+    private boolean intComparesFloat(int i, float f) {
+        if (isEqualSignComparator()) {
+            return i == f;
+        } else if (isUnequalSignComparator()) {
+            return i != f;
+        } else if (isBiggerThanComparator()) {
+            return i > f;
+        } else if (isBiggerThanOrEqualComparator()) {
+            return i >= f;
+        } else if (isSmallerThanComparator()) {
+            return i < f;
+        } else if (isSmallerThanOrEqualComparator()) {
+            return i <= f;
         }
         return false;
     }
@@ -138,35 +145,43 @@ public class AtomicCondition extends Condition {
     private boolean floatLiteralCompare(String s) {
         float f = Float.parseFloat(s);
         if (isIntegerLiteral(this.value)) {
-            int i2 = Integer.parseInt(this.value);
-            if (isEqualSignComparator()) {
-                return f == i2;
-            } else if (isUnequalSignComparator()) {
-                return f != i2;
-            } else if (isBiggerThanComparator()) {
-                return f > i2;
-            } else if (isBiggerThanOrEqualComparator()) {
-                return f >= i2;
-            } else if (isSmallerThanComparator()) {
-                return f < i2;
-            } else if (isSmallerThanOrEqualComparator()) {
-                return f <= i2;
-            }
+            return floatComparesInteger(f, Integer.parseInt(this.value));
         } else if (isFloatLiteral(this.value)) {
-            float f2 = Float.parseFloat(this.value);
-            if (isEqualSignComparator()) {
-                return f == f2;
-            } else if (isUnequalSignComparator()) {
-                return f != f2;
-            } else if (isBiggerThanComparator()) {
-                return f > f2;
-            } else if (isBiggerThanOrEqualComparator()) {
-                return f >= f2;
-            } else if (isSmallerThanComparator()) {
-                return f < f2;
-            } else if (isSmallerThanOrEqualComparator()) {
-                return f <= f2;
-            }
+            return floatCompareFloat(f, Float.parseFloat(this.value));
+        }
+        return false;
+    }
+
+    private boolean floatComparesInteger(float f, int i) {
+        if (isEqualSignComparator()) {
+            return f == i;
+        } else if (isUnequalSignComparator()) {
+            return f != i;
+        } else if (isBiggerThanComparator()) {
+            return f > i;
+        } else if (isBiggerThanOrEqualComparator()) {
+            return f >= i;
+        } else if (isSmallerThanComparator()) {
+            return f < i;
+        } else if (isSmallerThanOrEqualComparator()) {
+            return f <= i;
+        }
+        return false;
+    }
+
+    private boolean floatCompareFloat(float f1, float f2) {
+        if (isEqualSignComparator()) {
+            return f1 == f2;
+        } else if (isUnequalSignComparator()) {
+            return f1 != f2;
+        } else if (isBiggerThanComparator()) {
+            return f1 > f2;
+        } else if (isBiggerThanOrEqualComparator()) {
+            return f1 >= f2;
+        } else if (isSmallerThanComparator()) {
+            return f1 < f2;
+        } else if (isSmallerThanOrEqualComparator()) {
+            return f1 <= f2;
         }
         return false;
     }
@@ -210,7 +225,7 @@ public class AtomicCondition extends Condition {
     private boolean isIntegerLiteral(String s) {
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
-            if (('0' > c || c > '9') && (i == 0 && c != '-' && c != '+')) {
+            if (isNotDigitalChar(c) && isFirstNotCharSign(i, c)) {
                 return false;
             }
         }
@@ -224,11 +239,19 @@ public class AtomicCondition extends Condition {
         int index = s.indexOf('.');
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
-            if (('0' > c || c > '9') && (i == 0 && c != '-' && c != '+') && i != index) {
+            if (isNotDigitalChar(c) && isFirstNotCharSign(i, c) && i != index) {
                 return false;
             }
         }
         return true;
+    }
+
+    private boolean isNotDigitalChar(char c) {
+        return '0' > c || c > '9';
+    }
+
+    private boolean isFirstNotCharSign(int index, char c) {
+        return index == 0 && c != '-' && c != '+';
     }
 
     private boolean isEqualSignComparator() {

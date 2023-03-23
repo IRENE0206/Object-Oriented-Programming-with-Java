@@ -4,7 +4,6 @@ import java.io.File;
 
 public class UseCMD extends DBCmd {
     public UseCMD(String databaseName) {
-        this.commandType = "USE";
         this.databaseName = databaseName;
     }
 

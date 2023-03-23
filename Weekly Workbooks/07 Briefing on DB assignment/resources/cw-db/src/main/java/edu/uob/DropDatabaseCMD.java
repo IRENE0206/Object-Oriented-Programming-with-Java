@@ -2,7 +2,7 @@ package edu.uob;
 
 import java.io.File;
 
-public class DropDatabaseCMD extends DropCMD {
+public class DropDatabaseCMD extends DBCmd {
     public DropDatabaseCMD(String databaseName) {
         super();
         this.databaseName = databaseName;
