@@ -14,9 +14,9 @@ public class SelectRecordsTests {
      */
 
     private DBServer server;
-    SyntaxConstructor syntaxConstructor;
-    String randomDatabaseName;
-    String randomTableName;
+    private SyntaxConstructor syntaxConstructor;
+    private String randomDatabaseName;
+    private String randomTableName;
 
     @BeforeEach
     public void setup() {
@@ -38,7 +38,7 @@ public class SelectRecordsTests {
     public void testSelect() {
         String response = sendCommandToServer(syntaxConstructor.selectCommand("*", randomTableName));
         assertTrue(response.contains("[ERROR]"), "Cannot select a non-existing table");
-
+        String failMessage = "Failed to get the right selected result";
         sendCommandToServer(syntaxConstructor.createTableCommand(randomTableName, "name, mark, pass"));
         sendCommandToServer(syntaxConstructor.insertCommand(randomTableName, "'Steve', 65, TRUE"));
         sendCommandToServer(syntaxConstructor.insertCommand(randomTableName, "'Dave', 55, TRUE"));
@@ -46,44 +46,52 @@ public class SelectRecordsTests {
         sendCommandToServer(syntaxConstructor.insertCommand(randomTableName, "'Clive', 20, FALSE"));
 
         response = sendCommandToServer(syntaxConstructor.selectCommand("*", randomTableName));
-        assertTrue(response.contains("Steve"), "Failed to get the right selected result");
+        String steve = "Steve";
+        assertTrue(response.contains(steve), failMessage);
         response = sendCommandToServer(syntaxConstructor.selectCommand("*", randomTableName));
-        assertTrue(response.contains("Dave"), "Failed to get the right selected result");
+        String dave = "Dave";
+        assertTrue(response.contains(dave), failMessage);
         response = sendCommandToServer(syntaxConstructor.selectCommand("*", randomTableName));
-        assertTrue(response.contains("Bob"), "Failed to get the right selected result");
+        String bob = "Bob";
+        assertTrue(response.contains(bob), failMessage);
         response = sendCommandToServer(syntaxConstructor.selectCommand("*", randomTableName));
-        assertTrue(response.contains("Clive"), "Failed to get the right selected result");
+        String clive = "Clive";
+        assertTrue(response.contains(clive), failMessage);
 
         response = sendCommandToServer(syntaxConstructor.selectCommand("name, pass", randomTableName));
-        assertTrue(response.contains("name"), "Failed to get the right selected result");
-        assertTrue(response.contains("pass"), "Failed to get the right selected result");
-        assertFalse(response.contains("id"), "Failed to get the right selected result");
-        assertFalse(response.contains("mark"), "Failed to get the right selected result");
-        assertTrue(response.contains("Steve"), "Failed to get the right selected result");
-        assertTrue(response.contains("Dave"), "Failed to get the right selected result");
-        assertTrue(response.contains("Bob"), "Failed to get the right selected result");
-        assertTrue(response.contains("Clive"), "Failed to get the right selected result");
+        String name = "name";
+        assertTrue(response.contains(name), failMessage);
+        String pass = "pass";
+        assertTrue(response.contains(pass), failMessage);
+        String id = "id";
+        assertFalse(response.contains(id), failMessage);
+        String mark = "mark";
+        assertFalse(response.contains(mark), failMessage);
+        assertTrue(response.contains(steve), failMessage);
+        assertTrue(response.contains(dave), failMessage);
+        assertTrue(response.contains(bob), failMessage);
+        assertTrue(response.contains(clive), failMessage);
 
         response = sendCommandToServer(syntaxConstructor.selectCommand("name, mark", randomTableName, "pass != True"));
-        assertTrue(response.contains("name"), "Failed to get the right selected result");
-        assertTrue(response.contains("mark"), "Failed to get the right selected result");
-        assertFalse(response.contains("id"), "Failed to get the right selected result");
-        assertFalse(response.contains("pass"), "Failed to get the right selected result");
-        assertFalse(response.contains("Steve"), "Failed to get the right selected result");
-        assertFalse(response.contains("Dave"), "Failed to get the right selected result");
-        assertTrue(response.contains("Bob"), "Failed to get the right selected result");
-        assertTrue(response.contains("Clive"), "Failed to get the right selected result");
+        assertTrue(response.contains(name), failMessage);
+        assertTrue(response.contains(mark), failMessage);
+        assertFalse(response.contains(id), failMessage);
+        assertFalse(response.contains(pass), failMessage);
+        assertFalse(response.contains(steve), failMessage);
+        assertFalse(response.contains(dave), failMessage);
+        assertTrue(response.contains(bob), failMessage);
+        assertTrue(response.contains(clive), failMessage);
 
-        response = sendCommandToServer(syntaxConstructor.selectCommand("name", randomTableName,
+        response = sendCommandToServer(syntaxConstructor.selectCommand(name, randomTableName,
                 "pass == True AND name Like 've' AND mark > 60"));
-        assertTrue(response.contains("name"), "Failed to get the right selected result");
-        assertFalse(response.contains("mark"), "Failed to get the right selected result");
-        assertFalse(response.contains("id"), "Failed to get the right selected result");
-        assertFalse(response.contains("pass"), "Failed to get the right selected result");
-        assertTrue(response.contains("Steve"), "Failed to get the right selected result");
-        assertFalse(response.contains("Dave"), "Failed to get the right selected result");
-        assertFalse(response.contains("Bob"), "Failed to get the right selected result");
-        assertFalse(response.contains("Clive"), "Failed to get the right selected result");
+        assertTrue(response.contains(name), failMessage);
+        assertFalse(response.contains(mark), failMessage);
+        assertFalse(response.contains(id), failMessage);
+        assertFalse(response.contains(pass), failMessage);
+        assertTrue(response.contains(steve), failMessage);
+        assertFalse(response.contains(dave), failMessage);
+        assertFalse(response.contains(bob), failMessage);
+        assertFalse(response.contains(clive), failMessage);
 
         sendCommandToServer(syntaxConstructor.dropDatabaseCommand(randomDatabaseName));
     }

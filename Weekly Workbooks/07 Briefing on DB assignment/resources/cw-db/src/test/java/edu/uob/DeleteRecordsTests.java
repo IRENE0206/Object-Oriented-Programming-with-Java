@@ -12,9 +12,9 @@ public class DeleteRecordsTests {
      */
 
     private DBServer server;
-    SyntaxConstructor syntaxConstructor;
-    String randomDatabaseName;
-    String randomTableName;
+    private SyntaxConstructor syntaxConstructor;
+    private String randomDatabaseName;
+    private String randomTableName;
 
     @BeforeEach
     public void setup() {
@@ -42,16 +42,16 @@ public class DeleteRecordsTests {
 
         String response = sendCommandToServer((syntaxConstructor.deleteCommand(randomTableName, "name == 'Clive'")));
         assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
-        assertFalse(syntaxConstructor.stringContainsCaseInsensitively(response, "Clive"),
-                "Records that match the given condition should have been removed");
+        String shouldHaveBeenRemoved = "Records that match the given condition should have been removed";
+        assertFalse(syntaxConstructor.stringContainsCaseInsensitively(response, "Clive"), shouldHaveBeenRemoved);
 
         response = sendCommandToServer((syntaxConstructor.deleteCommand(randomTableName, "mark < 50")));
         assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
         response = sendCommandToServer(syntaxConstructor.selectCommand("*", randomTableName));
-        assertTrue(response.contains("Steve"), "Records that are not deleted should persist");
-        assertTrue(response.contains("Dave"), "Records that are not deleted should persist");
-        assertFalse(syntaxConstructor.stringContainsCaseInsensitively(response, "Bob"),
-                "Records that match the given condition should have been removed");
+        String shouldPersist = "Records that are not deleted should persist";
+        assertTrue(response.contains("Steve"), shouldPersist);
+        assertTrue(response.contains("Dave"), shouldPersist);
+        assertFalse(syntaxConstructor.stringContainsCaseInsensitively(response, "Bob"), shouldHaveBeenRemoved);
 
         response = sendCommandToServer((syntaxConstructor.deleteCommand(randomTableName, "tuition >= 30000")));
         assertTrue(response.contains("[ERROR]"), "The condition is invalid");

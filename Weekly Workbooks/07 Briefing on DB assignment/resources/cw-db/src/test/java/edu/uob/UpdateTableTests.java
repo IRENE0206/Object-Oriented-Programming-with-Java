@@ -15,9 +15,9 @@ public class UpdateTableTests {
 
      */
     private DBServer server;
-    SyntaxConstructor syntaxConstructor;
-    String randomDatabaseName;
-    String randomTableName;
+    private SyntaxConstructor syntaxConstructor;
+    private String randomDatabaseName;
+    private String randomTableName;
 
     @BeforeEach
     public void setup() {
@@ -37,10 +37,13 @@ public class UpdateTableTests {
 
     @Test
     public void testUpdateRecords() {
+        String oKTagMessage = "A valid query was made, however an [OK] tag was not returned";
+        String bobCondition = "name == 'Bob'";
         String response = sendCommandToServer(
                 syntaxConstructor.updateCommand(
-                        randomTableName, "mark = 50", "name == 'Bob'"));
-        assertTrue(response.contains("[ERROR]"), "Cannot update a non-existing table");
+                        randomTableName, "mark = 50", bobCondition));
+        String errorTag = "[ERROR]";
+        assertTrue(response.contains(errorTag), "Cannot update a non-existing table");
         sendCommandToServer(syntaxConstructor.createTableCommand(randomTableName, "name, mark, pass"));
         sendCommandToServer(syntaxConstructor.insertCommand(randomTableName, "'Steve', 65, TRUE"));
         sendCommandToServer(syntaxConstructor.insertCommand(randomTableName, "'Dave', 55, TRUE"));
@@ -49,29 +52,29 @@ public class UpdateTableTests {
 
         response = sendCommandToServer(
                 syntaxConstructor.updateCommand(
-                        randomTableName, "mark = 50, pass= TRUE", "name == 'Bob'"));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
-        response = sendCommandToServer(syntaxConstructor.selectCommand("mark", randomTableName, "name == 'Bob'"));
+                        randomTableName, "mark = 50, pass= TRUE", bobCondition));
+        assertTrue(response.contains("[OK]"), oKTagMessage);
+        response = sendCommandToServer(syntaxConstructor.selectCommand("mark", randomTableName, bobCondition));
         assertTrue(response.contains("50"), "Bob's mark should have been updated");
-        response = sendCommandToServer(syntaxConstructor.selectCommand("pass", randomTableName, "name == 'Bob'"));
+        response = sendCommandToServer(syntaxConstructor.selectCommand("pass", randomTableName, bobCondition));
         assertTrue(response.contains("TRUE"), "Bob's pass result should have been updated");
         response = sendCommandToServer(
                 syntaxConstructor.updateCommand(
-                        randomTableName, "tutor = Steve", "name == 'Bob'"));
-        assertTrue(response.contains("[ERROR]"), "Invalid NameValuePair");
+                        randomTableName, "tutor = Steve", bobCondition));
+        assertTrue(response.contains(errorTag), "Invalid NameValuePair");
         response = sendCommandToServer(
                 syntaxConstructor.updateCommand(
                         randomTableName, "pass =False", "name == 'Anas'"));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
+        assertTrue(response.contains("[OK]"), oKTagMessage);
         response = sendCommandToServer(
                 syntaxConstructor.updateCommand(
                         randomTableName, "pass =False", "tutor == 'Anas'"));
-        assertTrue(response.contains("[ERROR]"), "Invalid condition");
+        assertTrue(response.contains(errorTag), "Invalid condition");
 
         response = sendCommandToServer(
                 syntaxConstructor.updateCommand(
                         randomTableName, "id=3, mark=40", "name LIKE 'ive'"));
-        assertTrue(response.contains("[ERROR]"), "Cannot change id manually");
+        assertTrue(response.contains(errorTag), "Cannot change id manually");
 
         sendCommandToServer(syntaxConstructor.dropDatabaseCommand(randomDatabaseName));
     }

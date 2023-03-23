@@ -11,10 +11,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class UseDatabaseTests {
 
     private DBServer server;
-    SyntaxConstructor syntaxConstructor;
-    String randomDatabaseName1;
-    String randomDatabaseName2;
-    String randomTableName;
+    private SyntaxConstructor syntaxConstructor;
+    private String randomDatabaseName1;
+    private String randomDatabaseName2;
+    private String randomTableName;
 
     @BeforeEach
     public void setup() {
@@ -33,21 +33,23 @@ public class UseDatabaseTests {
 
     @Test
     public void testUseDatabase() {
+        String oKTagMessage = "A valid query was made, however an [OK] tag was not returned";
         String response = sendCommandToServer(syntaxConstructor.useCommand(randomDatabaseName1));
-        assertTrue(response.contains("[ERROR]"), "Cannot use a non-existing database");
+        String nonExistingDatabase = "Cannot use a non-existing database";
+        assertTrue(response.contains("[ERROR]"), nonExistingDatabase);
         sendCommandToServer(syntaxConstructor.createDataBaseCommand(randomDatabaseName1));
         response = sendCommandToServer(syntaxConstructor.useCommand(randomDatabaseName1));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
+        assertTrue(response.contains("[OK]"), oKTagMessage);
 
         response = sendCommandToServer(syntaxConstructor.useCommand(randomDatabaseName2));
-        assertTrue(response.contains("[ERROR]"), "Cannot use a non-existing database");
+        assertTrue(response.contains("[ERROR]"), nonExistingDatabase);
         sendCommandToServer(syntaxConstructor.createDataBaseCommand(randomDatabaseName2));
         response = sendCommandToServer(syntaxConstructor.useCommand(randomDatabaseName2));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
+        assertTrue(response.contains("[OK]"), oKTagMessage);
 
         sendCommandToServer(syntaxConstructor.createTableCommand(randomTableName));
         response = sendCommandToServer(syntaxConstructor.useCommand(randomDatabaseName1));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
+        assertTrue(response.contains("[OK]"), oKTagMessage);
         response = sendCommandToServer(syntaxConstructor.dropTableCommand(randomTableName));
         assertTrue(response.contains("[ERROR]"), "Created table is not in the current database in use");
 

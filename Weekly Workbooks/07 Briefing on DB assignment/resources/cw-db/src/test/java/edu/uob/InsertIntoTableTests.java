@@ -15,9 +15,9 @@ public class InsertIntoTableTests {
      */
 
     private DBServer server;
-    SyntaxConstructor syntaxConstructor;
-    String randomDatabaseName;
-    String randomTableName;
+    private SyntaxConstructor syntaxConstructor;
+    private String randomDatabaseName;
+    private String randomTableName;
 
     @BeforeEach
     public void setup() {
@@ -45,23 +45,27 @@ public class InsertIntoTableTests {
         sendCommandToServer(syntaxConstructor.createTableCommand(randomTableName, "name, mark, pass"));
 
         response = sendCommandToServer(syntaxConstructor.insertCommand(randomTableName, "'Steve', 65, TRUE"));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
+        String oKTagMessage = "A valid query was made, however an [OK] tag was not returned";
+        String okTag = "[OK]";
+        assertTrue(response.contains(okTag), oKTagMessage);
         response = sendCommandToServer(syntaxConstructor.insertCommand(randomTableName, "'Dave', 55, TRUE"));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
+        assertTrue(response.contains(okTag), oKTagMessage);
         response = sendCommandToServer(syntaxConstructor.insertCommand(randomTableName, "'Bob', 35, FALSE"));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
+        assertTrue(response.contains(okTag), oKTagMessage);
         response = sendCommandToServer(syntaxConstructor.insertCommand(randomTableName, "'Clive', 20, FALSE"));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
+        assertTrue(response.contains(okTag), oKTagMessage);
         response = sendCommandToServer(syntaxConstructor.selectCommand("*", randomTableName));
-        assertTrue(response.contains("Steve"), "Should have been inserted into table");
-        assertTrue(response.contains("Dave"), "Should have been inserted into table");
-        assertTrue(response.contains("Bob"), "Should have been inserted into table");
-        assertTrue(response.contains("Clive"), "Should have been inserted into table");
+        String shouldHaveBeenInserted = "Should have been inserted into table";
+        assertTrue(response.contains("Steve"), shouldHaveBeenInserted);
+        assertTrue(response.contains("Dave"), shouldHaveBeenInserted);
+        assertTrue(response.contains("Bob"), shouldHaveBeenInserted);
+        assertTrue(response.contains("Clive"), shouldHaveBeenInserted);
 
         response = sendCommandToServer(syntaxConstructor.insertCommand(randomTableName, "5, 'Kim', 60, TRUE"));
-        assertTrue(response.contains("ERROR"), "Cannot insert into table. Wrong number of values");
+        String wrongNumber = "Cannot insert into table. Wrong number of values";
+        assertTrue(response.contains("ERROR"), wrongNumber);
         response = sendCommandToServer(syntaxConstructor.insertCommand(randomTableName, "Kim', TRUE"));
-        assertTrue(response.contains("ERROR"), "Cannot insert into table. Wrong number of values");
+        assertTrue(response.contains("ERROR"), wrongNumber);
 
         sendCommandToServer((syntaxConstructor.dropDatabaseCommand(randomDatabaseName)));
     }

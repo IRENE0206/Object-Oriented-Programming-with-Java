@@ -15,9 +15,8 @@ public class CreateAndDropTableTests {
      */
 
     private DBServer server;
-    SyntaxConstructor syntaxConstructor;
-    String randomDatabaseName;
-    String randomTableName;
+    private SyntaxConstructor syntaxConstructor;
+    private String randomDatabaseName;
 
     @BeforeEach
     public void setup() {
@@ -36,29 +35,32 @@ public class CreateAndDropTableTests {
 
     @Test
     public void testCreateAndDropDatabase() {
-        randomTableName = syntaxConstructor.randomNameGenerator();
+        String randomTableName = syntaxConstructor.randomNameGenerator();
 
         String response = sendCommandToServer(syntaxConstructor.createTableCommand(randomTableName));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
+        String oKTagMessage = "A valid query was made, however an [OK] tag was not returned";
+        String okTag = "[OK]";
+        assertTrue(response.contains(okTag), oKTagMessage);
         response = sendCommandToServer(syntaxConstructor.createTableCommand(randomTableName));
-        assertTrue(response.contains("[ERROR]"), "Cannot create a table that already exists");
+        String errorTag = "[ERROR]";
+        assertTrue(response.contains(errorTag), "Cannot create a table that already exists");
         response = sendCommandToServer(syntaxConstructor.dropTableCommand(randomTableName));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
+        assertTrue(response.contains(okTag), oKTagMessage);
         response = sendCommandToServer(syntaxConstructor.dropTableCommand(randomTableName));
-        assertTrue(response.contains("[ERROR]"), "Cannot drop a table that has been dropped");
+        assertTrue(response.contains(errorTag), "Cannot drop a table that has been dropped");
 
         response = sendCommandToServer(syntaxConstructor.createTableCommand(randomTableName));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
+        assertTrue(response.contains(okTag), oKTagMessage);
         response = sendCommandToServer(syntaxConstructor.createTableCommand(randomTableName, "name, mark, pass"));
-        assertTrue(response.contains("[ERROR]"), "Cannot create a table that already exists");
+        assertTrue(response.contains(errorTag), "Cannot create a table that already exists");
         response = sendCommandToServer(syntaxConstructor.dropTableCommand(randomTableName));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
+        assertTrue(response.contains(okTag), oKTagMessage);
 
         response = sendCommandToServer(syntaxConstructor.createTableCommand(randomTableName, "id, name, mark, pass"));
-        assertTrue(response.contains("[ERROR]"), "ID column should not be manually inserted");
+        assertTrue(response.contains(errorTag), "ID column should not be manually inserted");
 
         response = sendCommandToServer(syntaxConstructor.createTableCommand(randomTableName, "name, mark, pass"));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
+        assertTrue(response.contains(okTag), oKTagMessage);
         response = sendCommandToServer(syntaxConstructor.selectCommand("*", randomTableName));
         assertTrue(syntaxConstructor.stringContainsCaseInsensitively(response, "id"),
                 "ID is not automatically added when creating table");
@@ -69,7 +71,7 @@ public class CreateAndDropTableTests {
         assertTrue(syntaxConstructor.stringContainsCaseInsensitively(response, "pass"),
                 "Column names are not added when creating table");
         response = sendCommandToServer(syntaxConstructor.dropTableCommand(randomTableName));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
+        assertTrue(response.contains(okTag), oKTagMessage);
 
         sendCommandToServer(syntaxConstructor.dropDatabaseCommand(randomDatabaseName));
     }

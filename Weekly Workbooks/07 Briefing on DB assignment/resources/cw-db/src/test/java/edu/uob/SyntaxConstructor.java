@@ -5,18 +5,18 @@ import java.util.List;
 import java.util.Random;
 
 public class SyntaxConstructor {
-    Random random;
+    private final Random random;
 
     public SyntaxConstructor() {
         random = new Random();
     }
 
-    String arbitraryWhiteSpaceGenerator() {
+    private String arbitraryWhiteSpaceGenerator() {
         int r = random.nextInt(10);
         return " ".repeat(r);
     }
 
-    String arbitraryCaseGenerator(String keyword) {
+    public String arbitraryCaseGenerator(String keyword) {
         StringBuilder accumulator = new StringBuilder();
         for (int i = 0; i < keyword.length(); i++) {
             int r = random.nextInt(10);

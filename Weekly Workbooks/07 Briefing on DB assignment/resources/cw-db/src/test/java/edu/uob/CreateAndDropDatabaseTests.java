@@ -15,8 +15,7 @@ public class CreateAndDropDatabaseTests {
      */
 
     private DBServer server;
-    SyntaxConstructor syntaxConstructor;
-    String randomDatabaseName;
+    private SyntaxConstructor syntaxConstructor;
 
     @BeforeEach
     public void setup() {
@@ -32,18 +31,19 @@ public class CreateAndDropDatabaseTests {
 
     @Test
     public void testCreateAndDropDatabase() {
-        randomDatabaseName = syntaxConstructor.randomNameGenerator();
+        String randomDatabaseName = syntaxConstructor.randomNameGenerator();
 
         String response = sendCommandToServer(syntaxConstructor.createDataBaseCommand(randomDatabaseName));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
+        String oKTagmessage = "A valid query was made, however an [OK] tag was not returned";
+        assertTrue(response.contains("[OK]"), oKTagmessage);
         response = sendCommandToServer(syntaxConstructor.createDataBaseCommand(
                 syntaxConstructor.arbitraryCaseGenerator(randomDatabaseName)));
         assertTrue(response.contains("[ERROR]"), "Cannot create a database that already exists");
         response = sendCommandToServer(syntaxConstructor.useCommand(randomDatabaseName));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
+        assertTrue(response.contains("[OK]"), oKTagmessage);
 
         response = sendCommandToServer(syntaxConstructor.dropDatabaseCommand(randomDatabaseName));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
+        assertTrue(response.contains("[OK]"), oKTagmessage);
         response = sendCommandToServer("DROP DATABASE " + syntaxConstructor.arbitraryCaseGenerator(randomDatabaseName));
         assertTrue(response.contains("[ERROR]"), "Cannot drop a non-existing database");
         response = sendCommandToServer(syntaxConstructor.useCommand(randomDatabaseName));

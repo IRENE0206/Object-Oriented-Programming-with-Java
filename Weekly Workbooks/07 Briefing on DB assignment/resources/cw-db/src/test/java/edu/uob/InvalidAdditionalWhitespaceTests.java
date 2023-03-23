@@ -14,9 +14,9 @@ public class InvalidAdditionalWhitespaceTests {
      */
 
     private DBServer server;
-    SyntaxConstructor syntaxConstructor;
-    String randomDatabaseName;
-    String randomTableName;
+    private SyntaxConstructor syntaxConstructor;
+    private String randomDatabaseName;
+    private String randomTableName;
 
     @BeforeEach
     public void setup() {
@@ -36,56 +36,62 @@ public class InvalidAdditionalWhitespaceTests {
 
     @Test
     public void testInvalidAdditionalWhiteSpace() {
-        sendCommandToServer("CREATE TABLE marks (name, mark, pass);");
-        String response = sendCommandToServer(syntaxConstructor.alterCommand("marks", "DROP", "marks . name"));
-        assertTrue(response.contains("[ERROR]"), "[AttributeName] cannot have additional whitespace");
-        response = sendCommandToServer(syntaxConstructor.alterCommand("marks", "DROP", "marks. mark"));
-        assertTrue(response.contains("[ERROR]"), "[AttributeName] cannot have additional whitespace");
-        response = sendCommandToServer(syntaxConstructor.alterCommand("marks", "DROP", "marks .pass"));
-        assertTrue(response.contains("[ERROR]"), "[AttributeName] cannot have additional whitespace");
+        sendCommandToServer(syntaxConstructor.createTableCommand(randomTableName, "name, mark, pass"));
+        String drop = "DROP";
+        String response =
+                sendCommandToServer(
+                        syntaxConstructor.alterCommand(randomTableName, drop,
+                                randomTableName + " . name"));
+        String cannotHaveAdditionalSpaces = "[AttributeName] cannot have additional whitespace";
+        String errorTag = "[ERROR]";
+        assertTrue(response.contains(errorTag), cannotHaveAdditionalSpaces);
+        response = sendCommandToServer(syntaxConstructor.alterCommand(randomTableName, drop,
+                randomTableName + ". mark"));
+        assertTrue(response.contains(errorTag), cannotHaveAdditionalSpaces);
+        response = sendCommandToServer(syntaxConstructor.alterCommand(randomTableName, drop,
+                randomTableName + " .pass"));
+        assertTrue(response.contains(errorTag), cannotHaveAdditionalSpaces);
 
-        response = sendCommandToServer(syntaxConstructor.insertCommand("marks", "' Dave', 55, TRUE"));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
-        response = sendCommandToServer(syntaxConstructor.selectCommand("*", "marks", "name == 'Dave'"));
-        assertFalse(syntaxConstructor.stringContainsCaseInsensitively(response, "Dave"),
-                "White space in single quotes should be preserved");
-        response = sendCommandToServer(syntaxConstructor.selectCommand("*", "marks", "name == ' Dave'"));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
-        assertTrue(syntaxConstructor.stringContainsCaseInsensitively(response, "Dave"),
-                "White space in single quotes should be preserved");
+        response = sendCommandToServer(syntaxConstructor.insertCommand(randomTableName, "' Dave', 55, TRUE"));
+        String oKTagMessage = "A valid query was made, however an [OK] tag was not returned";
+        String okTag = "[OK]";
+        assertTrue(response.contains(okTag), oKTagMessage);
+        response = sendCommandToServer(syntaxConstructor.selectCommand("*", randomTableName, "name == 'Dave'"));
+        String shouldBePreserved = "White space in single quotes should be preserved";
+        assertFalse(syntaxConstructor.stringContainsCaseInsensitively(response, "Dave"), shouldBePreserved);
+        response = sendCommandToServer(syntaxConstructor.selectCommand("*", randomTableName, "name == ' Dave'"));
+        assertTrue(response.contains(okTag), oKTagMessage);
+        assertTrue(syntaxConstructor.stringContainsCaseInsensitively(response, "Dave"), shouldBePreserved);
 
-        response = sendCommandToServer(syntaxConstructor.insertCommand("marks", "'Bob ', 35, FALSE"));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
-        response = sendCommandToServer(syntaxConstructor.selectCommand("*", "marks", "name == 'Bob'"));
-        assertFalse(syntaxConstructor.stringContainsCaseInsensitively(response, "Bob"),
-                "White space in single quotes should be preserved");
-        response = sendCommandToServer(syntaxConstructor.selectCommand("*",
-                "marks", "name == 'Bob '"));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
-        assertTrue(syntaxConstructor.stringContainsCaseInsensitively(response, "Bob"),
-                "White space in single quotes should be preserved");
+        response = sendCommandToServer(syntaxConstructor.insertCommand(randomTableName, "'Bob ', 35, FALSE"));
+        assertTrue(response.contains(okTag), oKTagMessage);
+        response = sendCommandToServer(syntaxConstructor.selectCommand("*", randomTableName, "name == 'Bob'"));
+        assertFalse(syntaxConstructor.stringContainsCaseInsensitively(response, "Bob"), shouldBePreserved);
+        response = sendCommandToServer(syntaxConstructor.selectCommand("*", randomTableName, "name == 'Bob '"));
+        assertTrue(response.contains(okTag), oKTagMessage);
+        assertTrue(syntaxConstructor.stringContainsCaseInsensitively(response, "Bob"), shouldBePreserved);
 
-        response = sendCommandToServer(syntaxConstructor.insertCommand("marks", "'Clive', + 20, FALSE"));
-        assertTrue(response.contains("[ERROR]"), "[IntegerLiteral]  cannot have additional whitespace");
-        response = sendCommandToServer(syntaxConstructor.insertCommand("marks", "'Clive', +20, FALSE"));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
+        response = sendCommandToServer(syntaxConstructor.insertCommand(randomTableName, "'Clive', + 20, FALSE"));
+        assertTrue(response.contains(errorTag), "[IntegerLiteral]  cannot have additional whitespace");
+        response = sendCommandToServer(syntaxConstructor.insertCommand(randomTableName, "'Clive', +20, FALSE"));
+        assertTrue(response.contains(okTag), oKTagMessage);
 
-        response = sendCommandToServer(syntaxConstructor.selectCommand("*", "marks", "name ! = 'Clive'"));
-        assertTrue(response.contains("[ERROR]"), "[Comparator]  cannot have additional whitespace");
-        response = sendCommandToServer(syntaxConstructor.selectCommand("*", "marks", "name = = 'Clive'"));
-        assertTrue(response.contains("[ERROR]"), "[Comparator]  cannot have additional whitespace");
+        response = sendCommandToServer(syntaxConstructor.selectCommand("*", randomTableName, "name ! = 'Clive'"));
+        assertTrue(response.contains(errorTag), "[Comparator]  cannot have additional whitespace");
+        response = sendCommandToServer(syntaxConstructor.selectCommand("*", randomTableName, "name = = 'Clive'"));
+        assertTrue(response.contains(errorTag), "[Comparator]  cannot have additional whitespace");
 
-        response = sendCommandToServer(syntaxConstructor.selectCommand("*", "marks", "name !='Clive'"));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
-        response = sendCommandToServer(syntaxConstructor.selectCommand("*", "marks", "name!= 'Clive'"));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
-        response = sendCommandToServer(syntaxConstructor.selectCommand("*", "marks", "name!='Clive'"));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
+        response = sendCommandToServer(syntaxConstructor.selectCommand("*", randomTableName, "name !='Clive'"));
+        assertTrue(response.contains(okTag), oKTagMessage);
+        response = sendCommandToServer(syntaxConstructor.selectCommand("*", randomTableName, "name!= 'Clive'"));
+        assertTrue(response.contains(okTag), oKTagMessage);
+        response = sendCommandToServer(syntaxConstructor.selectCommand("*", randomTableName, "name!='Clive'"));
+        assertTrue(response.contains(okTag), oKTagMessage);
 
-        response = sendCommandToServer(syntaxConstructor.insertCommand("marks", "'Irene', + 90.00, TRUE"));
-        assertTrue(response.contains("[ERROR]"), "[FloatLiteral]  cannot have additional whitespace");
-        response = sendCommandToServer(syntaxConstructor.insertCommand("marks", "'Irene', +90.00, TRUE"));
-        assertTrue(response.contains("[OK]"), "A valid query was made, however an [OK] tag was not returned");
+        response = sendCommandToServer(syntaxConstructor.insertCommand(randomTableName, "'Irene', + 90.00, TRUE"));
+        assertTrue(response.contains(errorTag), "[FloatLiteral]  cannot have additional whitespace");
+        response = sendCommandToServer(syntaxConstructor.insertCommand(randomTableName, "'Irene', +90.00, TRUE"));
+        assertTrue(response.contains(okTag), oKTagMessage);
 
         sendCommandToServer("DROP DATABASE " + randomDatabaseName);
     }

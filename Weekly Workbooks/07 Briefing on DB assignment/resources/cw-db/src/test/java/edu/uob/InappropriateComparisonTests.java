@@ -15,9 +15,9 @@ public class InappropriateComparisonTests {
      */
 
     private DBServer server;
-    SyntaxConstructor syntaxConstructor;
-    String randomDatabaseName;
-    String randomTableName;
+    private SyntaxConstructor syntaxConstructor;
+    private String randomDatabaseName;
+    private String randomTableName;
 
     @BeforeEach
     public void setup() {
@@ -44,46 +44,53 @@ public class InappropriateComparisonTests {
         sendCommandToServer(syntaxConstructor.insertCommand(randomTableName, "'Clive', 20, FALSE"));
 
         String response = sendCommandToServer(syntaxConstructor.selectCommand("*", randomTableName, "name >= 50"));
-        assertTrue(response.contains("[OK]"), "Errors should NOT be returned");
-        assertFalse(response.contains("Steve"), "Should return an empty table");
-        assertFalse(response.contains("Dave"), "Should return an empty table");
-        assertFalse(response.contains("Bob"), "Should return an empty table");
-        assertFalse(response.contains("Clive"), "Should return an empty table");
+        String errorsShouldNotBeReturned = "Errors should NOT be returned";
+        String okTag = "[OK]";
+        assertTrue(response.contains(okTag), errorsShouldNotBeReturned);
+        String shouldReturnAnEmptyTable = "Should return an empty table";
+        String steve = "Steve";
+        assertFalse(response.contains(steve), shouldReturnAnEmptyTable);
+        String dave = "Dave";
+        assertFalse(response.contains(dave), shouldReturnAnEmptyTable);
+        String bob = "Bob";
+        assertFalse(response.contains(bob), shouldReturnAnEmptyTable);
+        String clive = "Clive";
+        assertFalse(response.contains(clive), shouldReturnAnEmptyTable);
 
         response = sendCommandToServer(syntaxConstructor.selectCommand("*", randomTableName, "name LIKE 50"));
-        assertTrue(response.contains("[OK]"), "Errors should NOT be returned");
-        assertTrue(response.contains("[OK]"), "Errors should NOT be returned");
-        assertFalse(response.contains("Steve"), "Should return an empty table");
-        assertFalse(response.contains("Dave"), "Should return an empty table");
-        assertFalse(response.contains("Bob"), "Should return an empty table");
-        assertFalse(response.contains("Clive"), "Should return an empty table");
+        assertTrue(response.contains(okTag), errorsShouldNotBeReturned);
+        assertTrue(response.contains(okTag), errorsShouldNotBeReturned);
+        assertFalse(response.contains(steve), shouldReturnAnEmptyTable);
+        assertFalse(response.contains(dave), shouldReturnAnEmptyTable);
+        assertFalse(response.contains(bob), shouldReturnAnEmptyTable);
+        assertFalse(response.contains(clive), shouldReturnAnEmptyTable);
 
         response = sendCommandToServer(syntaxConstructor.selectCommand("*", randomTableName, "mark == TRUE"));
-        assertTrue(response.contains("[OK]"), "Errors should NOT be returned");
-        assertTrue(response.contains("[OK]"), "Errors should NOT be returned");
-        assertTrue(response.contains("[OK]"), "Errors should NOT be returned");
-        assertFalse(response.contains("Steve"), "Should return an empty table");
-        assertFalse(response.contains("Dave"), "Should return an empty table");
-        assertFalse(response.contains("Bob"), "Should return an empty table");
-        assertFalse(response.contains("Clive"), "Should return an empty table");
+        assertTrue(response.contains(okTag), errorsShouldNotBeReturned);
+        assertTrue(response.contains(okTag), errorsShouldNotBeReturned);
+        assertTrue(response.contains(okTag), errorsShouldNotBeReturned);
+        assertFalse(response.contains(steve), shouldReturnAnEmptyTable);
+        assertFalse(response.contains(dave), shouldReturnAnEmptyTable);
+        assertFalse(response.contains(bob), shouldReturnAnEmptyTable);
+        assertFalse(response.contains(clive), shouldReturnAnEmptyTable);
 
         response = sendCommandToServer(syntaxConstructor.selectCommand("*", randomTableName, "pass > FALSE"));
-        assertTrue(response.contains("[OK]"), "Errors should NOT be returned");
-        assertTrue(response.contains("[OK]"), "Errors should NOT be returned");
-        assertTrue(response.contains("[OK]"), "Errors should NOT be returned");
-        assertFalse(response.contains("Steve"), "Should return an empty table");
-        assertFalse(response.contains("Dave"), "Should return an empty table");
-        assertFalse(response.contains("Bob"), "Should return an empty table");
-        assertFalse(response.contains("Clive"), "Should return an empty table");
+        assertTrue(response.contains(okTag), errorsShouldNotBeReturned);
+        assertTrue(response.contains(okTag), errorsShouldNotBeReturned);
+        assertTrue(response.contains(okTag), errorsShouldNotBeReturned);
+        assertFalse(response.contains(steve), shouldReturnAnEmptyTable);
+        assertFalse(response.contains(dave), shouldReturnAnEmptyTable);
+        assertFalse(response.contains(bob), shouldReturnAnEmptyTable);
+        assertFalse(response.contains(clive), shouldReturnAnEmptyTable);
 
         response = sendCommandToServer(syntaxConstructor.selectCommand("*", randomTableName, "name > NULL"));
-        assertTrue(response.contains("[OK]"), "Errors should NOT be returned");
-        assertTrue(response.contains("[OK]"), "Errors should NOT be returned");
-        assertTrue(response.contains("[OK]"), "Errors should NOT be returned");
-        assertFalse(response.contains("Steve"), "Should return an empty table");
-        assertFalse(response.contains("Dave"), "Should return an empty table");
-        assertFalse(response.contains("Bob"), "Should return an empty table");
-        assertFalse(response.contains("Clive"), "Should return an empty table");
+        assertTrue(response.contains(okTag), errorsShouldNotBeReturned);
+        assertTrue(response.contains(okTag), errorsShouldNotBeReturned);
+        assertTrue(response.contains(okTag), errorsShouldNotBeReturned);
+        assertFalse(response.contains(steve), shouldReturnAnEmptyTable);
+        assertFalse(response.contains(dave), shouldReturnAnEmptyTable);
+        assertFalse(response.contains(bob), shouldReturnAnEmptyTable);
+        assertFalse(response.contains(clive), shouldReturnAnEmptyTable);
 
         sendCommandToServer(syntaxConstructor.dropDatabaseCommand(randomDatabaseName));
     }
