@@ -23,17 +23,17 @@ public class CreateTableCMD extends CreateCMD {
         setTableFilePath();
         File fileToCreate = new File(this.tableFilePath);
         if (fileToCreate.exists()) {
-            return errorMessage("Table " + this.tableName + " already exists");
+            return generateErrorMessage("Table " + this.tableName + " already exists");
         }
         DBTable dbTable = new DBTable(this.tableName);
         if (this.attributeList.size() > 0) {
             String error = dbTable.setColNames(attributeList, false);
             if (error != null) {
-                return errorMessage(error);
+                return generateErrorMessage(error);
             }
         }
         if (dbTable.failToFile(this.tableFilePath)) {
-            return errorMessage("Failed to create table " + this.tableName);
+            return generateErrorMessage("Failed to create table " + this.tableName);
         }
         return getQueryResults(null);
     }

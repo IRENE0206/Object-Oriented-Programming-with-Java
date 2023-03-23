@@ -17,7 +17,7 @@ public class UpdateCMD extends DBCmd {
     public String query(DBServer dbServer) {
         setDatabasePathFromCurrentDatabasePath(dbServer.getDatabasePath());
         setTableFilePath();
-        String error1 = tableFileToDBTable(this.tableFilePath, this.dbTable);
+        String error1 = loadTabFileToDBTable(this.tableFilePath, this.dbTable);
         if (error1 != null) {
             return error1;
         }
@@ -25,7 +25,7 @@ public class UpdateCMD extends DBCmd {
             return this.errorMessage;
         }
         if (this.dbTable.failToFile(this.tableFilePath)) {
-            return errorMessage("Failed to update " + this.tableName);
+            return generateErrorMessage("Failed to update " + this.tableName);
         }
         return getQueryResults(null);
     }

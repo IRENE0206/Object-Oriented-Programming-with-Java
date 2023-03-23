@@ -13,11 +13,11 @@ public class DropTableCMD extends DropCMD {
         setTableFilePath();
         File fileToDrop = new File(this.tableFilePath);
         if (!fileToDrop.isFile()) {
-            return errorMessage("Table " + this.tableName + " does not exist");
+            return generateErrorMessage("Table " + this.tableName + " does not exist");
         }
         if (fileToDrop.delete()) {
             return getQueryResults(null);
         }
-        return errorMessage("Failed to delete database " + this.tableName);
+        return generateErrorMessage("Failed to delete database " + this.tableName);
     }
 }

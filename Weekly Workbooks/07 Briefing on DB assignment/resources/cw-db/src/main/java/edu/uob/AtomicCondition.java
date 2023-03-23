@@ -51,17 +51,17 @@ public class AtomicCondition extends Condition {
         setAttributeIndex(tableName);
         if (this.errorMessage == null) {
             String attribute = row.get(this.attributeIndex);
-            if (likeCompare()) {
+            if (isLikeCompare()) {
                 return stringValueCompare(attribute);
-            } else if (smallerThanComparator() || smallerThanOrEqualComparator()
-                    || biggerThanOrEqualComparator() || biggerThanComparator()) {
+            } else if (isSmallerThanComparator() || isSmallerThanOrEqualComparator()
+                    || isBiggerThanOrEqualComparator() || isBiggerThanComparator()) {
                 if (isIntegerLiteral(attribute)) {
                     return integerLiteralCompare(attribute);
                 } else if (isFloatLiteral(attribute)) {
                     return floatLiteralCompare(attribute);
                 }
             } else if (isBooleanLiteral(attribute)) {
-                return boolValueCompare(attribute);
+                return isBoolValueCompare(attribute);
             } else if (isNull(attribute)) {
                 return nullValueCompare();
             }
@@ -91,9 +91,9 @@ public class AtomicCondition extends Condition {
     }
 
     private boolean nullValueCompare() {
-        if (equalSignComparator()) {
+        if (isEqualSignComparator()) {
             return isNull(this.value);
-        } else if (unequalSignComparator()) {
+        } else if (isUnequalSignComparator()) {
             return !isNull(this.value);
         }
         return false;
@@ -103,32 +103,32 @@ public class AtomicCondition extends Condition {
         int i = Integer.parseInt(s);
         if (isIntegerLiteral(this.value)) {
             int i2 = Integer.parseInt(this.value);
-            if (equalSignComparator()) {
+            if (isEqualSignComparator()) {
                 return i == i2;
-            } else if (unequalSignComparator()) {
+            } else if (isUnequalSignComparator()) {
                 return i != i2;
-            } else if (biggerThanComparator()) {
+            } else if (isBiggerThanComparator()) {
                 return i > i2;
-            } else if (biggerThanOrEqualComparator()) {
+            } else if (isBiggerThanOrEqualComparator()) {
                 return i >= i2;
-            } else if (smallerThanComparator()) {
+            } else if (isSmallerThanComparator()) {
                 return i < i2;
-            } else if (smallerThanOrEqualComparator()) {
+            } else if (isSmallerThanOrEqualComparator()) {
                 return i <= i2;
             }
         } else if (isFloatLiteral(this.value)) {
             float f2 = Float.parseFloat(this.value);
-            if (equalSignComparator()) {
+            if (isEqualSignComparator()) {
                 return i == f2;
-            } else if (unequalSignComparator()) {
+            } else if (isUnequalSignComparator()) {
                 return i != f2;
-            } else if (biggerThanComparator()) {
+            } else if (isBiggerThanComparator()) {
                 return i > f2;
-            } else if (biggerThanOrEqualComparator()) {
+            } else if (isBiggerThanOrEqualComparator()) {
                 return i >= f2;
-            } else if (smallerThanComparator()) {
+            } else if (isSmallerThanComparator()) {
                 return i < f2;
-            } else if (smallerThanOrEqualComparator()) {
+            } else if (isSmallerThanOrEqualComparator()) {
                 return i <= f2;
             }
         }
@@ -139,32 +139,32 @@ public class AtomicCondition extends Condition {
         float f = Float.parseFloat(s);
         if (isIntegerLiteral(this.value)) {
             int i2 = Integer.parseInt(this.value);
-            if (equalSignComparator()) {
+            if (isEqualSignComparator()) {
                 return f == i2;
-            } else if (unequalSignComparator()) {
+            } else if (isUnequalSignComparator()) {
                 return f != i2;
-            } else if (biggerThanComparator()) {
+            } else if (isBiggerThanComparator()) {
                 return f > i2;
-            } else if (biggerThanOrEqualComparator()) {
+            } else if (isBiggerThanOrEqualComparator()) {
                 return f >= i2;
-            } else if (smallerThanComparator()) {
+            } else if (isSmallerThanComparator()) {
                 return f < i2;
-            } else if (smallerThanOrEqualComparator()) {
+            } else if (isSmallerThanOrEqualComparator()) {
                 return f <= i2;
             }
         } else if (isFloatLiteral(this.value)) {
             float f2 = Float.parseFloat(this.value);
-            if (equalSignComparator()) {
+            if (isEqualSignComparator()) {
                 return f == f2;
-            } else if (unequalSignComparator()) {
+            } else if (isUnequalSignComparator()) {
                 return f != f2;
-            } else if (biggerThanComparator()) {
+            } else if (isBiggerThanComparator()) {
                 return f > f2;
-            } else if (biggerThanOrEqualComparator()) {
+            } else if (isBiggerThanOrEqualComparator()) {
                 return f >= f2;
-            } else if (smallerThanComparator()) {
+            } else if (isSmallerThanComparator()) {
                 return f < f2;
-            } else if (smallerThanOrEqualComparator()) {
+            } else if (isSmallerThanOrEqualComparator()) {
                 return f <= f2;
             }
         }
@@ -178,22 +178,22 @@ public class AtomicCondition extends Condition {
         } else {
             compareResult = s.toLowerCase().compareTo(this.value.toLowerCase());
         }
-        if (equalSignComparator()) {
+        if (isEqualSignComparator()) {
             return compareResult == 0;
-        } else if (unequalSignComparator()) {
+        } else if (isUnequalSignComparator()) {
             return compareResult != 0;
-        } else if (this.isLiteralValue && likeCompare()) {
+        } else if (this.isLiteralValue && isLikeCompare()) {
             return s.contains(this.value);
-        } else if (likeCompare()) {
+        } else if (isLikeCompare()) {
             return s.toLowerCase().contains(this.value.toLowerCase());
         }
         return false;
     }
 
-    private boolean boolValueCompare(String boolValue) {
-        if (equalSignComparator()) {
+    private boolean isBoolValueCompare(String boolValue) {
+        if (isEqualSignComparator()) {
             return stringsEqualCaseInsensitively(this.value, boolValue);
-        } else if (unequalSignComparator()) {
+        } else if (isUnequalSignComparator()) {
             return !stringsEqualCaseInsensitively(this.value, boolValue);
         }
         return false;
@@ -231,31 +231,31 @@ public class AtomicCondition extends Condition {
         return true;
     }
 
-    private boolean equalSignComparator() {
+    private boolean isEqualSignComparator() {
         return this.operator.compareTo("==") == 0;
     }
 
-    private boolean likeCompare() {
+    private boolean isLikeCompare() {
         return this.operator.toUpperCase().compareTo("LIKE") == 0;
     }
 
-    private boolean unequalSignComparator() {
+    private boolean isUnequalSignComparator() {
         return this.operator.compareTo("!=") == 0;
     }
 
-    private boolean biggerThanComparator() {
+    private boolean isBiggerThanComparator() {
         return this.operator.compareTo(">") == 0;
     }
 
-    private boolean biggerThanOrEqualComparator() {
+    private boolean isBiggerThanOrEqualComparator() {
         return this.operator.compareTo(">=") == 0;
     }
 
-    private boolean smallerThanComparator() {
+    private boolean isSmallerThanComparator() {
         return this.operator.compareTo("<") == 0;
     }
 
-    private boolean smallerThanOrEqualComparator() {
+    private boolean isSmallerThanOrEqualComparator() {
         return this.operator.compareTo("<=") == 0;
     }
 

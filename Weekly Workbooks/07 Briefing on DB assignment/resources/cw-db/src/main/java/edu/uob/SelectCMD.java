@@ -42,14 +42,14 @@ public class SelectCMD extends DBCmd {
     public String query(DBServer dbServer) {
         setDatabasePathFromCurrentDatabasePath(dbServer.getDatabasePath());
         setTableFilePath();
-        String error1 = tableFileToDBTable(this.tableFilePath, this.dbTable);
+        String error1 = loadTabFileToDBTable(this.tableFilePath, this.dbTable);
         if (error1 != null) {
             return error1;
         }
         if (this.selectAll && this.unconditional) {
             return getQueryResults(this.dbTable.toString());
         } else if (!this.selectAll && !this.dbTable.containsQueriedAttributes(this.attributeList)) {
-            return errorMessage("Invalid attribute list for " + tableName);
+            return generateErrorMessage("Invalid attribute list for " + tableName);
         } else if (!this.selectAll && this.unconditional) {
             String contents = this.dbTable.selectedContentToString(this.attributeList);
             if (this.hasInterpretError()) {

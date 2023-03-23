@@ -13,20 +13,20 @@ public class AlterDropCMD extends AlterCMD {
         setTableFilePath();
         File fileToAlter = new File(this.tableFilePath);
         if (!fileToAlter.isFile()) {
-            return errorMessage(tableName + " doesn't exist");
+            return generateErrorMessage(tableName + " doesn't exist");
         }
-        String error = tableFileToDBTable(this.tableFilePath, this.dbTable);
+        String error = loadTabFileToDBTable(this.tableFilePath, this.dbTable);
         if (error != null) {
             return error;
         }
         if (!this.dbTable.containsAttribute(this.attributeName)) {
-            return errorMessage(this.attributeName + " does not in table " + this.tableName);
+            return generateErrorMessage(this.attributeName + " does not in table " + this.tableName);
         } else if (this.attributeName.toLowerCase().compareTo("id") == 0) {
-            return errorMessage("Cannot drop id");
+            return generateErrorMessage("Cannot drop id");
         }
         this.dbTable.dropCol(this.attributeName);
         if (this.dbTable.failToFile(this.tableFilePath)) {
-            return errorMessage("Failed to change table " + this.tableName);
+            return generateErrorMessage("Failed to change table " + this.tableName);
         }
         return getQueryResults(null);
     }

@@ -33,7 +33,7 @@ public abstract class DBCmd {
         this.databasePath = currentDatabasePath;
     }
 
-    public String errorMessage(String message) {
+    public String generateErrorMessage(String message) {
         this.interpretError = true;
         return errorTag + message;
     }
@@ -58,13 +58,13 @@ public abstract class DBCmd {
         return this.databasePath + File.separator + tbName.toLowerCase() + tabFileExtension;
     }
 
-    String tableFileToDBTable(String tbFilePath, DBTable table) {
+    String loadTabFileToDBTable(String tbFilePath, DBTable table) {
         File fileToRead = new File(tbFilePath);
         FileReader reader;
         try {
             reader = new FileReader(fileToRead);
         } catch (FileNotFoundException e) {
-            return errorMessage("Table " + table.getTableName() + " not found");
+            return generateErrorMessage("Table " + table.getTableName() + " not found");
         }
         BufferedReader buffReader = new BufferedReader(reader);
         try {
@@ -80,17 +80,8 @@ public abstract class DBCmd {
             buffReader.close();
             return null;
         } catch (IOException e) {
-            return errorMessage("Failed to read table " + tbFilePath);
+            return generateErrorMessage("Failed to read table " + tbFilePath);
         }
-    }
-
-    boolean stringListContainsStringCaseInsensitively(List<String> stringList, String s) {
-        for (String str : stringList) {
-            if (stringsEqualCaseInsensitively(str, s)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     boolean stringsEqualCaseInsensitively(String s1, String s2) {

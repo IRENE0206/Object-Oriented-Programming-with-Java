@@ -16,6 +16,6 @@ public class UseCMD extends DBCmd {
             dbServer.setDatabasePath(this.databasePath);
             return getQueryResults(null);
         }
-        return errorMessage("Database " + this.databaseName + " is not an existing directory");
+        return generateErrorMessage("Database " + this.databaseName + " is not an existing directory");
     }
 }

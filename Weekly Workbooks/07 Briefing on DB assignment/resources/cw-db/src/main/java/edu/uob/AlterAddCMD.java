@@ -13,20 +13,20 @@ public class AlterAddCMD extends AlterCMD {
         setTableFilePath();
         File fileToAlter = new File(this.tableFilePath);
         if (!fileToAlter.isFile()) {
-            return errorMessage(tableName + " doesn't exist");
+            return generateErrorMessage(tableName + " doesn't exist");
         }
-        String error = tableFileToDBTable(this.tableFilePath, this.dbTable);
+        String error = loadTabFileToDBTable(this.tableFilePath, this.dbTable);
         if (error != null) {
             return error;
         } else if (this.dbTable.containsAttribute(this.attributeName)) {
-            return errorMessage(this.attributeName + " already exists in table " + this.tableName);
+            return generateErrorMessage(this.attributeName + " already exists in table " + this.tableName);
         }
         String error2 = this.dbTable.addCol(this.attributeName);
         if (error2 != null) {
-            return errorMessage(error2);
+            return generateErrorMessage(error2);
         }
         if (this.dbTable.failToFile(this.tableFilePath)) {
-            return errorMessage("Failed to change table " + this.tableName);
+            return generateErrorMessage("Failed to change table " + this.tableName);
         }
         return getQueryResults(null);
     }

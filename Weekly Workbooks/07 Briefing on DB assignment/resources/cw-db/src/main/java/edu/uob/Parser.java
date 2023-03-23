@@ -14,11 +14,11 @@ public class Parser {
         this.errorMessage.append("[ERROR] ");
     }
 
-    public DBCmd parse() {
+    public DBCmd parseCommand() {
         return getCommandType();
     }
 
-    public boolean isParsedOK() {
+    public boolean getParsedOk() {
         return this.parsedOK;
     }
 
@@ -33,23 +33,23 @@ public class Parser {
             return null;
         }
         if (toUse(firstKeyword)) {
-            return use();
+            return useDatabase();
         } else if (toCreate(firstKeyword)) {
-            return create();
+            return createDatabaseOrTable();
         } else if (toDrop(firstKeyword)) {
-            return drop();
+            return dropDatabaseOrTable();
         } else if (toAlter(firstKeyword)) {
-            return alter();
+            return alterTable();
         } else if (toInsert(firstKeyword)) {
-            return insert();
+            return insertTableRow();
         } else if (toSelect(firstKeyword)) {
-            return select();
+            return selectFromTable();
         } else if (toUpdate(firstKeyword)) {
-            return update();
+            return updateTable();
         } else if (toDelete(firstKeyword)) {
-            return delete();
+            return deleteTableRow();
         } else if (toJoin(firstKeyword)) {
-            return join();
+            return joinTwoTables();
         }
         return null;
     }
@@ -81,7 +81,7 @@ public class Parser {
         setErrorMessage("There should not be more tokens after command ends with ;");
     }
 
-    private UseCMD use() {
+    private UseCMD useDatabase() {
         String databaseName = tokeniser.getToken();
         if (invalidDatabaseName(databaseName)) {
             return null;
@@ -99,7 +99,7 @@ public class Parser {
         this.parsedOK = true;
     }
 
-    private void setDatabaseNameErrorMessage(String databaseName) {
+    private void setDBNameErrorMessage(String databaseName) {
         setErrorMessage(databaseName + " is not a valid [DatabaseName]");
     }
 
@@ -113,7 +113,7 @@ public class Parser {
 
     private boolean invalidDatabaseName(String s) {
         if (!isPlainText(s) || isReservedKeyword(s)) {
-            setDatabaseNameErrorMessage(s);
+            setDBNameErrorMessage(s);
             return true;
         }
         return false;
@@ -123,7 +123,7 @@ public class Parser {
         return s.compareTo(";") == 0;
     }
 
-    private CreateCMD create() {
+    private CreateCMD createDatabaseOrTable() {
         String databaseOrTable = tokeniser.getToken();
         if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
@@ -252,7 +252,7 @@ public class Parser {
         }
         String currToken = tokeniser.getToken();
         if (!isComma(currToken)) {
-            accumulator.add(getRidOfSingleQuote(token));
+            accumulator.add(removeSingleQuotes(token));
             return true;
         } else if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
@@ -267,7 +267,7 @@ public class Parser {
         setErrorMessage(tableName + " is not a valid [TableName]");
     }
 
-    private String getRidOfSingleQuote(String s) {
+    private String removeSingleQuotes(String s) {
         if (s.startsWith("'") && s.endsWith("'")) {
             return s.substring(1, s.length() - 1);
         }
@@ -286,7 +286,7 @@ public class Parser {
         return stringsEqualCaseInsensitively(s, "ON");
     }
 
-    private JoinCMD join() {
+    private JoinCMD joinTwoTables() {
         String tableName1 = tokeniser.getToken();
         if (invalidTableName(tableName1)) {
             return null;
@@ -362,7 +362,7 @@ public class Parser {
     }
 
 
-    private AlterCMD alter() {
+    private AlterCMD alterTable() {
         String secondKeyword = tokeniser.getToken();
         if (!toTable(secondKeyword)) {
             setErrorMessage(secondKeyword + " is not valid syntax");
@@ -530,7 +530,7 @@ public class Parser {
             return null;
         }
         boolean isStringLiteral = isStringLiteral(value);
-        return new AtomicCondition(comparator, attributeName, getRidOfSingleQuote(value), isStringLiteral);
+        return new AtomicCondition(comparator, attributeName, removeSingleQuotes(value), isStringLiteral);
     }
 
     private boolean isComma(String s) {
@@ -569,7 +569,7 @@ public class Parser {
         return stringsEqualCaseInsensitively(firstKeyword, "DROP");
     }
 
-    private DropCMD drop() {
+    private DropCMD dropDatabaseOrTable() {
         String databaseOrTable = tokeniser.getToken();
         if (failToMoveToNextToken()) {
             setLackMoreTokensErrorMessage();
@@ -619,7 +619,7 @@ public class Parser {
         return stringsEqualCaseInsensitively(firstKeyword, "INSERT");
     }
 
-    private InsertCMD insert() {
+    private InsertCMD insertTableRow() {
         String secondKeyword = tokeniser.getToken();
         if (!stringsEqualCaseInsensitively(secondKeyword, "INTO")) {
             setErrorMessage(secondKeyword + " is not invalid keyword 'INTO'");
@@ -672,7 +672,7 @@ public class Parser {
         }
         String currToken = tokeniser.getToken();
         if (isValue(value) && isCloseBracket(currToken)) {
-            accumulator.add(getRidOfSingleQuote(value));
+            accumulator.add(removeSingleQuotes(value));
             return true;
         } else if (isValue(value) && isComma(currToken)) {
             if (failToMoveToNextToken()) {
@@ -680,7 +680,7 @@ public class Parser {
                 accumulator.clear();
                 return false;
             }
-            accumulator.add(getRidOfSingleQuote(value));
+            accumulator.add(removeSingleQuotes(value));
             return getValueList(accumulator);
         } else if (isValue(value)) {
             setMissingBracketMessage(")");
@@ -735,14 +735,14 @@ public class Parser {
         return null;
     }
 
-    private SelectCMD select() {
+    private SelectCMD selectFromTable() {
         if (isWildCard()) {
             return selectWildCard();
         }
-        return selectSpecified();
+        return selectCertainAttributes();
     }
 
-    private SelectCMD selectSpecified() {
+    private SelectCMD selectCertainAttributes() {
         List<String> accumulator = new ArrayList<>();
         if (!getAttributeList(accumulator)) {
             return null;
@@ -789,7 +789,7 @@ public class Parser {
         return stringsEqualCaseInsensitively(firstKeyword, "UPDATE");
     }
 
-    private UpdateCMD update() {
+    private UpdateCMD updateTable() {
         String tableName = tokeniser.getToken();
         if (invalidTableName(tableName)) {
             return null;
@@ -861,14 +861,14 @@ public class Parser {
                 setLackMoreTokensErrorMessage();
                 return false;
             }
-            accumulator.put(attributeName, getRidOfSingleQuote(value));
+            accumulator.put(attributeName, removeSingleQuotes(value));
             return getNameValuePair(accumulator);
         } else if (isWhere(next)) {
             if (failToMoveToNextToken()) {
                 setLackMoreTokensErrorMessage();
                 return false;
             }
-            accumulator.put(attributeName, getRidOfSingleQuote(value));
+            accumulator.put(attributeName, removeSingleQuotes(value));
             return true;
         } else {
             setErrorMessage(next + " is not valid keyword");
@@ -892,7 +892,7 @@ public class Parser {
         return stringsEqualCaseInsensitively(firstKeyword, "DELETE");
     }
 
-    private DeleteCMD delete() {
+    private DeleteCMD deleteTableRow() {
         String from = tokeniser.getToken();
         if (isNotFrom(from)) {
             setErrorMessage(from + " is not valid keyword. Should be 'FROM'");
@@ -936,25 +936,25 @@ public class Parser {
         String[] reservedKeywords = {"USE", "CREATE", "DATABASE", "TABLE", "DROP", "ALTER", "INSERT", "INTO", "VALUES",
             "SELECT", "FROM", "UPDATE", "SET", "WHERE", "DELETE", "JOIN", "ON",
             "AND", "ADD", "TRUE", "FALSE", "OR", "LIKE"};
-        return arrayContains(reservedKeywords, s);
+        return stringArrayContainsString(reservedKeywords, s);
     }
 
     private boolean isPlainText(String s) {
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
-            if (!(isLetter(c) || isDigit(c))) {
+            if (!(characterIsLetter(c) || isDigit(c))) {
                 return false;
             }
         }
         return true;
     }
 
-    private boolean isLetter(Character c) {
+    private boolean characterIsLetter(Character c) {
         return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
     }
 
     private boolean isLetter(String s) {
-        return s.length() == 1 && isLetter(s.charAt(0));
+        return s.length() == 1 && characterIsLetter(s.charAt(0));
     }
 
     private boolean isDigit(Character c) {
@@ -972,7 +972,7 @@ public class Parser {
     private boolean isSymbol(String s) {
         String[] symbols = {"!", "#", "$", "%", "&", "(", ")", "*", "+", ",",
             "-", ".", "/", ":", ";", ">", "=", "<", "?", "@", "[", "\\", "]", "^", "_", "`", "{", "}", "~"};
-        return arrayContains(symbols, s);
+        return stringArrayContainsString(symbols, s);
     }
 
     private boolean isAdd(String s) {
@@ -991,7 +991,7 @@ public class Parser {
         return stringsEqualCaseInsensitively(s, "TRUE") || stringsEqualCaseInsensitively(s, "FALSE");
     }
 
-    private boolean arrayContains(String[] array, String s) {
+    private boolean stringArrayContainsString(String[] array, String s) {
         return Arrays.stream(array).toList().contains(s.toUpperCase());
     }
 
@@ -1001,7 +1001,7 @@ public class Parser {
 
     private boolean isComparator(String s) {
         String[] comparators = {"==", ">", "<", ">=", "<=", "!=", "LIKE"};
-        return arrayContains(comparators, s);
+        return stringArrayContainsString(comparators, s);
     }
 
     private boolean isCharLiteral(String s) {

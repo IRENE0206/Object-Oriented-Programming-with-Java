@@ -13,16 +13,16 @@ public class InsertCMD extends DBCmd {
     public String query(DBServer dbServer) {
         setDatabasePathFromCurrentDatabasePath(dbServer.getDatabasePath());
         setTableFilePath();
-        String error1 = tableFileToDBTable(this.tableFilePath, this.dbTable);
+        String error1 = loadTabFileToDBTable(this.tableFilePath, this.dbTable);
         if (error1 != null) {
             return error1;
         }
         String error2 = this.dbTable.addRow(this.attributeList);
         if (error2 != null) {
-            return errorMessage(error2);
+            return generateErrorMessage(error2);
         }
         if (this.dbTable.failToFile(this.tableFilePath)) {
-            return errorMessage("Failed to save changes to table file");
+            return generateErrorMessage("Failed to save changes to table file");
         }
         return getQueryResults(null);
     }

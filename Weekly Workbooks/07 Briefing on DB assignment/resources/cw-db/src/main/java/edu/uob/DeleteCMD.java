@@ -19,13 +19,13 @@ public class DeleteCMD extends DBCmd {
     public String query(DBServer dbServer) {
         setDatabasePathFromCurrentDatabasePath(dbServer.getDatabasePath());
         setTableFilePath();
-        String error1 = tableFileToDBTable(this.tableFilePath, this.dbTable);
+        String error1 = loadTabFileToDBTable(this.tableFilePath, this.dbTable);
         if (error1 != null) {
             return error1;
         }
         if (this.dbTable.deleteRow(this.conditions, this)) {
             if (this.dbTable.failToFile(this.tableFilePath)) {
-                return errorMessage("Failed to update " + this.tableName);
+                return generateErrorMessage("Failed to update " + this.tableName);
             }
             return getQueryResults(null);
         }

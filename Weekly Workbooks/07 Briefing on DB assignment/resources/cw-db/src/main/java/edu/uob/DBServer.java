@@ -42,8 +42,8 @@ public class DBServer {
             return "";
         }
         Parser parser = new Parser(command);
-        DBCmd dbCmd = parser.parse();
-        if (parser.isParsedOK() && dbCmd != null) {
+        DBCmd dbCmd = parser.parseCommand();
+        if (parser.getParsedOk() && dbCmd != null) {
             return dbCmd.query(this);
         } else {
             return parser.getErrorMessage();

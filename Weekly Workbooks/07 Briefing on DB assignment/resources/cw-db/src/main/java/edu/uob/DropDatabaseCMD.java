@@ -13,9 +13,9 @@ public class DropDatabaseCMD extends DropCMD {
         setDatabasePathFromStorageFolderPath(dbServer.getStorageFolderPath());
         File fileToDrop = new File(this.databasePath);
         if (!fileToDrop.isDirectory()) {
-            return errorMessage(this.databaseName + " is not an existing directory");
+            return generateErrorMessage(this.databaseName + " is not an existing directory");
         } else if (failToDeleteFileRecursively(fileToDrop)) {
-            return errorMessage("Failed to drop " + this.databaseName);
+            return generateErrorMessage("Failed to drop " + this.databaseName);
         }
         return getQueryResults(null);
     }
