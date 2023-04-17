@@ -6,12 +6,17 @@ This workbook will lead you through the next assessed exercise,
 the aim of which is to build a database server (from the ground up !)
 This will not only give you more practice writing complex Java programmes,
 <<<<<<< HEAD
+<<<<<<< HEAD
 but will also provide you with hands-on experience of using query languages. 
 Note that assignment WILL contribute to your unit mark with a weighting of 35%. 
 =======
 but will also provide you with hands-on experience of using query languages.
 Note that assignment WILL contribute to your unit mark with a weighting of 35%.
 >>>>>>> develop
+=======
+but will also provide you with hands-on experience of using query languages. 
+Note that assignment WILL contribute to your unit mark with a weighting of 35%. 
+>>>>>>> 2921864a9a01aa13b6ad5b19a94348f5ae7df964
 
 The assignment will be marked on the lab machines, so it is essential that you check that you
 can compile and run your code using Maven on these machines before submission.
@@ -40,10 +45,14 @@ Don't panic - if you stick to the above list of advice, you should remain safe !
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 # 
 =======
 #
 >>>>>>> develop
+=======
+# 
+>>>>>>> 2921864a9a01aa13b6ad5b19a94348f5ae7df964
 ### Task 2: Assignment Overview
 
 
@@ -52,10 +61,14 @@ This server should receive incoming requests (conforming to a standard query lan
 and then interrogate and manipulate a set of stored records.
 Your server will maintain persistent data as a number of files on your filesystem.
 <<<<<<< HEAD
+<<<<<<< HEAD
 You will not be required to implement a client application - this will be provided for you 
 =======
 You will not be required to implement a client application - this will be provided for you
 >>>>>>> develop
+=======
+You will not be required to implement a client application - this will be provided for you 
+>>>>>>> 2921864a9a01aa13b6ad5b19a94348f5ae7df964
 (to allow you to connect to your server and check that is it working correctly).
 
 As usual, you have been provided with a <a href="resources/cw-db" target="_blank">Maven project</a>
@@ -83,6 +96,7 @@ as well as the flexibility and robustness with which your server operates.
 You will also be assessed on the "quality" of your source code (guidance will be provided during the assignment
 to help you improve this aspect of your work).
 <<<<<<< HEAD
+<<<<<<< HEAD
 Finally, since test-driven development is key to the processes taught on this programme, 
 the extent and quality of your test cases will also be considered.  
 
@@ -95,6 +109,13 @@ the extent and quality of your test cases will also be considered.
 
 #
 >>>>>>> develop
+=======
+Finally, since test-driven development is key to the processes taught on this programme, 
+the extent and quality of your test cases will also be considered.  
+
+
+# 
+>>>>>>> 2921864a9a01aa13b6ad5b19a94348f5ae7df964
 ### Task 3: Persistent Storage
  <a href='03%20Persistent%20Storage/slides/segment-1.pdf' target='_blank'> ![](../../resources/icons/slides.png) </a> <a href='03%20Persistent%20Storage/video/segment-1.mp4' target='_blank'> ![](../../resources/icons/video.png) </a>
 
@@ -133,19 +154,27 @@ Your java code should work on ALL platforms - for this reason, you should make u
 (which will contain the relevant character for the platform the code is running on).
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 Note that if you encounter a tab file with invalid formatting when reading in data from the filesystem, your file parsing method should 
 =======
 Note that if you encounter a tab file with invalid formatting when reading in data from the filesystem, your file parsing method should
 >>>>>>> develop
+=======
+Note that if you encounter a tab file with invalid formatting when reading in data from the filesystem, your file parsing method should 
+>>>>>>> 2921864a9a01aa13b6ad5b19a94348f5ae7df964
 throw an `IOException`. You should ensure that this exception is subsequently caught by another part of your server - remember:
 don't let your server crash !  
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 # 
 =======
 #
 >>>>>>> develop
+=======
+# 
+>>>>>>> 2921864a9a01aa13b6ad5b19a94348f5ae7df964
 ### Task 4: Maintaining Relationships
 
 
@@ -162,19 +191,27 @@ For simplicity, no primary or foreign key marker keywords are provided by the qu
 
 It is _not_ your responsibility to normalise the database - this is a job for developers who have designed the database schema and who make use of your database server. If you don't know what normalisation is, then don't worry - you don't need to know for this assignment (although I bet you are intrigued to find out now ;o)
 <<<<<<< HEAD
+<<<<<<< HEAD
   
 =======
 
 >>>>>>> develop
+=======
+  
+>>>>>>> 2921864a9a01aa13b6ad5b19a94348f5ae7df964
 
 
 ![](04%20Maintaining%20Relationships/images/sheds.jpg)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 # 
 =======
 #
 >>>>>>> develop
+=======
+# 
+>>>>>>> 2921864a9a01aa13b6ad5b19a94348f5ae7df964
 ### Task 5: Java Data Structures
 
 
@@ -210,6 +247,7 @@ method to save these structures _back out_ to the filesystem again
 In order to check that your code is successfully reading and writing data from the files,
 you should alter the data _whilst it is in memory_ (i.e. _after_ you have read it in but _before_ you write it back out again).
 <<<<<<< HEAD
+<<<<<<< HEAD
 You could for example replace the age of all people in the table with a randomly generated one. 
 By changing the data in this way, you can check to make sure that the file system files are actually being over-written and updated !  
 
@@ -222,6 +260,13 @@ By changing the data in this way, you can check to make sure that the file syste
 
 #
 >>>>>>> develop
+=======
+You could for example replace the age of all people in the table with a randomly generated one. 
+By changing the data in this way, you can check to make sure that the file system files are actually being over-written and updated !  
+
+
+# 
+>>>>>>> 2921864a9a01aa13b6ad5b19a94348f5ae7df964
 ### Task 6: Communication
 
 
@@ -229,9 +274,13 @@ It is not the aim of this assignment to address the topic of network or socket p
 For this reason, the networking aspects of the server have been provided for you
 in <a href="resources/cw-db/src/main/java/edu/uob/DBServer.java" target="_blank">the template server class</a>.
 <<<<<<< HEAD
+<<<<<<< HEAD
 This server can be run from the command line using `mvnw exec:java@server`.
 =======
 >>>>>>> develop
+=======
+This server can be run from the command line using `mvnw exec:java@server`.
+>>>>>>> 2921864a9a01aa13b6ad5b19a94348f5ae7df964
 
 The database server listens on port 8888 in order to receive incoming messages. These incoming commands are then
 passed to the `handleCommand` method for processing. Your task is to add to the `handleCommand` method to respond to the commands.
@@ -241,10 +290,14 @@ Rather it should respond with the content of _all_ of the tables currently in yo
 
 You should attempt to make the response as human-reader friendly as possible. It is important that your test cases do not
 <<<<<<< HEAD
+<<<<<<< HEAD
 check for exact formatting (since this may vary from implementation to implementation). 
 =======
 check for exact formatting (since this may vary from implementation to implementation).
 >>>>>>> develop
+=======
+check for exact formatting (since this may vary from implementation to implementation). 
+>>>>>>> 2921864a9a01aa13b6ad5b19a94348f5ae7df964
 You will see from the sample test script provided in the template project how tests can be written using simple word matching.
 You should use the same approach when writing your own tests.
 
@@ -252,6 +305,7 @@ It is essential that your response is returned by the `handleCommand` method and
 When we test your server during the marking process, we will be monitoring what is returned via the network.
 You won't get any marks for just doing `println` messages in the terminal !
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 To help you ensure that your server conforms to the correct protocol, a 
 <a href="resources/cw-db/src/main/java/edu/uob/DBClient.java" target="_blank">command-line client</a>
@@ -261,6 +315,11 @@ To help you ensure that your server conforms to the correct protocol, a
 <a href="resources/cw-db/src/main/java/edu/uob/DBClient.java" target="_blank">command-line client</a>
 has been provided for you. This client can be run from the command line using `mvnw exec:java@client`
 >>>>>>> develop
+=======
+To help you ensure that your server conforms to the correct protocol, a 
+<a href="resources/cw-db/src/main/java/edu/uob/DBClient.java" target="_blank">command-line client</a>
+has been provided for you. This client can be run from the command line using `mvnw exec:java@client`.
+>>>>>>> 2921864a9a01aa13b6ad5b19a94348f5ae7df964
 You should not have to change any of the code in the client, any features that you implement in this class
 will not be executed during the marking process.
 The client has been provided purely to allow you to manually check that your server is operating correctly.
@@ -271,10 +330,14 @@ For the sake of simplicity, you may assume only a single client is connected at 
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 # 
 =======
 #
 >>>>>>> develop
+=======
+# 
+>>>>>>> 2921864a9a01aa13b6ad5b19a94348f5ae7df964
 ### Task 7: Query Language
 
 
@@ -298,6 +361,7 @@ A grammar that fully defines the simplified query language is provided in <a hre
 To help illustrate the use of the query language, we have also provided <a href="resources/example-transcript.docx" target="_blank">a transcript of example queries</a>.
 You will note that BNF grammar contains two distinct types of rule:
 <<<<<<< HEAD
+<<<<<<< HEAD
 - Symbols with angle brackets `<name>` denote rules which MAY contain arbitrary additional whitespace 
 - Symbols with square brackets `[name]` indicate rules that can NOT contain additional whitespace
 
@@ -310,6 +374,13 @@ characters between certain tokens. So for example:
 As a consequence of these rules, your server should be able to correctly parse incoming commands irrespective of the number of _additional_ whitespace
 characters between certain tokens. So for example:
 >>>>>>> develop
+=======
+- Symbols with angle brackets `<name>` denote rules which MAY contain arbitrary additional whitespace 
+- Symbols with square brackets `[name]` indicate rules that can NOT contain additional whitespace
+
+As a consequence of these rules, your server should be able to correctly parse incoming commands irrespective of the number of _additional_ whitespace
+characters between certain tokens. So for example: 
+>>>>>>> 2921864a9a01aa13b6ad5b19a94348f5ae7df964
 <pre>SELECT    *  FROM     people  WHERE   Name  ==  'Steve' ;</pre>
 is valid and acceptable, being equivalent to:
 <pre>SELECT * FROM people WHERE Name=='Steve';</pre>
@@ -323,10 +394,14 @@ Note that you should NOT use any existing parsers or parser generators (Yacc, Le
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 # 
 =======
 #
 >>>>>>> develop
+=======
+# 
+>>>>>>> 2921864a9a01aa13b6ad5b19a94348f5ae7df964
 ### Task 8: Query Specifics
 
 
@@ -349,6 +424,7 @@ This is so the user can determine which attributes came from which tables (as we
 two tables have attributes of the same name). The joined table should NOT contain the ID columns from the original tables,
 but rather should include a new ID column containing new sequentially generated IDs.
 <<<<<<< HEAD
+<<<<<<< HEAD
   
 
 
@@ -359,6 +435,12 @@ but rather should include a new ID column containing new sequentially generated 
 
 #
 >>>>>>> develop
+=======
+  
+
+
+# 
+>>>>>>> 2921864a9a01aa13b6ad5b19a94348f5ae7df964
 ### Task 9: Error Handling
 
 
@@ -395,10 +477,14 @@ These will be used by the automated testing scripts during the marking process !
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 # 
 =======
 #
 >>>>>>> develop
+=======
+# 
+>>>>>>> 2921864a9a01aa13b6ad5b19a94348f5ae7df964
 ### Task 10: Submission
 
 
@@ -413,10 +499,14 @@ of the server and verify the correct operation of your code. The completeness an
 into account during the marking of this assignment. You submission will also be assessed on "code quality" as outlined in the lectures.
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 You should make sure your code can respond to _at the very least_ the "standard" query spacing (as illustrated in the 
 =======
 You should make sure your code can respond to _at the very least_ the "standard" query spacing (as illustrated in the
 >>>>>>> develop
+=======
+You should make sure your code can respond to _at the very least_ the "standard" query spacing (as illustrated in the 
+>>>>>>> 2921864a9a01aa13b6ad5b19a94348f5ae7df964
 <a href="resources/example-transcript.docx" target="_blank">example transcript</a>).
 As with any real implementation of SQL, you should also however try to support some level of variability and robustness.
 Remember that different users may attempt to use different spacing standards - it would be nice to support them, not constrain them.
@@ -439,7 +529,11 @@ Remember that your main class MUST be called `DBServer` and should not change th
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 # 
 =======
 #
 >>>>>>> develop
+=======
+# 
+>>>>>>> 2921864a9a01aa13b6ad5b19a94348f5ae7df964
