@@ -10,9 +10,16 @@ import java.nio.file.Files;
 public class DBServer {
 
     private static final char END_OF_TRANSMISSION = 4;
+<<<<<<< HEAD
     private String storageFolderPath;
 
     public static void main(String args[]) throws IOException {
+=======
+    private final String storageFolderPath;
+    private String databasePath;
+
+    public static void main(String[] args) throws IOException {
+>>>>>>> develop
         DBServer server = new DBServer();
         server.blockingListenOn(8888);
     }
@@ -25,7 +32,11 @@ public class DBServer {
         try {
             // Create the database storage folder if it doesn't already exist !
             Files.createDirectories(Paths.get(storageFolderPath));
+<<<<<<< HEAD
         } catch(IOException ioe) {
+=======
+        } catch (IOException ioe) {
+>>>>>>> develop
             System.out.println("Can't seem to create database storage folder " + storageFolderPath);
         }
     }
@@ -37,9 +48,22 @@ public class DBServer {
     * <p>This method handles all incoming DB commands and carries out the required actions.
     */
     public String handleCommand(String command) {
+<<<<<<< HEAD
         // TODO implement your server logic here
 
         return "";
+=======
+        if (command.isEmpty()) {
+            return "";
+        }
+        Parser parser = new Parser(command);
+        DBCmd dbCmd = parser.parseCommand();
+        if (parser.getParsedOk() && dbCmd != null) {
+            return dbCmd.query(this);
+        } else {
+            return parser.getErrorMessage();
+        }
+>>>>>>> develop
     }
 
     //  === Methods below handle networking aspects of the project - you will not need to change these ! ===
@@ -60,10 +84,18 @@ public class DBServer {
     }
 
     private void blockingHandleConnection(ServerSocket serverSocket) throws IOException {
+<<<<<<< HEAD
         try (Socket s = serverSocket.accept();
         BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()))) {
 
+=======
+        try (
+            Socket s = serverSocket.accept();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()))
+        ) {
+>>>>>>> develop
             System.out.println("Connection established: " + serverSocket.getInetAddress());
             while (!Thread.interrupted()) {
                 String incomingCommand = reader.readLine();
@@ -76,6 +108,7 @@ public class DBServer {
         }
     }
 
+<<<<<<< HEAD
     public DBTable readDataFromFile(String filename) {
         File fileToRead = new File(filename);
         try {
@@ -131,4 +164,19 @@ public class DBServer {
             System.out.println("Cannot write to " + fileToWrite);
         }
     }
+=======
+    public String getStorageFolderPath() {
+        return this.storageFolderPath;
+    }
+
+    public String getDatabasePath() {
+        return this.databasePath;
+    }
+
+    public void setDatabasePath(String path) {
+        this.databasePath = path;
+    }
+
+
+>>>>>>> develop
 }
