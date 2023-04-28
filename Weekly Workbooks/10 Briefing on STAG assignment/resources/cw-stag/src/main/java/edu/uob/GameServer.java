@@ -1,11 +1,10 @@
 package edu.uob;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import com.alexmerz.graphviz.ParseException;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Paths;
@@ -33,7 +32,20 @@ public final class GameServer {
     *
     */
     public GameServer(File entitiesFile, File actionsFile) {
-        // TODO implement your server logic here
+        // TODO: implement your server logic here
+        GameState gameState = new GameState();
+        EntitiesLoader entitiesLoader = new EntitiesLoader(gameState, entitiesFile);
+        try {
+            entitiesLoader.loadEntities();
+        } catch (FileNotFoundException | ParseException e) {
+            throw new RuntimeException(e);
+        }
+        ActionsLoader actionsLoader = new ActionsLoader(gameState, actionsFile);
+        try {
+            actionsLoader.loadActions();
+        } catch (ParserConfigurationException | IOException | SAXException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -43,7 +55,7 @@ public final class GameServer {
     * <p>This method handles all incoming game commands and carries out the corresponding actions.
     */
     public String handleCommand(String command) {
-        // TODO implement your server logic here
+        // TODO: implement your server logic here
         return "";
     }
 
