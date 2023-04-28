@@ -7,6 +7,9 @@ public class GameState {
     private Location startLocation;
     private Location storeroom;
     private final HashMap<String, Location> locations;
+    // One or more possible trigger phrases (ANY of which can be used to initiate the action)
+    // action trigger keyPhrases are NOT unique
+    // trigger phrases cannot (and will not) contain the names of entities
     private final HashMap<String, HashSet<GameAction>> actions;
     private final HashMap<String, Player> players;
 
@@ -24,6 +27,10 @@ public class GameState {
         return this.startLocation;
     }
 
+    // a container for all entities that have no initial location in the game
+    // These entities will not enter the game until
+    // an action places them into another location within the game
+    // there will be no paths to/from it
     public void setStoreroom(Location l) {
         this.storeroom = l;
     }
@@ -58,6 +65,10 @@ public class GameState {
 
     public Player getPlayer(String playerName) {
         return this.players.get(playerName);
+    }
+
+    public HashMap<String, HashSet<GameAction>> getActions() {
+        return this.actions;
     }
 
     public boolean hasPlayer(String playerName) {

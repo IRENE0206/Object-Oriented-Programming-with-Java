@@ -25,8 +25,12 @@ public class Player extends GameEntity {
         return this.artefacts.containsKey(artefactName);
     }
 
-    public void getArtefact(Artefact artefact) {
+    public void pickArtefact(Artefact artefact) {
         this.artefacts.put(artefact.getName(), artefact);
+    }
+
+    public HashMap<String, Artefact> getArtefacts() {
+        return this.artefacts;
     }
 
     public void dropArtefact(String artefactName) {

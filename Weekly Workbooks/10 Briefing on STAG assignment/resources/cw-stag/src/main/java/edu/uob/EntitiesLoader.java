@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
 
+// all entity files used during marking are in a valid format
 public class EntitiesLoader {
     private final GameState gameState;
     private final File entitiesFile;
@@ -27,6 +28,7 @@ public class EntitiesLoader {
         Graph wholeDocument = parser.getGraphs().get(0);
         ArrayList<Graph> sections = wholeDocument.getSubgraphs();
         ArrayList<Graph> locations = sections.get(0).getSubgraphs();
+        // locations subgraph will always be first in the entities file
         for (int i = 0; i < locations.size(); i++) {
             Graph location = locations.get(i);
             Node node = location.getNodes(false).get(0);
@@ -41,6 +43,8 @@ public class EntitiesLoader {
                 putEntitiesInLocation(locationSubGraph, l);
             }
             if (i == 0) {
+                // the start location can be called anything we like,
+                // however it will always be the first location that appears in the "entities" file.
                 this.gameState.setStartLocation(l);
             } else if (l.getName().equalsIgnoreCase("storeroom")){
                 this.gameState.setStoreroom(l);
@@ -48,6 +52,7 @@ public class EntitiesLoader {
                 this.gameState.addLocation(l);
             }
         }
+        // paths subgraph will always appear after the locations
         ArrayList<Edge> paths = sections.get(1).getEdges();
         addPaths(paths);
     }

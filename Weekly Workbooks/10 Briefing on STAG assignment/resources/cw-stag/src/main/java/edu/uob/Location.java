@@ -59,6 +59,18 @@ public class Location extends GameEntity {
         return this.locations;
     }
 
+    public HashMap<String, Artefact> getArtefacts() {
+        return this.artefacts;
+    }
+
+    public HashMap<String, Furniture> getFurnitures() {
+        return furnitures;
+    }
+
+    public HashMap<String, Character> getCharacters() {
+        return characters;
+    }
+
     public void addPathToLocation(Location location) {
         this.locations.put(location.getName(), location);
     }
