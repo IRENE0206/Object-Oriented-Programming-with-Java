@@ -79,6 +79,7 @@ public class LoadEntitiesTests {
         assertFalse(cabin.hasPathToLocation("cellar"));
         Location forest = extendedGameState.getLocationByName("forest");
         assertTrue(forest.hasPathToLocation("cabin"));
+        assertTrue(cabin.hasPathToLocation("forest"));
         assertTrue(forest.hasPathToLocation("riverbank"));
         assertTrue(forest.hasArtefact("key"));
         assertTrue(forest.hasFurniture("tree"));

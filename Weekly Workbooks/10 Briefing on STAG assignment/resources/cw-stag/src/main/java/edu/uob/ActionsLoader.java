@@ -31,25 +31,25 @@ public class ActionsLoader {
             Element consumed = (Element) action.getElementsByTagName("consumed").item(0);
             for (int j = 0; j < consumed.getElementsByTagName("entity").getLength(); j++) {
                 String entity = consumed.getElementsByTagName("entity").item(j).getTextContent();
-                gameAction.addConsumedEntity(entity);
+                gameAction.addConsumedEntity(entity.toLowerCase());
             }
             Element subjects = (Element) action.getElementsByTagName("subjects").item(0);
             for (int j = 0; j < subjects.getElementsByTagName("entity").getLength(); j++) {
                 String entity = subjects.getElementsByTagName("entity").item(j).getTextContent();
-                gameAction.addSubjectEntity(entity);
+                gameAction.addSubjectEntity(entity.toLowerCase());
             }
             Element produced = (Element) action.getElementsByTagName("produced").item(0);
             for (int j = 0; j < produced.getElementsByTagName("entity").getLength(); j++) {
                 String entity = produced.getElementsByTagName("entity").item(j).getTextContent();
-                gameAction.addProducedEntity(entity);
+                gameAction.addProducedEntity(entity.toLowerCase());
             }
             Element narration = (Element) action.getElementsByTagName("narration").item(0);
             String explanation = narration.getTextContent();
-            gameAction.setNarration(explanation);
+            gameAction.setNarration(explanation.toLowerCase());
             Element triggers = (Element) action.getElementsByTagName("triggers").item(0);
             for (int j = 0; j < triggers.getElementsByTagName("keyphrase").getLength(); j++) {
                 String phrase = triggers.getElementsByTagName("keyphrase").item(j).getTextContent();
-                this.gameState.addAction(phrase, gameAction);
+                this.gameState.addAction(phrase.toLowerCase(), gameAction);
             }
         }
     }

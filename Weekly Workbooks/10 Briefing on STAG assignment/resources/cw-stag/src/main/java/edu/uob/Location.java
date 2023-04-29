@@ -3,15 +3,15 @@ package edu.uob;
 import java.util.HashMap;
 
 public class Location extends GameEntity {
-    private HashMap<String, Artefact> artefacts;
-    private HashMap<String, Furniture> furnitures;
-    private HashMap<String, Character> characters;
-    private HashMap<String, Location> locations;
+    private final HashMap<String, Artefact> artefacts;
+    private final HashMap<String, Furniture> furniture;
+    private final HashMap<String, Character> characters;
+    private final HashMap<String, Location> locations;
 
     public Location(String name, String description) {
         super(name, description);
         this.artefacts = new HashMap<>();
-        this.furnitures = new HashMap<>();
+        this.furniture = new HashMap<>();
         this.characters = new HashMap<>();
         this.locations = new HashMap<>();
     }
@@ -29,15 +29,15 @@ public class Location extends GameEntity {
     }
 
     public boolean hasFurniture(String furnitureName) {
-        return this.furnitures.containsKey(furnitureName);
+        return this.furniture.containsKey(furnitureName);
     }
 
     public void addFurniture(Furniture furniture) {
-        this.furnitures.put(furniture.getName(), furniture);
+        this.furniture.put(furniture.getName(), furniture);
     }
 
     public void removeFurniture(String furnitureName) {
-        this.furnitures.remove(furnitureName);
+        this.furniture.remove(furnitureName);
     }
 
     public boolean hasCharacter(String characterName) {
@@ -63,8 +63,8 @@ public class Location extends GameEntity {
         return this.artefacts;
     }
 
-    public HashMap<String, Furniture> getFurnitures() {
-        return furnitures;
+    public HashMap<String, Furniture> getFurniture() {
+        return furniture;
     }
 
     public HashMap<String, Character> getCharacters() {

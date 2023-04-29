@@ -1,19 +1,23 @@
 package edu.uob;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 public class CommandParser {
+    String[] basicCommands = {"inventory", "inv", "get", "drop", "goto", "look"};
     private String command;
+    private final List<String> splitCommand;
     private String currentPlayerName;
     private Player currentPlayer;
     private Location playerLocation;
-    private GameState gameState;
+    private final GameState gameState;
 
     public CommandParser(GameState gameState, String command) {
         this.command = command.toLowerCase();
         this.gameState = gameState;
+        this.splitCommand = new ArrayList<>();
     }
 
     public String parseCommand() {
@@ -25,8 +29,8 @@ public class CommandParser {
         if (playerNameError != null) {
             return playerNameError;
         }
-        List<String> basicCommandsContained = findBasicCommand(this.command);
-        List<String> triggerPhrasesContained = findTriggerPhrases(this.command);
+        List<String> basicCommandsContained = findBasicCommand();
+        List<String> triggerPhrasesContained = findTriggerPhrases();
         if (findNoSpecifiedCommand(triggerPhrasesContained) && findOnlyOne(basicCommandsContained)) {
             return this.chooseBasicCommand(basicCommandsContained.get(0));
         }
@@ -34,12 +38,13 @@ public class CommandParser {
     }
 
     private String reformatCommand() {
-        String[] strings = this.command.split(":");
+        String[] strings = this.command.split(":", 2);
         if (strings.length != 2) {
             return "Wrong format incoming command message";
         }
         this.currentPlayerName = strings[0];
         this.command = strings[1].trim().replaceAll("\\s+", " ");
+        this.splitCommand.addAll(Arrays.stream(this.command.split(" ")).toList());
         return null;
     }
 
@@ -60,13 +65,19 @@ public class CommandParser {
     // built-in commands are reserved words and
     // therefore cannot be used as names for any other elements of the command language
     private boolean isValidPlayerName(String playerName) {
-        return findNoSpecifiedCommand(findBasicCommand(playerName));
+        List<String> playerNameWords = Arrays.stream(playerName.split(" ")).toList();
+        for (String basicCommand : this.basicCommands) {
+            if (playerNameWords.contains(basicCommand)) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    private List<String> findTriggerPhrases(String stringToInvestigate) {
+    private List<String> findTriggerPhrases() {
         List<String> triggerPhrasesContained = new ArrayList<>();
         for (String triggerPhrase : this.gameState.getActions().keySet()) {
-            if (stringToInvestigate.contains(triggerPhrase)) {
+            if (this.splitCommand.contains(triggerPhrase.toLowerCase())) {
                 triggerPhrasesContained.add(triggerPhrase);
             }
         }
@@ -89,15 +100,11 @@ public class CommandParser {
         // }
     } */
 
-
-
-
     // Basic Commands
-    private List<String> findBasicCommand(String stringToInvestigate) {
-        String[] basicCommands = {"inventory", "inv", "get", "drop", "goto", "look"};
+    private List<String> findBasicCommand() {
         List<String> containedCommands = new ArrayList<>();
-        for (String s : basicCommands) {
-            if (stringToInvestigate.contains(s)) {
+        for (String s : this.basicCommands) {
+            if (this.splitCommand.contains(s)) {
                 containedCommands.add(s);
             }
         }
@@ -105,14 +112,15 @@ public class CommandParser {
     }
 
     private String chooseBasicCommand(String commandType) {
+        int index = this.splitCommand.indexOf(commandType);
         if (commandType.equalsIgnoreCase("inventory") || commandType.equalsIgnoreCase("inv")) {
             return this.inventoryCommand();
         } else if (commandType.equalsIgnoreCase("get")) {
-            return this.getArtefactCommand();
+            return this.getArtefactCommand(index);
         } else if (commandType.equalsIgnoreCase("drop")) {
-            return this.dropArtefactCommand();
+            return this.dropArtefactCommand(index);
         } else if (commandType.equalsIgnoreCase("goto")) {
-            return this.goToLocationCommand();
+            return this.goToLocationCommand(index);
         } else {
             return this.lookCommand();
         }
@@ -129,19 +137,20 @@ public class CommandParser {
 
     // "get": picks up a specified artefact from the current location and
     // adds it into player's inventory
-    private String getArtefactCommand() {
+    private String getArtefactCommand(int index) {
         List<String> artefacts = new ArrayList<>();
         for (String artefactName : this.playerLocation.getArtefacts().keySet()) {
-            if (this.command.contains(artefactName)) {
+            if (this.splitCommand.subList(0, index).contains(artefactName)) {
+                return "Invalid syntax";
+            }
+            if (this.splitCommand.subList(index + 1, this.splitCommand.size()).contains(artefactName)) {
                 artefacts.add(artefactName);
             }
         }
         if (artefacts.size() != 1) {
-            return "Invalid artefact";
+            return "Invalid syntax";
         }
         String artefactName = artefacts.get(0);
-        System.out.println("HERE");
-        System.out.println(artefactName);
         Artefact artefact = this.playerLocation.getArtefacts().get(artefactName);
         this.currentPlayer.pickArtefact(artefact);
         this.playerLocation.removeArtefact(artefactName);
@@ -152,10 +161,13 @@ public class CommandParser {
 
     // "drop": puts down an artefact from player's inventory and
     // places it into the current location
-    private String dropArtefactCommand() {
+    private String dropArtefactCommand(int index) {
         List<String> artefacts = new ArrayList<>();
         for (String artefactName : this.currentPlayer.getArtefacts().keySet()) {
-            if (this.command.contains(artefactName)) {
+            if (this.splitCommand.subList(0, index).contains(artefactName)) {
+                return "Invalid syntax";
+            }
+            if (this.splitCommand.subList(index + 1, this.splitCommand.size()).contains(artefactName)) {
                 artefacts.add(artefactName);
             }
         }
@@ -173,10 +185,13 @@ public class CommandParser {
 
     // "goto": moves the player to the specified location
     // (if there is a path to that location)
-    private String goToLocationCommand() {
+    private String goToLocationCommand(int index) {
         List<String> locations = new ArrayList<>();
         for (String locationName : this.playerLocation.getPathsToLocations().keySet()) {
-            if (this.command.contains(locationName)) {
+            if (this.splitCommand.subList(0, index).contains(locationName)) {
+                return "Invalid syntax";
+            }
+            if (this.splitCommand.subList(index + 1, this.splitCommand.size()).contains(locationName)) {
                 locations.add(locationName);
             }
         }
@@ -192,14 +207,15 @@ public class CommandParser {
     // "look": prints names and descriptions of entities in the current location and
     // lists paths to other locations
     private String lookCommand() {
-        StringBuilder currentLocation = new StringBuilder(this.playerLocation.getName());
-        currentLocation.append(": ").append(this.playerLocation.getDescription()).append("\n");
+        StringBuilder currentLocation = new StringBuilder("Current location:\n");
+        currentLocation.append(this.playerLocation.getName())
+                .append(": ").append(this.playerLocation.getDescription()).append("\n");
         StringBuilder artefacts = new StringBuilder("Artefacts:\n");
         for (Artefact artefact : this.playerLocation.getArtefacts().values()) {
             artefacts.append(artefact.getName()).append(": ").append(artefact.getDescription()).append("\n");
         }
         StringBuilder furnitures = new StringBuilder("Furnitures:\n");
-        for (Furniture furniture : this.playerLocation.getFurnitures().values()) {
+        for (Furniture furniture : this.playerLocation.getFurniture().values()) {
             furnitures.append(furniture.getName()).append(": ").append(furniture.getDescription()).append("\n");
         }
         StringBuilder characters = new StringBuilder("Characters:\n");
@@ -212,4 +228,5 @@ public class CommandParser {
         }
         return currentLocation.append(artefacts).append(furnitures).append(characters).append(locations).toString();
     }
+
 }

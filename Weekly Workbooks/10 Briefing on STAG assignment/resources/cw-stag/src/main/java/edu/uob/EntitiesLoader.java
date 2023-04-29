@@ -94,7 +94,7 @@ public class EntitiesLoader {
     }
 
     private String getEntityName(Node node) {
-        return node.getId().getId();
+        return node.getId().getId().toLowerCase();
     }
 
     private String getEntityDescription(Node node) {

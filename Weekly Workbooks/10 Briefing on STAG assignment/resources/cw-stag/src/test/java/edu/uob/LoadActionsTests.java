@@ -47,7 +47,7 @@ public class LoadActionsTests {
         subjectsLoaded(gameAction0, subjects0);
         consumedLoaded(gameAction0, consumed0);
         producedLoaded(gameAction0, produced0);
-        String[] triggerPhrases1 = {"chop", "cut", "cutdown"};
+        String[] triggerPhrases1 = {"chop", "cut", "cutDown"};
         String[] subjects1 = {"tree", "axe"};
         String[] consumed1 = {"tree"};
         String[] produced1 = {"log"};
@@ -74,7 +74,7 @@ public class LoadActionsTests {
     private GameAction triggerPhrasesLoadedBasic(String[] triggerPhrases) {
         GameAction gameAction = null;
         for (int i = 0; i < triggerPhrases.length; i++) {
-            String phrase = triggerPhrases[i];
+            String phrase = triggerPhrases[i].toLowerCase();
             assertTrue(this.basicGameState.hasTriggerPhrase(phrase));
             HashSet<GameAction> actions = this.basicGameState.getPossibleActions(phrase);
             assertEquals(1, actions.size());
@@ -110,7 +110,7 @@ public class LoadActionsTests {
     @Test
     void testLoadExtendedActionsFile() {
         assertTrue(this.extendedGameState.hasTriggerPhrase("cut down"));
-        assertFalse(this.extendedGameState.hasTriggerPhrase("cutdown"));
+        assertFalse(this.extendedGameState.hasTriggerPhrase("cutDown"));
         GameAction payAction = (GameAction) this.extendedGameState.getPossibleActions("pay").toArray()[0];
         String[] subjects0 = {"elf", "coin"};
         subjectsLoaded(payAction, subjects0);
@@ -123,6 +123,20 @@ public class LoadActionsTests {
         subjectsLoaded(blowAction, subjects1);
         String[] produced1 = {"lumberjack"};
         producedLoaded(blowAction, produced1);
+        GameAction bridgeAction = (GameAction) this.extendedGameState.getPossibleActions("bridge").toArray()[0];
+        String[] subjects2 = {"log", "river"};
+        subjectsLoaded(bridgeAction, subjects2);
+        String[] consumed2 = {"log"};
+        consumedLoaded(bridgeAction, consumed2);
+        String[] produced2 = {"clearing"};
+        producedLoaded(bridgeAction, produced2);
+        GameAction digAction = (GameAction) this.extendedGameState.getPossibleActions("dig").toArray()[0];
+        String[] subjects3 = {"ground", "shovel"};
+        subjectsLoaded(digAction, subjects3);
+        String[] consumed3 = {"ground"};
+        consumedLoaded(digAction, consumed3);
+        String[] produced3 = {"hole", "gold"};
+        producedLoaded(digAction, produced3);
     }
 
 
