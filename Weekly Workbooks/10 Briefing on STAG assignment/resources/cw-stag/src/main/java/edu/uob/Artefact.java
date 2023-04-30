@@ -1,6 +1,6 @@
 package edu.uob;
 
-// can be collected by the player
+// Physical things within the game that can be collected by the player
 public class Artefact extends GameEntity {
     private Player currentOwner;
 

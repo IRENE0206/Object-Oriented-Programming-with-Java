@@ -2,16 +2,15 @@ package edu.uob;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
-// Note that the action is only valid if ALL subject entities are available to the player.
-// If a valid action is found, your server must undertake the relevant additions/removals (production/consumption).
-// it is NOT possible to perform an action where a subject, or a consumed or produced entity is currently in another player's inventory
 public class GameAction {
+    // One or more possible trigger phrases (ANY of which can be used to initiate the action)
     private final List<String> triggerPhrases;
-    // One or more subject entities that are acted upon
-    // (ALL of which need to be available to perform the action)
-    // requires the entity to either be in the inventory of the player invoking the action or
-    // for that entity to be in the room/location where the action is being performed
+
+    // *One or more* subject entities
+    // ALL of which need to be available to perform the action:
+    // in the inventory of the player invoking the action OR in the room/location where the action is being *performed*
     // subjects of an action can be locations, characters or furniture
     private final List<String> subjectEntityNames;
 
@@ -21,9 +20,10 @@ public class GameAction {
     private final List<String> consumedEntityNames;
 
     // optional, all created by the action
-    // moved from its current location in the game (which might be in the storeroom)
+    // moved from its current location (which might be in the storeroom)
     // to the location in which the action is triggered.
     private final List<String> producedEntityNames;
+
     private String narration;
     private Location triggeredLocation;
 
@@ -113,41 +113,66 @@ public class GameAction {
         }
     }
 
+    // it is NOT possible to perform an action where a subject, or a consumed or produced entity
+    // is currently in another player's inventory
     public boolean isPerformable(GameState gameState) {
         if (this.triggeredLocation == null) {
             return false;
         }
+        // is only valid if ALL subject entities are available to the player.
         for (String entityName : this.subjectEntityNames) {
-            Location location = gameState.getEntityByName(entityName).getCurrentLocation();
-            Player currentPlayer = gameState.getCurrentPlayer();
-            if (location == null && currentPlayer.getArtefactByName(entityName) == null) {
+            if (this.isArtefactAndInOtherPlayerInv(entityName, gameState)) {
                 return false;
-            } else if (location == gameState.getStoreroom()) {
+            } else if (!this.isArtefactAndInCurrentPlayerInv(entityName, gameState) &&
+                    gameState.getEntityByName(entityName).getCurrentLocation() != this.triggeredLocation) {
+                return false;
+            }
+        }
+        return this.consumedAndProducedEntitiesNotInOtherPlayerInv(gameState);
+    }
+
+    private boolean consumedAndProducedEntitiesNotInOtherPlayerInv(GameState gameState) {
+        return this.listedEntitiesNotInOtherPlayerInv(this.consumedEntityNames, gameState) &&
+                this.listedEntitiesNotInOtherPlayerInv(this.producedEntityNames, gameState);
+    }
+
+    private boolean listedEntitiesNotInOtherPlayerInv(List<String> entityNames, GameState gameState) {
+        for (String entityName : entityNames) {
+            if (this.isArtefactAndInOtherPlayerInv(entityName, gameState)) {
                 return false;
             }
         }
         return true;
     }
 
-    public boolean isGivenValidEntities(List<String> entitiesMentionedInCommand) {
-        int subjectMentioned = 0;
-        // If you have entities from different actions, it will probably get caught as "extraneous entities"
-        int extraneousEntity = 0;
-        for (String entityName : entitiesMentionedInCommand) {
-            System.out.println("entityName "+ entityName);
-            if (this.isSubjectEntityName(entityName)) {
-                subjectMentioned += 1;
-            } else if (!this.isConsumedEntityName(entityName) && !this.isProducedEntityName(entityName)) {
-                extraneousEntity += 1;
-            }
-        }
-        System.out.println("subjectMentioned" + subjectMentioned);
-        System.out.println(extraneousEntity);
-        return  subjectMentioned >= 1 && extraneousEntity == 0;
+    private boolean isArtefactAndInOtherPlayerInv(String entityName, GameState gameState) {
+        Location entityLocation = gameState.getEntityByName(entityName).getCurrentLocation();
+        Player currentPlayer = gameState.getCurrentPlayer();
+        return entityLocation == null && currentPlayer.getArtefactByName(entityName) == null;
     }
 
-    // Trigger keywords can't be used decorations
-    public boolean isGivenValidTriggerPhrases(List<String> triggerPhrasesMentioned) {
+    private boolean isArtefactAndInCurrentPlayerInv(String entityName, GameState gameState) {
+        Location entityLocation = gameState.getEntityByName(entityName).getCurrentLocation();
+        Player currentPlayer = gameState.getCurrentPlayer();
+        return entityLocation == null && currentPlayer.getArtefactByName(entityName) != null;
+    }
+
+    public boolean isGivenValidEntities(List<String> entityNamesMentionedInCommand) {
+        int subjectEntitiesCount = 0;
+        for (String entityName : entityNamesMentionedInCommand) {
+            // System.out.println("entityName "+ entityName);
+            if (this.isSubjectEntityName(entityName)) {
+                subjectEntitiesCount += 1;
+            } else if (!this.isConsumedEntityName(entityName) && !this.isProducedEntityName(entityName)) {
+                // entities from different actions as "extraneous entities"
+                return false;
+            }
+        }
+        return  subjectEntitiesCount >= 1;
+    }
+
+    // Trigger keywords can't be used as decorations
+    public boolean isGivenValidTriggerPhrases(Set<String> triggerPhrasesMentioned) {
         for (String phrase : triggerPhrasesMentioned) {
             if (!this.triggerPhrases.contains(phrase)) {
                 return false;

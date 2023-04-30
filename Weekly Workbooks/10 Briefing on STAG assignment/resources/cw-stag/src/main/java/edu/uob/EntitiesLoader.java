@@ -12,6 +12,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 
 // all entity files used during marking are in a valid format
+// entity names defined in the configuration files will be unique
 public class EntitiesLoader {
     private final GameState gameState;
     private final File entitiesFile;

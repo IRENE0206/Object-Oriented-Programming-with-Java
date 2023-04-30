@@ -68,6 +68,7 @@ public class LoadEntitiesTests {
     @Test
     void testLoadExtendedEntitiesFile() {
         Location storeroom = extendedGameState.getStoreroom();
+        // there will be no paths to/from storeroom
         assertEquals(0, storeroom.getPathsNumber());
         String[] artefactsInCabin = {"potion", "axe", "coin"};
         String[] artefactsInStore = {"log", "shovel", "gold"};

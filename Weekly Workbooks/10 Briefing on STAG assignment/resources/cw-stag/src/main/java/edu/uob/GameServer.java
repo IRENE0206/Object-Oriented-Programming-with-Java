@@ -33,7 +33,7 @@ public final class GameServer {
     *
     */
     public GameServer(File entitiesFile, File actionsFile) {
-        // TODO: implement your server logic here
+        // game state must NOT be made persistent between server invocations
         this.gameState = new GameState();
         EntitiesLoader entitiesLoader = new EntitiesLoader(gameState, entitiesFile);
         try {
@@ -56,7 +56,6 @@ public final class GameServer {
     * <p>This method handles all incoming game commands and carries out the corresponding actions.
     */
     public String handleCommand(String command) {
-        // TODO: implement your server logic here
         CommandParser commandParser = new CommandParser(this.gameState, command);
         return commandParser.parseCommand();
     }

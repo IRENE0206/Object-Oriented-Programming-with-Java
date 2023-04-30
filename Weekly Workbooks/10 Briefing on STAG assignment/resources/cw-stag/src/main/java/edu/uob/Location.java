@@ -2,10 +2,15 @@ package edu.uob;
 
 import java.util.HashMap;
 
+// Rooms or places within the game
 public class Location extends GameEntity {
+    // Artefacts that are currently present in a location
     private final HashMap<String, Artefact> artefacts;
+    // Furniture that belongs within a location
     private final HashMap<String, Furniture> furniture;
+    // Characters that are currently at a location
     private final HashMap<String, Character> characters;
+    // Paths to other locations
     private final HashMap<String, Location> locations;
     private final HashMap<String, Player> players;
 
@@ -76,12 +81,8 @@ public class Location extends GameEntity {
 
     public void removeEntity(Player player) {
         if (player != null) {
-            this.removePlayerFromLocation(player.getName());
+            this.players.remove(player.getName());
         }
-    }
-
-    private void removePlayerFromLocation(String playerName) {
-        this.players.remove(playerName);
     }
 
     public void addEntity(GameEntity gameEntity) {
@@ -135,13 +136,9 @@ public class Location extends GameEntity {
 
     public void addEntity(Player player) {
         if (player != null) {
-            this.addPlayerToLocation(player.getName(), player);
+            this.players.put(player.getName(), player);
             player.setCurrentLocation(this);
         }
-    }
-
-    private void addPlayerToLocation(String playerName, Player player) {
-        this.players.put(playerName, player);
     }
 
     public boolean hasArtefact(String artefactName) {
@@ -176,31 +173,33 @@ public class Location extends GameEntity {
         return this.locations.size();
     }
 
-    public String showAllInformation(String currentPlayerName) {
-        StringBuilder information = new StringBuilder("Location:\n");
+    public String observedByCurrentPlayer(String currentPlayerName) {
+        // prints names and descriptions of entities in the current location
+        StringBuilder information = new StringBuilder("<Current location>:\n");
         information.append(this.getName()).append(": ")
-                .append(this.getDescription()).append("\n").append("Artefacts:\n");
+                .append(this.getDescription()).append("\n").append("<Artefacts>:\n");
         for (String artefactName : this.artefacts.keySet()) {
             information.append(artefactName).append(": ")
                     .append(this.getArtefactByName(artefactName).getDescription()).append("\n");
         }
-        information.append("Furniture:\n");
+        information.append("<Furniture>:\n");
         for (String furnitureName : this.furniture.keySet()) {
             information.append(furnitureName).append(": ")
                     .append(this.getFurnitureByName(furnitureName).getDescription()).append("\n");
         }
-        information.append("Characters:\n");
+        information.append("<Characters>:\n");
         for (String characterName : this.characters.keySet()) {
             information.append(characterName).append(": ")
                     .append(this.getCharacterByName(characterName).getDescription()).append("\n");
         }
-        information.append("Paths to:\n");
+        // lists paths to other locations
+        information.append("<Paths to>:\n");
         for (String locationName : this.locations.keySet()) {
             information.append(locationName).append(" ");
         }
         information.append("\n");
         // include other players in your description of a location when a look command is issued by a user
-        information.append("Other players:\n");
+        information.append("<Other players>:\n");
         for (String playerName : this.players.keySet()) {
             if (!playerName.equalsIgnoreCase(currentPlayerName)) {
                 information.append(playerName).append("\n");

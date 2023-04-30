@@ -1,7 +1,9 @@
 package edu.uob;
 
 import java.util.HashMap;
+import java.util.Set;
 
+// represents the user in the game
 public class Player extends GameEntity {
     private final HashMap<String, Artefact> artefacts;
     private int health;
@@ -28,7 +30,6 @@ public class Player extends GameEntity {
         }
         this.removeFromCurrentLocation();
         location.addEntity(this);
-        this.setCurrentLocation(location);
     }
 
     @Override
@@ -36,7 +37,7 @@ public class Player extends GameEntity {
         entityVisitor.actOnEntity(this);
     }
 
-    public void pickArtefact(Artefact artefact) {
+    public void pickUpArtefact(Artefact artefact) {
         if (artefact == null) {
             return;
         }
@@ -49,8 +50,8 @@ public class Player extends GameEntity {
         return this.artefacts.get(artefactName);
     }
 
-    public HashMap<String, Artefact> getArtefacts() {
-        return this.artefacts;
+    public Set<String> getArtefactNames() {
+        return this.artefacts.keySet();
     }
 
     public void dropArtefact(String artefactName) {
@@ -58,8 +59,10 @@ public class Player extends GameEntity {
         if (artefact == null) {
             return;
         }
+        // puts down an artefact from player's inventory
         this.artefacts.remove(artefactName);
         artefact.setCurrentOwner(null);
+        // places it into the current location
         this.getCurrentLocation().addEntity(artefact);
     }
 

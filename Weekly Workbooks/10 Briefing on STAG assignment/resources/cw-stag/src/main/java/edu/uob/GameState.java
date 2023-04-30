@@ -4,17 +4,20 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class GameState {
+    // a "special" location that is the starting point for an adventure
     private Location startLocation;
+    // a container for all of the entities that have no initial location in the game
     private Location storeroom;
     private final HashMap<String, Location> locations;
-    // One or more possible trigger phrases (ANY of which can be used to initiate the action)
+
     // action trigger keyPhrases are NOT unique
     // trigger phrases cannot (and will not) contain the names of entities
     private final HashMap<String, HashSet<GameAction>> actions;
     private final HashMap<String, Player> players;
 
     private Player currentPlayer;
-    // entity names cannot contain spaces
+    // entity names defined in the configuration files will be unique
+    // there should only be a single instance of each entity within the game
     private final HashMap<String, GameEntity> entities;
 
     public GameState() {
@@ -81,7 +84,7 @@ public class GameState {
         this.players.put(player.getName(), player);
     }
 
-    public Player getPlayer(String playerName) {
+    public Player getPlayerByName(String playerName) {
         return this.players.get(playerName);
     }
 
