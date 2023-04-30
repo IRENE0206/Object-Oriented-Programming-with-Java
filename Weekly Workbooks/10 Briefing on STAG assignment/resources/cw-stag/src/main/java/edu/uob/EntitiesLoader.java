@@ -40,7 +40,7 @@ public class EntitiesLoader {
             Location l = new Location(locationName, locationDescription);
             ArrayList<Graph> locationSubGraphs = location.getSubgraphs();
             for (Graph locationSubGraph : locationSubGraphs) {
-                putEntitiesInLocation(locationSubGraph, l);
+                putSubjectsIntoLocation(locationSubGraph, l);
             }
             if (i == 0) {
                 // the start location can be called anything we like,
@@ -71,11 +71,11 @@ public class EntitiesLoader {
                 continue;
             }
             Location toLocation = this.gameState.getLocationByName(toName);
-            fromLocation.addPathToLocation(toLocation);
+            fromLocation.addEntity(toLocation);
         }
     }
 
-    private void putEntitiesInLocation(Graph graph, Location location) {
+    private void putSubjectsIntoLocation(Graph graph, Location location) {
         for (Node node : graph.getNodes(false)) {
             String entityType = getEntityType(graph);
             String entityName = getEntityName(node);
@@ -84,11 +84,17 @@ public class EntitiesLoader {
                 continue;
             }
             if (entityType.equalsIgnoreCase("characters")) {
-                location.addCharacter(new Character(entityName, entityDescription));
+                Character character = new Character(entityName, entityDescription);
+                location.addEntity(character);
+                this.gameState.addEntity(character);
             } else if (entityType.equalsIgnoreCase("artefacts")) {
-                location.addArtefact(new Artefact(entityName, entityDescription));
+                Artefact artefact = new Artefact(entityName, entityDescription);
+                location.addEntity(artefact);
+                this.gameState.addEntity(artefact);
             } else if (entityType.equalsIgnoreCase("furniture")) {
-                location.addFurniture(new Furniture(entityName, entityDescription));
+                Furniture furniture = new Furniture(entityName, entityDescription);
+                location.addEntity(furniture);
+                this.gameState.addEntity(furniture);
             }
         }
     }
@@ -102,7 +108,7 @@ public class EntitiesLoader {
     }
 
     private String getEntityType(Graph graph) {
-        return graph.getId().getId();
+        return graph.getId().getId().toLowerCase();
     }
 
 }

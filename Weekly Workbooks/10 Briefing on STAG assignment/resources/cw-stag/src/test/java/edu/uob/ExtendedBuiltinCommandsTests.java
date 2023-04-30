@@ -72,7 +72,6 @@ public class ExtendedBuiltinCommandsTests {
             response = sendCommandToServer("simon: look").toLowerCase();
             assertFalse(response.contains(artefact.toLowerCase()));
             response = sendCommandToServer("simon: inventory").toLowerCase();
-            System.out.println(response);
             assertTrue(response.contains(artefact.toLowerCase()));
             sendCommandToServer("simon: drop " + artefact);
             response = sendCommandToServer("simon: look").toLowerCase();

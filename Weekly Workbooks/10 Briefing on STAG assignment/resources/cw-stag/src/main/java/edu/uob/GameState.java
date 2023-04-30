@@ -13,18 +13,32 @@ public class GameState {
     private final HashMap<String, HashSet<GameAction>> actions;
     private final HashMap<String, Player> players;
 
+    private Player currentPlayer;
+    // entity names cannot contain spaces
+    private final HashMap<String, GameEntity> entities;
+
     public GameState() {
         this.players = new HashMap<>();
         this.locations = new HashMap<>();
         this.actions = new HashMap<>();
+        this.entities = new HashMap<>();
     }
 
     public void setStartLocation(Location l) {
         this.startLocation = l;
+        addEntity(l);
     }
 
     public Location getStartLocation() {
         return this.startLocation;
+    }
+
+    public Player getCurrentPlayer() {
+        return this.currentPlayer;
+    }
+
+    public void setCurrentPlayer(Player currentPlayer) {
+        this.currentPlayer = currentPlayer;
     }
 
     // a container for all entities that have no initial location in the game
@@ -33,6 +47,7 @@ public class GameState {
     // there will be no paths to/from it
     public void setStoreroom(Location l) {
         this.storeroom = l;
+        addEntity(l);
     }
 
     public Location getStoreroom() {
@@ -41,6 +56,7 @@ public class GameState {
 
     public void addLocation(Location l) {
         this.locations.put(l.getName(), l);
+        addEntity(l);
     }
 
     public Location getLocationByName(String locationName) {
@@ -49,14 +65,7 @@ public class GameState {
         } else if (locationName.equalsIgnoreCase(this.storeroom.getName())) {
             return this.storeroom;
         }
-        return this.locations.get(locationName);
-    }
-
-    public boolean hasLocation(String locationName) {
-        if (this.startLocation.getName().equalsIgnoreCase(locationName) || this.storeroom.getName().equalsIgnoreCase(locationName)) {
-            return true;
-        }
-        return this.locations.containsKey(locationName.toLowerCase());
+        return this.locations.get(locationName.toLowerCase());
     }
 
     public void addPlayer(Player player) {
@@ -67,20 +76,9 @@ public class GameState {
         return this.players.get(playerName);
     }
 
-    public HashMap<String, HashSet<GameAction>> getActions() {
-        return this.actions;
-    }
-
-    public boolean hasPlayer(String playerName) {
-        return this.players.containsKey(playerName);
-    }
-
-    public boolean hasTriggerPhrase(String phrase) {
-        return this.actions.containsKey(phrase);
-    }
-
     public void addAction(String triggerPhrase, GameAction gameAction) {
-        if (this.hasTriggerPhrase(triggerPhrase)) {
+        triggerPhrase = triggerPhrase.toLowerCase();
+        if (this.actions.get(triggerPhrase) != null) {
             this.actions.get(triggerPhrase).add(gameAction);
         } else {
             HashSet<GameAction> gameActions = new HashSet<>();
@@ -90,6 +88,20 @@ public class GameState {
     }
 
     public HashSet<GameAction> getPossibleActions(String triggerPhrase) {
-        return this.actions.get(triggerPhrase);
+        return this.actions.get(triggerPhrase.toLowerCase());
+    }
+
+    public void addEntity(GameEntity entity) {
+        if (entity != null) {
+            this.entities.put(entity.getName(), entity);
+        }
+    }
+
+    public HashMap<String, HashSet<GameAction>> getActions() {
+        return this.actions;
+    }
+
+    public GameEntity getEntityByName(String entityName) {
+        return this.entities.get(entityName.toLowerCase());
     }
 }

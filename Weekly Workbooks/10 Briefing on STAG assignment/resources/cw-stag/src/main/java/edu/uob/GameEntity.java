@@ -7,6 +7,7 @@ public abstract class GameEntity
     //  there should only be a single instance of each entity within the game
     private final String name;
     private final String description;
+    private Location currentLocation;
 
     public GameEntity(String name, String description)
     {
@@ -16,11 +17,25 @@ public abstract class GameEntity
 
     public String getName()
     {
-        return name;
+        return this.name;
     }
 
     public String getDescription()
     {
-        return description;
+        return this.description;
     }
+
+    public Location getCurrentLocation() {
+        return this.currentLocation;
+    }
+
+    public void setCurrentLocation(Location currentLocation) {
+        this.currentLocation = currentLocation;
+    }
+
+    public abstract void removeFromCurrentLocation();
+
+    public abstract void addToLocation(Location location);
+
+    public abstract void getActedUpon(EntityVisitor entityVisitor);
 }

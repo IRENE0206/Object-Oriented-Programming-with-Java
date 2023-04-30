@@ -36,60 +36,86 @@ public class LoadEntitiesTests {
 
     @Test
     void testLoadBasicEntitiesFile() {
+        String[] locations = {"cabin", "storeroom", "cellar", "forest"};
+        String[] artefacts = {"log", "potion", "key"};
+        String[] furniture = {"trapdoor", "tree"};
+        String[] characters = {"elf"};
         Location storeroom = basicGameState.getStoreroom();
-        assertEquals(0, storeroom.getPathsToLocations().size());
+        assertEquals(0, storeroom.getPathsNumber());
         Location startLocation = basicGameState.getStartLocation();
-        assertEquals("cabin", startLocation.getName());
-        assertEquals("storeroom",storeroom.getName());
-        assertTrue(basicGameState.hasLocation("cellar"));
-        assertTrue(basicGameState.hasLocation("forest"));
-        assertTrue(storeroom.hasArtefact("log"));
-        assertTrue(startLocation.hasArtefact("potion"));
-        assertTrue(startLocation.hasFurniture("trapdoor"));
-        Location cellar = basicGameState.getLocationByName("cellar");
-        assertTrue(cellar.hasCharacter("elf"));
-        assertTrue(cellar.hasPathToLocation("cabin"));
-        assertFalse(startLocation.hasPathToLocation("cellar"));
-        assertTrue(startLocation.hasPathToLocation("forest"));
-        Location forest = basicGameState.getLocationByName("forest");
-        assertTrue(forest.hasPathToLocation("cabin"));
-        assertTrue(forest.hasArtefact("key"));
-        assertTrue(forest.hasFurniture("tree"));
+        assertEquals(locations[0], startLocation.getName());
+        assertEquals(locations[1],storeroom.getName());
+        assertNotNull(basicGameState.getLocationByName(locations[2]));
+        assertNotNull(basicGameState.getLocationByName(locations[3]));
+        assertTrue(storeroom.hasArtefact(artefacts[0]));
+        assertTrue(startLocation.hasArtefact(artefacts[1]));
+        assertTrue(startLocation.hasFurniture(furniture[0]));
+        Location cellar = basicGameState.getLocationByName(locations[2]);
+        assertTrue(cellar.hasCharacter(characters[0]));
+        assertNotNull(cellar.getDestinationByName(locations[0]));
+        assertNull(startLocation.getDestinationByName(locations[2]));
+        assertNotNull(startLocation.getDestinationByName(locations[3]));
+        Location forest = basicGameState.getLocationByName(locations[3]);
+        assertNotNull(forest.getDestinationByName(locations[0]));
+        assertTrue(forest.hasArtefact(artefacts[2]));
+        assertTrue(forest.hasFurniture(furniture[1]));
+        testGameStateContainsSubjects(locations, basicGameState);
+        testGameStateContainsSubjects(artefacts, basicGameState);
+        testGameStateContainsSubjects(furniture, basicGameState);
+        testGameStateContainsSubjects(characters, basicGameState);
     }
 
     @Test
     void testLoadExtendedEntitiesFile() {
         Location storeroom = extendedGameState.getStoreroom();
-        assertEquals(0, storeroom.getPathsToLocations().size());
+        assertEquals(0, storeroom.getPathsNumber());
+        String[] artefactsInCabin = {"potion", "axe", "coin"};
         String[] artefactsInStore = {"log", "shovel", "gold"};
+        String[] artefactsInForest = {"key"};
+        String[] artefactsInRiverbank = {"horn"};
+        String[] furniture = {"hole", "trapdoor", "tree", "river", "ground"};
+        String[] locations = {"cabin", "cellar", "forest", "riverbank", "clearing"};
+        String[] characters = {"lumberjack", "elf"};
         for (String artefact : artefactsInStore) {
             assertTrue(storeroom.hasArtefact(artefact));
         }
-        storeroom.hasFurniture("hole");
-        storeroom.hasCharacter("lumberjack");
-        Location cellar = extendedGameState.getLocationByName("cellar");
-        assertTrue(cellar.hasCharacter("elf"));
-        assertTrue(cellar.hasPathToLocation("cabin"));
-        Location cabin = extendedGameState.getLocationByName("cabin");
-        String[] artefactsInCabin = {"potion", "axe", "coin"};
+        storeroom.hasFurniture(furniture[0]);
+        storeroom.hasCharacter(characters[0]);
+        Location cellar = extendedGameState.getLocationByName(locations[1]);
+        assertTrue(cellar.hasCharacter(characters[1]));
+        assertNotNull(cellar.getDestinationByName(locations[0]));
+        Location cabin = extendedGameState.getLocationByName(locations[0]);
         for (String artefact : artefactsInCabin) {
             assertTrue(cabin.hasArtefact(artefact));
         }
-        assertTrue(cabin.hasFurniture("trapdoor"));
-        assertFalse(cabin.hasPathToLocation("cellar"));
-        Location forest = extendedGameState.getLocationByName("forest");
-        assertTrue(forest.hasPathToLocation("cabin"));
-        assertTrue(cabin.hasPathToLocation("forest"));
-        assertTrue(forest.hasPathToLocation("riverbank"));
-        assertTrue(forest.hasArtefact("key"));
-        assertTrue(forest.hasFurniture("tree"));
-        Location riverbank = extendedGameState.getLocationByName("riverbank");
-        assertTrue(riverbank.hasPathToLocation("forest"));
-        assertFalse(riverbank.hasPathToLocation("clearing"));
-        assertTrue(riverbank.hasArtefact("horn"));
-        assertTrue(riverbank.hasFurniture("river"));
-        Location clearing = extendedGameState.getLocationByName("clearing");
-        assertTrue(clearing.hasPathToLocation("riverbank"));
-        assertTrue(clearing.hasFurniture("ground"));
+        assertTrue(cabin.hasFurniture(furniture[1]));
+        assertNull(cabin.getDestinationByName(locations[1]));
+        Location forest = extendedGameState.getLocationByName(locations[2]);
+        assertNotNull(forest.getDestinationByName(locations[0]));
+        assertNotNull(cabin.getDestinationByName(locations[2]));
+        assertNotNull(forest.getDestinationByName(locations[3]));
+        assertTrue(forest.hasArtefact(artefactsInForest[0]));
+        assertTrue(forest.hasFurniture(furniture[2]));
+        Location riverbank = extendedGameState.getLocationByName(locations[3]);
+        assertNotNull(riverbank.getDestinationByName(locations[2]));
+        assertNull(riverbank.getDestinationByName(locations[4]));
+        assertTrue(riverbank.hasArtefact(artefactsInRiverbank[0]));
+        assertTrue(riverbank.hasFurniture(furniture[3]));
+        Location clearing = extendedGameState.getLocationByName(locations[4]);
+        assertNotNull(clearing.getDestinationByName(locations[3]));
+        assertTrue(clearing.hasFurniture(furniture[4]));
+        testGameStateContainsSubjects(locations, extendedGameState);
+        testGameStateContainsSubjects(artefactsInCabin, extendedGameState);
+        testGameStateContainsSubjects(artefactsInForest, extendedGameState);
+        testGameStateContainsSubjects(artefactsInRiverbank, extendedGameState);
+        testGameStateContainsSubjects(artefactsInStore, extendedGameState);
+        testGameStateContainsSubjects(furniture, extendedGameState);
+        testGameStateContainsSubjects(characters, extendedGameState);
+    }
+
+    private void testGameStateContainsSubjects(String[] subjects, GameState gameState) {
+        for (String subjectName : subjects) {
+            assertNotNull(gameState.getEntityByName(subjectName));
+        }
     }
 }

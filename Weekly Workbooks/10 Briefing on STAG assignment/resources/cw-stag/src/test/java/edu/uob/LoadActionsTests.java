@@ -75,7 +75,7 @@ public class LoadActionsTests {
         GameAction gameAction = null;
         for (int i = 0; i < triggerPhrases.length; i++) {
             String phrase = triggerPhrases[i].toLowerCase();
-            assertTrue(this.basicGameState.hasTriggerPhrase(phrase));
+            assertNotNull(this.basicGameState.getPossibleActions(phrase));
             HashSet<GameAction> actions = this.basicGameState.getPossibleActions(phrase);
             assertEquals(1, actions.size());
             if (i == 0) {
@@ -109,8 +109,8 @@ public class LoadActionsTests {
 
     @Test
     void testLoadExtendedActionsFile() {
-        assertTrue(this.extendedGameState.hasTriggerPhrase("cut down"));
-        assertFalse(this.extendedGameState.hasTriggerPhrase("cutDown"));
+        assertNotNull(this.extendedGameState.getPossibleActions("cut down"));
+        assertNull(this.extendedGameState.getPossibleActions("cutDown"));
         GameAction payAction = (GameAction) this.extendedGameState.getPossibleActions("pay").toArray()[0];
         String[] subjects0 = {"elf", "coin"};
         subjectsLoaded(payAction, subjects0);

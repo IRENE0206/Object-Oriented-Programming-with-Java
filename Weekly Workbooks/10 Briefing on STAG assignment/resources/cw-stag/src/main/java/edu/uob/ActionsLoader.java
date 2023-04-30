@@ -19,7 +19,8 @@ public class ActionsLoader {
         this.gameState = gameState;
         this.actionsFile = actionsFile;
     }
-
+    // the tags (e.g. <subjects> ) will always all be lower case
+    // entity names and action triggers are case-insensitive (so could be UPPER lower or MiXeD)
     public void loadActions() throws ParserConfigurationException, IOException, SAXException {
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         Document document = builder.parse(this.actionsFile);
@@ -45,7 +46,7 @@ public class ActionsLoader {
             }
             Element narration = (Element) action.getElementsByTagName("narration").item(0);
             String explanation = narration.getTextContent();
-            gameAction.setNarration(explanation.toLowerCase());
+            gameAction.setNarration(explanation);
             Element triggers = (Element) action.getElementsByTagName("triggers").item(0);
             for (int j = 0; j < triggers.getElementsByTagName("keyphrase").getLength(); j++) {
                 String phrase = triggers.getElementsByTagName("keyphrase").item(j).getTextContent();

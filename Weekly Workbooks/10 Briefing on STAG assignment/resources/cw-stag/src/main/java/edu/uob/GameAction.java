@@ -12,61 +12,69 @@ public class GameAction {
     // requires the entity to either be in the inventory of the player invoking the action or
     // for that entity to be in the room/location where the action is being performed
     // subjects of an action can be locations, characters or furniture
-    List<String> subjectEntities;
+    List<String> subjectEntityNames;
 
-    // An optional set of consumed entities that are all removed by the action
-    // it should be removed from its current location
-    // (which could be any location within the game) moved into the storeroom location
-    List<String> consumedEntities;
+    // optional, all removed by the action
+    // removed from its current location (which could be any location within the game)
+    // moved into the storeroom location
+    List<String> consumedEntityNames;
 
-    // An optional set of produced entities that are all created by the action
-    // When an entity is produced,
-    // it should be moved from its current location in the game
-    // (which might be in the storeroom) to the location in which the action is triggered.
-    List<String> producedEntities;
+    // optional, all created by the action
+    // moved from its current location in the game (which might be in the storeroom)
+    // to the location in which the action is triggered.
+    List<String> producedEntityNames;
     String narration;
+    Location triggeredLocation;
 
     public GameAction() {
-        this.subjectEntities = new ArrayList<>();
-        this.consumedEntities = new ArrayList<>();
-        this.producedEntities = new ArrayList<>();
+        this.subjectEntityNames = new ArrayList<>();
+        this.consumedEntityNames = new ArrayList<>();
+        this.producedEntityNames = new ArrayList<>();
         this.narration = null;
     }
 
+    public Location getTriggeredLocation() {
+        return this.triggeredLocation;
+    }
+
+    public void setTriggeredLocation(Location triggeredLocation) {
+        this.triggeredLocation = triggeredLocation;
+    }
+
     public boolean hasSubjectEntity(String entityName) {
-        return this.subjectEntities.contains(entityName);
+        return this.subjectEntityNames.contains(entityName);
     }
 
     public void addSubjectEntity(String entityName) {
-        this.subjectEntities.add(entityName);
+        this.subjectEntityNames.add(entityName.toLowerCase());
     }
 
-    public List<String> getSubjectEntities() {
-        return this.subjectEntities;
+    public List<String> getSubjectEntityNames() {
+        return this.subjectEntityNames;
     }
 
     public boolean hasConsumedEntity(String entityName) {
-        return this.consumedEntities.contains(entityName);
+        return this.consumedEntityNames.contains(entityName);
     }
 
     public void addConsumedEntity(String entityName) {
-        this.consumedEntities.add(entityName);
+        this.consumedEntityNames.add(entityName.toLowerCase());
     }
 
-    public List<String> getConsumedEntities() {
-        return this.consumedEntities;
+    public List<String> getConsumedEntityNames() {
+        return this.consumedEntityNames;
     }
 
     public boolean hasProducedEntity(String entityName) {
-        return this.producedEntities.contains(entityName);
+        return this.producedEntityNames.contains(entityName);
     }
 
     public void addProducedEntity(String entityName) {
-        this.producedEntities.add(entityName);
+        this.producedEntityNames.add(entityName.toLowerCase());
     }
 
-    public List<String> getProducedEntities() {
-        return this.producedEntities;
+    public List<String> getProducedEntityNames() {
+        return this.producedEntityNames;
     }
 
     public void setNarration(String explanation) {
@@ -75,5 +83,27 @@ public class GameAction {
 
     public String getNarration() {
         return this.narration;
+    }
+
+    public void consumeEntities(GameState gameState) {
+        EntityVisitor consumeVisitor = new ConsumeVisitor(this.triggeredLocation, gameState);
+        List<GameEntity> consumedEntities = new ArrayList<>();
+        for (String entityName : this.consumedEntityNames) {
+            consumedEntities.add(gameState.getEntityByName(entityName));
+        }
+        for (GameEntity entity : consumedEntities) {
+            consumeVisitor.actOnEntity(entity);
+        }
+    }
+
+    public void produceEntities(GameState gameState) {
+        EntityVisitor produceVisitor = new ProduceVisitor(this.triggeredLocation, gameState);
+        List<GameEntity> producedEntities = new ArrayList<>();
+        for (String entityName : this.producedEntityNames) {
+            producedEntities.add(gameState.getEntityByName(entityName));
+        }
+        for (GameEntity entity : producedEntities) {
+            produceVisitor.actOnEntity(entity);
+        }
     }
 }
