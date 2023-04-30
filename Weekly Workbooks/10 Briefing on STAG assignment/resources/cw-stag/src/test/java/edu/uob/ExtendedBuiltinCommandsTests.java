@@ -39,7 +39,7 @@ public class ExtendedBuiltinCommandsTests {
         testGetAndDropArtefacts(path0, artefacts0);
         testFailToGetWrongElements(furniture0);
 
-        sendCommandToServer("simon: goto forest");
+        sendCommandToServer("simon: goto dark forest");
         String[] artefacts1 = {"key"};
         String[] furniture1 = {"tree"};
         List<String> path1 = new ArrayList<>();
@@ -49,7 +49,7 @@ public class ExtendedBuiltinCommandsTests {
         testGetAndDropArtefacts(path1, artefacts1);
         testFailToGetWrongElements(furniture1);
 
-        sendCommandToServer("simon: goto riverbank");
+        sendCommandToServer("simon: goto riverbank.");
         String[] artefacts2 = {"horn"};
         String[] furniture2 = {"river"};
         List<String> path2 = new ArrayList<>();

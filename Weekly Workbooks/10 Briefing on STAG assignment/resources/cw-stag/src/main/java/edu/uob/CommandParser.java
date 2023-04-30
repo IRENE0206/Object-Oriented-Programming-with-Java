@@ -18,6 +18,8 @@ public class CommandParser {
         this.basicCommandKeywordsFound = new ArrayList<>();
         this.triggerPhrasesFound = new ArrayList<>();
         this.entityNamesFound = new ArrayList<>();
+        // All commands (including entity names, locations, built in commands and action triggers)
+        // should be treated as case-insensitive
         this.rawCommandInLowerCase = command.toLowerCase();
         this.gameState = gameState;
         this.splitCommand = new ArrayList<>();
@@ -28,6 +30,7 @@ public class CommandParser {
         this.basicCommandKeywords.add("drop");
         this.basicCommandKeywords.add("goto");
         this.basicCommandKeywords.add("look");
+        this.basicCommandKeywords.add("health");
     }
 
     public String parseCommand() {
@@ -45,6 +48,9 @@ public class CommandParser {
         String singleBuiltinKeywordMentioned = getTheBuiltinCommandType();
         boolean noTriggerPhrasesFound = this.triggerPhrasesFound.isEmpty();
         int entitiesMentionedCount = this.entityNamesFound.size();
+        System.out.println(singleBuiltinKeywordMentioned);
+        System.out.println(noTriggerPhrasesFound);
+        System.out.println(entitiesMentionedCount);
         if (singleBuiltinKeywordMentioned != null && noTriggerPhrasesFound && entitiesMentionedCount <= 1) {
             return chooseBasicCommand(singleBuiltinKeywordMentioned);
         } else if (singleBuiltinKeywordMentioned == null && !noTriggerPhrasesFound && entitiesMentionedCount >= 1) {
@@ -54,12 +60,18 @@ public class CommandParser {
     }
 
     private String reformatCommand() {
+        // incoming command messages begin with the username of the player who issued that command
         String[] strings = this.rawCommandInLowerCase.split(":", 2);
         if (strings.length != 2) {
             return "Wrong format incoming command message";
         }
+        // everything before the first : is the player's name
         this.currentPlayerName = strings[0];
-        this.rawCommandInLowerCase = strings[1].trim().replaceAll("\\s+", " ");
+        // assume actions and entities will only contain alphabetical characters
+        // action triggers can have spaces as well
+        // consider the punctuation as decoration, thus allowing you to process the command
+        this.rawCommandInLowerCase = strings[1].replaceAll("[^a-zA-Z0-9]+", " ");
+        this.rawCommandInLowerCase = this.rawCommandInLowerCase.trim().replaceAll("\\s+", " ");
         this.splitCommand.addAll(Arrays.stream(this.rawCommandInLowerCase.split(" ")).toList());
         return null;
     }
@@ -70,6 +82,8 @@ public class CommandParser {
         } else if (!isValidPlayerName(this.currentPlayerName)) {
             return "Invalid player name";
         } else {
+            // when the server encounters a command from a previously unseen user,
+            // a new player should be created and placed in the start location of the game
             this.currentPlayer = new Player(currentPlayerName, "");
             this.currentPlayer.setCurrentLocation(this.gameState.getStartLocation());
             this.gameState.addPlayer(this.currentPlayer);
@@ -81,6 +95,7 @@ public class CommandParser {
 
     // built-in commands are reserved words and
     // therefore cannot be used as names for any other elements of the command language
+    // Valid player names can consist of uppercase and lowercase letters, spaces, apostrophes and hyphens
     private boolean isValidPlayerName(String playerName) {
         List<String> playerNameWords = Arrays.stream(playerName.split(" ")).toList();
         for (String basicCommand : this.basicCommandKeywords) {
@@ -88,7 +103,7 @@ public class CommandParser {
                 return false;
             }
         }
-        return true;
+        return playerName.matches("[A-Za-z\\s`-]+");
     }
 
     private void findBuiltinKeywords() {
@@ -120,6 +135,7 @@ public class CommandParser {
 
     private void findEntityNames() {
         for (String word : this.splitCommand) {
+            System.out.println("word: "+ word);
             if (this.gameState.getEntityByName(word) != null) {
                 this.entityNamesFound.add(word);
             }
@@ -142,7 +158,7 @@ public class CommandParser {
 
     // Game Actions
     private String chooseMatchingAction() {
-        List<GameAction> allValidActionsMatched = new ArrayList<>();
+        Set<GameAction> allValidActionsMatched = new HashSet<>();
         for (String triggerPhrase : this.triggerPhrasesFound) {
             System.out.println(triggerPhrase);
             allValidActionsMatched.addAll(matchWithTriggerPhrase(triggerPhrase));
@@ -156,19 +172,11 @@ public class CommandParser {
         }
     }
 
-    private GameAction getSinglePerformableAction(List<GameAction> allActionsMatched) {
-        if (allActionsMatched.size() == 0) {
+    private GameAction getSinglePerformableAction(Set<GameAction> allActionsMatched) {
+        if (allActionsMatched.size() != 1) {
             return null;
         }
-        GameAction firstAction = allActionsMatched.get(0);
-        if (allActionsMatched.size() != 1) {
-            for (GameAction action : allActionsMatched) {
-                if (action != firstAction) {
-                    return null;
-                }
-            }
-        }
-        return firstAction;
+        return allActionsMatched.stream().toList().get(0);
     }
 
     private List<GameAction> matchWithTriggerPhrase(String triggerPhrase) {
@@ -184,6 +192,13 @@ public class CommandParser {
         }
         return allValidActionsMatchedWithTriggerPhrase;
     }
+
+    /*
+    It is also worth explicitly distinguishing between:
+- valid: a command which structurally correct (for example, action commands have a trigger key phrase and at least one subject)
+- matched: the trigger key phrase and subject(s) of a command in an incoming message are found in the HashMap of actions
+- performable: all the subjects of an action from the MashMap are "available" to the player
+     */
 
     private boolean matchWithAction(GameAction gameAction) {
         gameAction.setTriggeredLocation(this.playerLocation);
@@ -201,7 +216,10 @@ public class CommandParser {
     private String chooseBuiltinCommandWithNoEntity(String commandKeyword) {
         if (commandKeyword.equalsIgnoreCase(this.basicCommandKeywords.get(5))) {
             return this.lookCommand();
-        } else {
+        } else if (commandKeyword.equalsIgnoreCase(this.basicCommandKeywords.get(6))) {
+            return this.healthCommand();
+        }
+        else {
             return this.inventoryCommand();
         }
     }
@@ -211,8 +229,10 @@ public class CommandParser {
             return this.getArtefactCommand(gameEntityName);
         } else if (commandKeyword.equalsIgnoreCase(this.basicCommandKeywords.get(3))) {
             return this.dropArtefactCommand(gameEntityName);
-        } else {
+        } else if (commandKeyword.equalsIgnoreCase(this.basicCommandKeywords.get(4))){
             return this.goToLocationCommand(gameEntityName);
+        } else {
+            return "Invalid syntax for " + commandKeyword;
         }
     }
 
@@ -278,7 +298,11 @@ public class CommandParser {
     // lists paths to other locations
     // keep the location descriptions for when you are in that location and do a look
     private String lookCommand() {
-        return this.playerLocation.showAllInformation();
+        return this.playerLocation.showAllInformation(this.currentPlayerName);
+    }
+
+    private String healthCommand() {
+        return String.valueOf(this.currentPlayer.getHealth());
     }
 
 }

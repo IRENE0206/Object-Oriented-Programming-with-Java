@@ -105,6 +105,9 @@ public class GameState {
     }
 
     public GameEntity getEntityByName(String entityName) {
+        if (entityName.equalsIgnoreCase("health")) {
+            return this.currentPlayer;
+        }
         return this.entities.get(entityName.toLowerCase());
     }
 
@@ -133,5 +136,9 @@ public class GameState {
         for (String s : this.entities.keySet()) {
             System.out.println(s);
         }
+    }
+
+    public String checkIfCurrentPlayerHealthRunOut() {
+        return this.currentPlayer.checkHealthRunOut(this.startLocation);
     }
 }

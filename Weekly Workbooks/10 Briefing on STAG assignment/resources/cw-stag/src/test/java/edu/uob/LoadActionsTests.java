@@ -91,19 +91,19 @@ public class LoadActionsTests {
 
     private void subjectsLoaded(GameAction gameAction, String[] subjects) {
         for (String subject : subjects) {
-            assertTrue(gameAction.hasSubjectEntity(subject));
+            assertTrue(gameAction.isSubjectEntityName(subject));
         }
     }
 
     private void consumedLoaded(GameAction gameAction, String[] consumed) {
         for (String c : consumed) {
-            assertTrue(gameAction.hasConsumedEntity(c));
+            assertTrue(gameAction.isConsumedEntityName(c));
         }
     }
 
     private void producedLoaded(GameAction gameAction, String[] produced) {
         for (String p : produced) {
-            assertTrue(gameAction.hasProducedEntity(p));
+            assertTrue(gameAction.isProducedEntityName(p));
         }
     }
 

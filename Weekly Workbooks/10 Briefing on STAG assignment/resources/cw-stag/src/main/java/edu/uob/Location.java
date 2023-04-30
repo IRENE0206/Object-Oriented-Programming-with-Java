@@ -176,7 +176,7 @@ public class Location extends GameEntity {
         return this.locations.size();
     }
 
-    public String showAllInformation() {
+    public String showAllInformation(String currentPlayerName) {
         StringBuilder information = new StringBuilder("Location:\n");
         information.append(this.getName()).append(": ")
                 .append(this.getDescription()).append("\n").append("Artefacts:\n");
@@ -199,6 +199,13 @@ public class Location extends GameEntity {
             information.append(locationName).append(" ");
         }
         information.append("\n");
+        // include other players in your description of a location when a look command is issued by a user
+        information.append("Other players:\n");
+        for (String playerName : this.players.keySet()) {
+            if (!playerName.equalsIgnoreCase(currentPlayerName)) {
+                information.append(playerName).append("\n");
+            }
+        }
         return information.toString();
     }
 

@@ -36,10 +36,6 @@ public class Player extends GameEntity {
         entityVisitor.actOnEntity(this);
     }
 
-    public boolean hasArtefact(String artefactName) {
-        return this.artefacts.containsKey(artefactName);
-    }
-
     public void pickArtefact(Artefact artefact) {
         if (artefact == null) {
             return;
@@ -83,11 +79,25 @@ public class Player extends GameEntity {
         }
     }
 
-    public void gotoLocation(Location location) {
-        if (location == null) {
-            return;
+    private void restoreHealth() {
+        this.health = 3;
+    }
+
+    public String checkHealthRunOut(Location startLocation) {
+        if (this.health != 0) {
+            return "";
         }
-        this.addToLocation(location);
+        // When a player's health runs out (i.e. when it becomes zero)
+        // they should lose all items in their inventory
+        for (String artefactName : this.artefacts.keySet()) {
+            // (which are dropped in the location where they ran out of health)
+            this.dropArtefact(artefactName);
+        }
+        // The player should then be transported to the start location of the game and
+        this.addToLocation(startLocation);
+        // their health level restored to full (i.e. 3)
+        this.restoreHealth();
+        return this.getName() + " died and lost all items, must return to the start of the game\n";
     }
 
 }

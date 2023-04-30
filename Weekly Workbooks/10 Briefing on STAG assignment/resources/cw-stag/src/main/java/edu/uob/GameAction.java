@@ -47,40 +47,28 @@ public class GameAction {
         this.triggeredLocation = triggeredLocation;
     }
 
-    public boolean hasSubjectEntity(String entityName) {
+    public boolean isSubjectEntityName(String entityName) {
         return this.subjectEntityNames.contains(entityName);
     }
 
-    public void addSubjectEntity(String entityName) {
+    public void addSubjectEntityName(String entityName) {
         this.subjectEntityNames.add(entityName.toLowerCase());
     }
 
-    public List<String> getSubjectEntityNames() {
-        return this.subjectEntityNames;
-    }
-
-    public boolean hasConsumedEntity(String entityName) {
+    public boolean isConsumedEntityName(String entityName) {
         return this.consumedEntityNames.contains(entityName);
     }
 
-    public void addConsumedEntity(String entityName) {
+    public void addConsumedEntityName(String entityName) {
         this.consumedEntityNames.add(entityName.toLowerCase());
     }
 
-    public List<String> getConsumedEntityNames() {
-        return this.consumedEntityNames;
-    }
-
-    public boolean hasProducedEntity(String entityName) {
+    public boolean isProducedEntityName(String entityName) {
         return this.producedEntityNames.contains(entityName);
     }
 
-    public void addProducedEntity(String entityName) {
+    public void addProducedEntityName(String entityName) {
         this.producedEntityNames.add(entityName.toLowerCase());
-    }
-
-    public List<String> getProducedEntityNames() {
-        return this.producedEntityNames;
     }
 
     public void setNarration(String explanation) {
@@ -92,16 +80,17 @@ public class GameAction {
     }
 
     public String performAction(GameState gameState) {
+        String playerHealthRunOut = "";
         if (!this.consumedEntityNames.isEmpty()) {
-            this.consumeEntities(gameState);
+            playerHealthRunOut += this.consumeEntities(gameState);
         }
         if (!this.producedEntityNames.isEmpty()) {
             this.produceEntities(gameState);
         }
-        return this.getNarration();
+        return this.getNarration() + playerHealthRunOut;
     }
 
-    private void consumeEntities(GameState gameState) {
+    private String consumeEntities(GameState gameState) {
         EntityVisitor consumeVisitor = new ConsumeVisitor(this.triggeredLocation, gameState);
         List<GameEntity> consumedEntities = new ArrayList<>();
         for (String entityName : this.consumedEntityNames) {
@@ -110,6 +99,7 @@ public class GameAction {
         for (GameEntity entity : consumedEntities) {
             consumeVisitor.actOnEntity(entity);
         }
+        return gameState.checkIfCurrentPlayerHealthRunOut();
     }
 
     private void produceEntities(GameState gameState) {
@@ -141,19 +131,22 @@ public class GameAction {
 
     public boolean isGivenValidEntities(List<String> entitiesMentionedInCommand) {
         int subjectMentioned = 0;
+        // If you have entities from different actions, it will probably get caught as "extraneous entities"
         int extraneousEntity = 0;
         for (String entityName : entitiesMentionedInCommand) {
-            if (this.hasSubjectEntity(entityName)) {
+            System.out.println("entityName "+ entityName);
+            if (this.isSubjectEntityName(entityName)) {
                 subjectMentioned += 1;
-            } else if (!this.hasConsumedEntity(entityName) && !this.hasProducedEntity(entityName)) {
+            } else if (!this.isConsumedEntityName(entityName) && !this.isProducedEntityName(entityName)) {
                 extraneousEntity += 1;
             }
         }
-        System.out.println(subjectMentioned);
+        System.out.println("subjectMentioned" + subjectMentioned);
         System.out.println(extraneousEntity);
         return  subjectMentioned >= 1 && extraneousEntity == 0;
     }
 
+    // Trigger keywords can't be used decorations
     public boolean isGivenValidTriggerPhrases(List<String> triggerPhrasesMentioned) {
         for (String phrase : triggerPhrasesMentioned) {
             if (!this.triggerPhrases.contains(phrase)) {
