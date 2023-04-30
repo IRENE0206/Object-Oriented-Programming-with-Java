@@ -3,8 +3,11 @@ package edu.uob;
 import java.util.*;
 
 public class CommandParser {
-    List<String> basicCommands;
-    private String command;
+    private final List<String> basicCommandKeywords;
+    private final List<String> basicCommandKeywordsFound;
+    private final List<String> triggerPhrasesFound;
+    private final List<String> entityNamesFound;
+    private String rawCommandInLowerCase;
     private final List<String> splitCommand;
     private String currentPlayerName;
     private Player currentPlayer;
@@ -12,16 +15,19 @@ public class CommandParser {
     private final GameState gameState;
 
     public CommandParser(GameState gameState, String command) {
-        this.command = command.toLowerCase();
+        this.basicCommandKeywordsFound = new ArrayList<>();
+        this.triggerPhrasesFound = new ArrayList<>();
+        this.entityNamesFound = new ArrayList<>();
+        this.rawCommandInLowerCase = command.toLowerCase();
         this.gameState = gameState;
         this.splitCommand = new ArrayList<>();
-        this.basicCommands = new ArrayList<>();
-        this.basicCommands.add("inventory");
-        this.basicCommands.add("inv");
-        this.basicCommands.add("get");
-        this.basicCommands.add("drop");
-        this.basicCommands.add("goto");
-        this.basicCommands.add("look");
+        this.basicCommandKeywords = new ArrayList<>();
+        this.basicCommandKeywords.add("inventory");
+        this.basicCommandKeywords.add("inv");
+        this.basicCommandKeywords.add("get");
+        this.basicCommandKeywords.add("drop");
+        this.basicCommandKeywords.add("goto");
+        this.basicCommandKeywords.add("look");
     }
 
     public String parseCommand() {
@@ -33,24 +39,28 @@ public class CommandParser {
         if (playerNameError != null) {
             return playerNameError;
         }
-        List<String> basicCommandsMentioned = getBuiltinKeywordsMentioned();
-        List<String> triggerPhrasesMentioned = getTriggerPhrasesMentioned();
-        List<GameEntity> entitiesMentioned = getEntitiesMentioned();
-        String builtinKeyword = getTheBuiltinCommandType(basicCommandsMentioned);
-        if (builtinKeyword != null && triggerPhrasesMentioned.isEmpty() && entitiesMentioned.size() <= 1) {
-            return chooseBasicCommand(builtinKeyword, entitiesMentioned);
+        findBuiltinKeywords();
+        findTriggerPhrases();
+        findEntityNames();
+        String singleBuiltinKeywordMentioned = getTheBuiltinCommandType();
+        boolean noTriggerPhrasesFound = this.triggerPhrasesFound.isEmpty();
+        int entitiesMentionedCount = this.entityNamesFound.size();
+        if (singleBuiltinKeywordMentioned != null && noTriggerPhrasesFound && entitiesMentionedCount <= 1) {
+            return chooseBasicCommand(singleBuiltinKeywordMentioned);
+        } else if (singleBuiltinKeywordMentioned == null && !noTriggerPhrasesFound && entitiesMentionedCount >= 1) {
+            return chooseMatchingAction();
         }
-        return "";
+        return "Invalid syntax";
     }
 
     private String reformatCommand() {
-        String[] strings = this.command.split(":", 2);
+        String[] strings = this.rawCommandInLowerCase.split(":", 2);
         if (strings.length != 2) {
             return "Wrong format incoming command message";
         }
         this.currentPlayerName = strings[0];
-        this.command = strings[1].trim().replaceAll("\\s+", " ");
-        this.splitCommand.addAll(Arrays.stream(this.command.split(" ")).toList());
+        this.rawCommandInLowerCase = strings[1].trim().replaceAll("\\s+", " ");
+        this.splitCommand.addAll(Arrays.stream(this.rawCommandInLowerCase.split(" ")).toList());
         return null;
     }
 
@@ -65,6 +75,7 @@ public class CommandParser {
             this.gameState.addPlayer(this.currentPlayer);
         }
         this.playerLocation = this.currentPlayer.getCurrentLocation();
+        this.gameState.setCurrentPlayer(this.currentPlayer);
         return null;
     }
 
@@ -72,7 +83,7 @@ public class CommandParser {
     // therefore cannot be used as names for any other elements of the command language
     private boolean isValidPlayerName(String playerName) {
         List<String> playerNameWords = Arrays.stream(playerName.split(" ")).toList();
-        for (String basicCommand : this.basicCommands) {
+        for (String basicCommand : this.basicCommandKeywords) {
             if (playerNameWords.contains(basicCommand)) {
                 return false;
             }
@@ -80,18 +91,15 @@ public class CommandParser {
         return true;
     }
 
-    private List<String> getBuiltinKeywordsMentioned() {
-        List<String> basicMentioned = new ArrayList<>();
+    private void findBuiltinKeywords() {
         for (String s : this.splitCommand) {
-            if (this.basicCommands.contains(s)) {
-                basicMentioned.add(s);
+            if (this.basicCommandKeywords.contains(s)) {
+                this.basicCommandKeywordsFound.add(s);
             }
         }
-        return basicMentioned;
     }
 
-    private List<String> getTriggerPhrasesMentioned() {
-        List<String> triggerPhrasesMentioned = new ArrayList<>();
+    private void findTriggerPhrases() {
         for (String triggerPhrase : this.gameState.getActions().keySet()) {
             if (triggerPhrase.contains(" ")) {
                 List<String> triggerPhraseSplit = Arrays.stream(triggerPhrase.split(" ")).toList();
@@ -100,76 +108,123 @@ public class CommandParser {
                     if (this.splitCommand.get(i).equalsIgnoreCase(triggerPhraseSplit.get(0))) {
                         String substringOfCommand = String.join(" ", this.splitCommand.subList(i, i + triggerPhraseWordCount));
                         if (substringOfCommand.equalsIgnoreCase(triggerPhrase)) {
-                            triggerPhrasesMentioned.add(substringOfCommand);
+                            this.triggerPhrasesFound.add(substringOfCommand);
                         }
                     }
                 }
             } else if (this.splitCommand.contains(triggerPhrase)) {
-                triggerPhrasesMentioned.add(triggerPhrase);
+                this.triggerPhrasesFound.add(triggerPhrase);
             }
         }
-        return triggerPhrasesMentioned;
     }
 
-    private List<GameEntity> getEntitiesMentioned() {
-        List<GameEntity> entitiesMentioned = new ArrayList<>();
+    private void findEntityNames() {
         for (String word : this.splitCommand) {
-            GameEntity gameEntity = this.gameState.getEntityByName(word);
-            if (gameEntity != null) {
-                entitiesMentioned.add(gameEntity);
+            if (this.gameState.getEntityByName(word) != null) {
+                this.entityNamesFound.add(word);
             }
         }
-        return entitiesMentioned;
     }
 
-    private String getTheBuiltinCommandType(List<String> basicCommandMentioned) {
-        if (basicCommandMentioned.size() != 1) {
+    private String getTheBuiltinCommandType() {
+        if (this.basicCommandKeywordsFound.size() != 1) {
             return null;
         }
-        return basicCommandMentioned.get(0);
+        return this.basicCommandKeywordsFound.get(0);
     }
 
-    private GameEntity getTheEntityForBuiltinCommand(List<GameEntity> entitiesMentioned) {
-        if (entitiesMentioned.size() != 1) {
+    private String getTheEntityForBuiltinCommand() {
+        if (this.entityNamesFound.size() != 1) {
             return null;
         }
-        return entitiesMentioned.get(0);
+        return this.entityNamesFound.get(0);
+    }
+
+    // Game Actions
+    private String chooseMatchingAction() {
+        List<GameAction> allValidActionsMatched = new ArrayList<>();
+        for (String triggerPhrase : this.triggerPhrasesFound) {
+            System.out.println(triggerPhrase);
+            allValidActionsMatched.addAll(matchWithTriggerPhrase(triggerPhrase));
+        }
+        System.out.println("I mean " + allValidActionsMatched.size());
+        GameAction singlePerformableAction = getSinglePerformableAction(allValidActionsMatched);
+        if (singlePerformableAction == null) {
+            return "Invalid command: fail to match a single performable action";
+        } else {
+            return singlePerformableAction.performAction(this.gameState);
+        }
+    }
+
+    private GameAction getSinglePerformableAction(List<GameAction> allActionsMatched) {
+        if (allActionsMatched.size() == 0) {
+            return null;
+        }
+        GameAction firstAction = allActionsMatched.get(0);
+        if (allActionsMatched.size() != 1) {
+            for (GameAction action : allActionsMatched) {
+                if (action != firstAction) {
+                    return null;
+                }
+            }
+        }
+        return firstAction;
+    }
+
+    private List<GameAction> matchWithTriggerPhrase(String triggerPhrase) {
+        List<GameAction> allValidActionsMatchedWithTriggerPhrase = new ArrayList<>();
+        for (GameAction gameAction : this.gameState.getPossibleActions(triggerPhrase)) {
+            System.out.println("HERE");
+            System.out.println(this.gameState.getPossibleActions(triggerPhrase).size());
+            if (matchWithAction(gameAction)) {
+                System.out.println("YES");
+                allValidActionsMatchedWithTriggerPhrase.add(gameAction);
+                System.out.println(allValidActionsMatchedWithTriggerPhrase.size());
+            }
+        }
+        return allValidActionsMatchedWithTriggerPhrase;
+    }
+
+    private boolean matchWithAction(GameAction gameAction) {
+        gameAction.setTriggeredLocation(this.playerLocation);
+        return gameAction.isGivenValidTriggerPhrases(this.triggerPhrasesFound) &&
+                gameAction.isPerformable(this.gameState) &&
+                gameAction.isGivenValidEntities(this.entityNamesFound);
     }
 
     // Basic Commands
-
     // input must have command first and then subject entity
     private boolean entityComeBeforeBuiltinKeyword(String entityMentioned, String builtinKeywordMentioned) {
         return this.splitCommand.indexOf(entityMentioned) - this.splitCommand.indexOf(builtinKeywordMentioned) <= 0;
     }
 
     private String chooseBuiltinCommandWithNoEntity(String commandKeyword) {
-        if (commandKeyword.equalsIgnoreCase(this.basicCommands.get(5))) {
+        if (commandKeyword.equalsIgnoreCase(this.basicCommandKeywords.get(5))) {
             return this.lookCommand();
         } else {
             return this.inventoryCommand();
         }
     }
 
-    private String chooseBuiltinCommandWithOneEntity(String commandKeyword, GameEntity gameEntity) {
-        if (commandKeyword.equalsIgnoreCase(this.basicCommands.get(2))) {
-            return this.getArtefactCommand(gameEntity);
-        } else if (commandKeyword.equalsIgnoreCase(this.basicCommands.get(3))) {
-            return this.dropArtefactCommand(gameEntity);
+    private String chooseBuiltinCommandWithOneEntity(String commandKeyword, String gameEntityName) {
+        if (commandKeyword.equalsIgnoreCase(this.basicCommandKeywords.get(2))) {
+            return this.getArtefactCommand(gameEntityName);
+        } else if (commandKeyword.equalsIgnoreCase(this.basicCommandKeywords.get(3))) {
+            return this.dropArtefactCommand(gameEntityName);
         } else {
-            return this.goToLocationCommand(gameEntity);
+            return this.goToLocationCommand(gameEntityName);
         }
     }
 
-    private String chooseBasicCommand(String commandKeyword, List<GameEntity> entitiesMentioned) {
-        if (entitiesMentioned.size() == 0) {
+    private String chooseBasicCommand(String commandKeyword) {
+        if (this.entityNamesFound.size() == 0) {
             return chooseBuiltinCommandWithNoEntity(commandKeyword);
         } else {
-            GameEntity gameEntity = getTheEntityForBuiltinCommand(entitiesMentioned);
-            if (gameEntity == null || entityComeBeforeBuiltinKeyword(gameEntity.getName(), commandKeyword)) {
+            String gameEntityName = getTheEntityForBuiltinCommand();
+            if (gameEntityName == null || entityComeBeforeBuiltinKeyword(gameEntityName, commandKeyword)) {
                 return "Invalid syntax for " + commandKeyword;
             }
-            return chooseBuiltinCommandWithOneEntity(commandKeyword, gameEntity);
+            return chooseBuiltinCommandWithOneEntity(commandKeyword, gameEntityName);
         }
     }
 
@@ -183,40 +238,37 @@ public class CommandParser {
 
     // "get": picks up a specified artefact from the current location and
     // adds it into player's inventory
-    private String getArtefactCommand(GameEntity gameEntity) {
-        String entityName = gameEntity.getName();
+    private String getArtefactCommand(String gameEntityName) {
         String locationName = this.playerLocation.getName();
-        Artefact artefact = this.playerLocation.getArtefactByName(entityName);
+        Artefact artefact = this.playerLocation.getArtefactByName(gameEntityName);
         if (artefact != null) {
             this.currentPlayer.pickArtefact(artefact);
-            return this.currentPlayerName + " picks up " + entityName +
+            return this.currentPlayerName + " picks up " + gameEntityName +
                     " from the " + locationName + " and adds it into inventory";
         }
-        return "Cannot pick up " + entityName + " from " + locationName;
+        return "Cannot pick up " + gameEntityName + " from " + locationName;
     }
 
     // "drop": puts down an artefact from player's inventory and
     // places it into the current location
-    private String dropArtefactCommand(GameEntity gameEntity) {
-        String entityName = gameEntity.getName();
+    private String dropArtefactCommand(String gameEntityName) {
         String locationName = this.playerLocation.getName();
-        Artefact artefact = this.currentPlayer.getArtefacts().get(entityName);
+        Artefact artefact = this.currentPlayer.getArtefacts().get(gameEntityName);
         if (artefact == null) {
-            return "Cannot put down " + entityName + " from " + this.currentPlayerName +"'s inventory";
+            return "Cannot put down " + gameEntityName + " from " + this.currentPlayerName +"'s inventory";
         }
-        this.currentPlayer.dropArtefact(entityName);
-        return "puts down " + entityName + "from " +
+        this.currentPlayer.dropArtefact(gameEntityName);
+        return "puts down " + gameEntityName + "from " +
                 this.currentPlayerName + "'s inventory and places it into " + locationName;
     }
 
     // "goto": moves the player to the specified location
     // (if there is a path to that location)
-    private String goToLocationCommand(GameEntity gameEntity) {
-        String entityName = gameEntity.getName();
+    private String goToLocationCommand(String gameEntityName) {
         String currentLocationName = this.playerLocation.getName();
-        Location destination = this.playerLocation.getDestinationByName(entityName);
+        Location destination = this.playerLocation.getDestinationByName(gameEntityName);
         if (destination == null) {
-            return "Cannot move to " + entityName + " from " + currentLocationName;
+            return "Cannot move to " + gameEntityName + " from " + currentLocationName;
         }
         this.currentPlayer.addToLocation(destination);
         return this.currentPlayerName + " moves from " + currentLocationName + " to " + destination.getName();

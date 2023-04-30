@@ -49,6 +49,10 @@ public class Player extends GameEntity {
         artefact.setCurrentOwner(this);
     }
 
+    public Artefact getArtefactByName(String artefactName) {
+        return this.artefacts.get(artefactName);
+    }
+
     public HashMap<String, Artefact> getArtefacts() {
         return this.artefacts;
     }

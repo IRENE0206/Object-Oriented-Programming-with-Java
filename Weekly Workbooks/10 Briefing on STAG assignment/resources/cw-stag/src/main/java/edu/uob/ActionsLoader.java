@@ -50,6 +50,7 @@ public class ActionsLoader {
             Element triggers = (Element) action.getElementsByTagName("triggers").item(0);
             for (int j = 0; j < triggers.getElementsByTagName("keyphrase").getLength(); j++) {
                 String phrase = triggers.getElementsByTagName("keyphrase").item(j).getTextContent();
+                gameAction.addTriggerPhrases(phrase);
                 this.gameState.addAction(phrase.toLowerCase(), gameAction);
             }
         }

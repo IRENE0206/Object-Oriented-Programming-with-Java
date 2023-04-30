@@ -25,8 +25,11 @@ public class GameState {
     }
 
     public void setStartLocation(Location l) {
+        if (l == null) {
+            return;
+        }
         this.startLocation = l;
-        addEntity(l);
+        this.entities.put(l.getName(), l);
     }
 
     public Location getStartLocation() {
@@ -46,8 +49,11 @@ public class GameState {
     // an action places them into another location within the game
     // there will be no paths to/from it
     public void setStoreroom(Location l) {
+        if (l == null) {
+            return;
+        }
         this.storeroom = l;
-        addEntity(l);
+        this.entities.put(l.getName(), l);
     }
 
     public Location getStoreroom() {
@@ -55,8 +61,11 @@ public class GameState {
     }
 
     public void addLocation(Location l) {
+        if (l == null) {
+            return;
+        }
         this.locations.put(l.getName(), l);
-        addEntity(l);
+        this.entities.put(l.getName(), l);
     }
 
     public Location getLocationByName(String locationName) {
@@ -91,17 +100,38 @@ public class GameState {
         return this.actions.get(triggerPhrase.toLowerCase());
     }
 
-    public void addEntity(GameEntity entity) {
-        if (entity != null) {
-            this.entities.put(entity.getName(), entity);
-        }
-    }
-
     public HashMap<String, HashSet<GameAction>> getActions() {
         return this.actions;
     }
 
     public GameEntity getEntityByName(String entityName) {
         return this.entities.get(entityName.toLowerCase());
+    }
+
+    public void addEntity(Character character) {
+        if (character == null) {
+            return;
+        }
+        this.entities.put(character.getName(), character);
+    }
+
+    public void addEntity(Artefact artefact) {
+        if (artefact == null) {
+            return;
+        }
+        this.entities.put(artefact.getName(), artefact);
+    }
+
+    public void addEntity(Furniture furniture) {
+        if (furniture == null) {
+            return;
+        }
+        this.entities.put(furniture.getName(), furniture);
+    }
+
+    public void printAllEntities() {
+        for (String s : this.entities.keySet()) {
+            System.out.println(s);
+        }
     }
 }

@@ -9,13 +9,13 @@ import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BasicActionsTests {
+public class ExtendedActionsTests {
     private GameServer server;
 
     @BeforeEach
     public void setup() {
-        File entitiesFile = Paths.get("config" + File.separator + "basic-entities.dot").toAbsolutePath().toFile();
-        File actionsFile = Paths.get("config" + File.separator + "basic-actions.xml").toAbsolutePath().toFile();
+        File entitiesFile = Paths.get("config" + File.separator + "extended-entities.dot").toAbsolutePath().toFile();
+        File actionsFile = Paths.get("config" + File.separator + "extended-actions.xml").toAbsolutePath().toFile();
         server = new GameServer(entitiesFile, actionsFile);
     }
 
@@ -26,11 +26,14 @@ public class BasicActionsTests {
 
     @Test
     public void testRandomOrderBasicActions() {
+        String response = sendCommandToServer("simon: get axe");
         sendCommandToServer("simon: goto forest");
-        String response = sendCommandToServer("simon: look").toLowerCase();
+        response = sendCommandToServer("simon: look").toLowerCase();
+        System.out.println(response);
         assertTrue(response.contains("tree"));
         assertFalse(response.contains("log"));
         response = sendCommandToServer("simon: axe chop tree");
+        System.out.println(response);
         assertEquals("You cut down the tree with the axe", response);
         response = sendCommandToServer("simon: look");
         assertFalse(response.contains("tree"));
