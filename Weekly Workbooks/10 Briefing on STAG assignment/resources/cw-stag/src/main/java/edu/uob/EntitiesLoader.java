@@ -78,7 +78,7 @@ public class EntitiesLoader {
 
     private void putSubjectsIntoLocation(Graph graph, Location location) {
         for (Node node : graph.getNodes(false)) {
-            String entityType = getEntityType(graph);
+            String entityType = graph.getId().getId().toLowerCase();
             String entityName = getEntityName(node);
             String entityDescription = getEntityDescription(node);
             if (entityName.isEmpty()) {
@@ -106,10 +106,6 @@ public class EntitiesLoader {
 
     private String getEntityDescription(Node node) {
         return node.getAttribute("description");
-    }
-
-    private String getEntityType(Graph graph) {
-        return graph.getId().getId().toLowerCase();
     }
 
 }
