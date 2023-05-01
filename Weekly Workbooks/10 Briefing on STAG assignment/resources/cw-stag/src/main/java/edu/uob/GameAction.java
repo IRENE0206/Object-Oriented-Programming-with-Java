@@ -5,23 +5,29 @@ import java.util.List;
 import java.util.Set;
 
 public class GameAction {
-    // One or more possible trigger phrases (ANY of which can be used to initiate the action)
+    // One or more possible trigger phrases (*ANY* of which can be used to initiate the action)
     private final List<String> triggerPhrases;
 
-    // *One or more* subject entities
-    // ALL of which need to be available to perform the action:
-    // in the inventory of the player invoking the action OR in the room/location where the action is being *performed*
-    // subjects of an action can be locations, characters or furniture
+    /**
+     * One or more* subject entities
+     * ALL of which need to be available to perform the action:
+     * in the inventory of the player invoking the action OR in the room/location where the action is being *performed*
+     * subjects of an action can be locations, characters or furniture
+     */
     private final List<String> subjectEntityNames;
 
-    // optional, all removed by the action
-    // removed from its current location (which could be any location within the game)
-    // moved into the storeroom location
+    /**
+     * optional, all removed by the action
+     * removed from its current location (which could be *any* location within the game)
+     * moved into the storeroom location
+     */
     private final List<String> consumedEntityNames;
 
-    // optional, all created by the action
-    // moved from its current location (which might be in the storeroom)
-    // to the location in which the action is triggered.
+    /**
+     * optional, all created by the action
+     * moved from its current location (which might be in the storeroom)
+     * to the location in which the action is triggered.
+     */
     private final List<String> producedEntityNames;
 
     private String narration;
@@ -39,10 +45,6 @@ public class GameAction {
         this.triggerPhrases.add(triggerPhrase);
     }
 
-    public Location getTriggeredLocation() {
-        return this.triggeredLocation;
-    }
-
     public void setTriggeredLocation(Location triggeredLocation) {
         this.triggeredLocation = triggeredLocation;
     }
@@ -52,7 +54,7 @@ public class GameAction {
     }
 
     public void addSubjectEntityName(String entityName) {
-        this.subjectEntityNames.add(entityName.toLowerCase());
+        this.subjectEntityNames.add(entityName);
     }
 
     public boolean isConsumedEntityName(String entityName) {
@@ -60,7 +62,7 @@ public class GameAction {
     }
 
     public void addConsumedEntityName(String entityName) {
-        this.consumedEntityNames.add(entityName.toLowerCase());
+        this.consumedEntityNames.add(entityName);
     }
 
     public boolean isProducedEntityName(String entityName) {
@@ -68,7 +70,7 @@ public class GameAction {
     }
 
     public void addProducedEntityName(String entityName) {
-        this.producedEntityNames.add(entityName.toLowerCase());
+        this.producedEntityNames.add(entityName);
     }
 
     public void setNarration(String explanation) {
@@ -87,16 +89,16 @@ public class GameAction {
         if (!this.producedEntityNames.isEmpty()) {
             this.produceEntities(gameState);
         }
-        return this.getNarration() + playerHealthRunOut;
+        return this.getNarration() + "\n" + playerHealthRunOut;
     }
 
     private String consumeEntities(GameState gameState) {
         EntityVisitor consumeVisitor = new ConsumeVisitor(this.triggeredLocation, gameState);
-        List<GameEntity> consumedEntities = new ArrayList<>();
+        List<GameEntity> entitiesToConsume = new ArrayList<>();
         for (String entityName : this.consumedEntityNames) {
-            consumedEntities.add(gameState.getEntityByName(entityName));
+            entitiesToConsume.add(gameState.getEntityByName(entityName));
         }
-        for (GameEntity entity : consumedEntities) {
+        for (GameEntity entity : entitiesToConsume) {
             consumeVisitor.actOnEntity(entity);
         }
         return gameState.checkIfCurrentPlayerHealthRunOut();
@@ -104,11 +106,11 @@ public class GameAction {
 
     private void produceEntities(GameState gameState) {
         EntityVisitor produceVisitor = new ProduceVisitor(this.triggeredLocation, gameState);
-        List<GameEntity> producedEntities = new ArrayList<>();
+        List<GameEntity> entitiesToProduce = new ArrayList<>();
         for (String entityName : this.producedEntityNames) {
-            producedEntities.add(gameState.getEntityByName(entityName));
+            entitiesToProduce.add(gameState.getEntityByName(entityName));
         }
-        for (GameEntity entity : producedEntities) {
+        for (GameEntity entity : entitiesToProduce) {
             produceVisitor.actOnEntity(entity);
         }
     }
@@ -121,45 +123,34 @@ public class GameAction {
         }
         // is only valid if ALL subject entities are available to the player.
         for (String entityName : this.subjectEntityNames) {
-            if (this.isArtefactAndInOtherPlayerInv(entityName, gameState)) {
+            Location entityLocation = gameState.getEntityByName(entityName).getCurrentLocation();
+            if (entityLocation == null && this.isArtefactInOtherPlayerInv(entityName, gameState)) {
                 return false;
-            } else if (!this.isArtefactAndInCurrentPlayerInv(entityName, gameState) &&
-                    gameState.getEntityByName(entityName).getCurrentLocation() != this.triggeredLocation) {
+            } else if (entityLocation != this.triggeredLocation) {
                 return false;
             }
         }
-        return this.consumedAndProducedEntitiesNotInOtherPlayerInv(gameState);
-    }
-
-    private boolean consumedAndProducedEntitiesNotInOtherPlayerInv(GameState gameState) {
         return this.listedEntitiesNotInOtherPlayerInv(this.consumedEntityNames, gameState) &&
                 this.listedEntitiesNotInOtherPlayerInv(this.producedEntityNames, gameState);
     }
 
     private boolean listedEntitiesNotInOtherPlayerInv(List<String> entityNames, GameState gameState) {
         for (String entityName : entityNames) {
-            if (this.isArtefactAndInOtherPlayerInv(entityName, gameState)) {
+            Location entityLocation = gameState.getEntityByName(entityName).getCurrentLocation();
+            if (entityLocation == null && this.isArtefactInOtherPlayerInv(entityName, gameState)) {
                 return false;
             }
         }
         return true;
     }
 
-    private boolean isArtefactAndInOtherPlayerInv(String entityName, GameState gameState) {
-        Location entityLocation = gameState.getEntityByName(entityName).getCurrentLocation();
-        Player currentPlayer = gameState.getCurrentPlayer();
-        return entityLocation == null && currentPlayer.getArtefactByName(entityName) == null;
+    private boolean isArtefactInOtherPlayerInv(String entityName, GameState gameState) {
+        return gameState.getCurrentPlayer().getArtefactByName(entityName) == null;
     }
 
-    private boolean isArtefactAndInCurrentPlayerInv(String entityName, GameState gameState) {
-        Location entityLocation = gameState.getEntityByName(entityName).getCurrentLocation();
-        Player currentPlayer = gameState.getCurrentPlayer();
-        return entityLocation == null && currentPlayer.getArtefactByName(entityName) != null;
-    }
-
-    public boolean isGivenValidEntities(List<String> entityNamesMentionedInCommand) {
+    public boolean isGivenValidEntityNames(List<String> entityNamesMentioned) {
         int subjectEntitiesCount = 0;
-        for (String entityName : entityNamesMentionedInCommand) {
+        for (String entityName : entityNamesMentioned) {
             // System.out.println("entityName "+ entityName);
             if (this.isSubjectEntityName(entityName)) {
                 subjectEntitiesCount += 1;

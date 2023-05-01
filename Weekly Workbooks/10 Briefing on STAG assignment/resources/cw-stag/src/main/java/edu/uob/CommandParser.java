@@ -196,7 +196,7 @@ public class CommandParser {
     private boolean matchWithAction(GameAction gameAction) {
         gameAction.setTriggeredLocation(this.playerLocation);
         return gameAction.isGivenValidTriggerPhrases(this.triggerPhrasesFound) &&
-                gameAction.isGivenValidEntities(this.entityNamesFound) &&
+                gameAction.isGivenValidEntityNames(this.entityNamesFound) &&
                 gameAction.isPerformable(this.gameState);
     }
 
