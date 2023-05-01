@@ -29,32 +29,32 @@ public class ActionsLoader {
         for (int i = 1; i < actions.getLength(); i += 2) {
             Element action = (Element) actions.item(i);
             GameAction gameAction = new GameAction();
-            Element consumed = (Element) action.getElementsByTagName("consumed").item(0);
-            for (int j = 0; j < consumed.getElementsByTagName("entity").getLength(); j++) {
-                String entity = consumed.getElementsByTagName("entity").item(j).getTextContent();
-                gameAction.addConsumedEntityName(entity.toLowerCase());
-            }
-            Element subjects = (Element) action.getElementsByTagName("subjects").item(0);
-            for (int j = 0; j < subjects.getElementsByTagName("entity").getLength(); j++) {
-                String entity = subjects.getElementsByTagName("entity").item(j).getTextContent();
-                gameAction.addSubjectEntityName(entity.toLowerCase());
-            }
-            Element produced = (Element) action.getElementsByTagName("produced").item(0);
-            for (int j = 0; j < produced.getElementsByTagName("entity").getLength(); j++) {
-                String entity = produced.getElementsByTagName("entity").item(j).getTextContent();
-                gameAction.addProducedEntityName(entity.toLowerCase());
-            }
+            this.loadByTagName(action, "consumed", "entity", gameAction);
+            this.loadByTagName(action, "subjects", "entity", gameAction);
+            this.loadByTagName(action, "produced", "entity", gameAction);
             Element narration = (Element) action.getElementsByTagName("narration").item(0);
             String explanation = narration.getTextContent();
             gameAction.setNarration(explanation);
-            Element triggers = (Element) action.getElementsByTagName("triggers").item(0);
-            for (int j = 0; j < triggers.getElementsByTagName("keyphrase").getLength(); j++) {
-                String phrase = triggers.getElementsByTagName("keyphrase").item(j).getTextContent();
-                gameAction.addTriggerPhrases(phrase);
-                this.gameState.addAction(phrase.toLowerCase(), gameAction);
-            }
+            this.loadByTagName(action, "triggers", "keyphrase", gameAction);
         }
     }
 
+    private void loadByTagName(Element action, String attributeName, String tagName, GameAction gameAction) {
+        Element attribute = (Element) action.getElementsByTagName(attributeName).item(0);
+        NodeList nodes = attribute.getElementsByTagName(tagName);
+        for (int j = 0; j < nodes.getLength(); j++) {
+            String stringToAdd = nodes.item(j).getTextContent().toLowerCase();
+            if (attributeName.equalsIgnoreCase("consumed")) {
+                gameAction.addConsumedEntityName(stringToAdd);
+            } else if (attributeName.equalsIgnoreCase("subjects")) {
+                gameAction.addSubjectEntityName(stringToAdd);
+            } else if (attributeName.equalsIgnoreCase("produced")) {
+                gameAction.addProducedEntityName(stringToAdd);
+            } else if (attributeName.equalsIgnoreCase("triggers")) {
+                gameAction.addTriggerPhrases(stringToAdd);
+                this.gameState.addAction(stringToAdd, gameAction);
+            }
+        }
+    }
 
 }
