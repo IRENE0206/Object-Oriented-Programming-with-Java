@@ -13,18 +13,15 @@ import java.util.HashSet;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class LoadActionsTests {
-    private GameState basicGameState;
     private GameState extendedGameState;
+    private ExtendedActionsHelper extendedActionsHelper;
+
     @BeforeEach
     void setUp() {
-        basicGameState = loadFile("basic-actions.xml");
-        extendedGameState = loadFile("extended-actions.xml");
-    }
-
-    private GameState loadFile(String fileName) {
+        this.extendedGameState = new GameState();
+        String fileName = "extended-actions.xml";
         File file = Paths.get("config" + File.separator + fileName).toAbsolutePath().toFile();
-        GameState gameState = new GameState();
-        ActionsLoader actionsLoader = new ActionsLoader(gameState, file);
+        ActionsLoader actionsLoader = new ActionsLoader(extendedGameState, file);
         try {
             actionsLoader.loadActions();
         } catch (ParserConfigurationException parserConfigurationException) {
@@ -34,110 +31,60 @@ public class LoadActionsTests {
         } catch (SAXException saxException) {
             fail("SAXException was thrown when attempting to read " + fileName);
         }
-        return gameState;
+        this.extendedActionsHelper = new ExtendedActionsHelper();
     }
 
     @Test
-    void testLoadBasicActionsFile() {
-        String[] triggerPhrases0 = {"open", "unlock"};
-        String[] subjects0 = {"trapdoor", "key"};
-        String[] consumed0 = {"key"};
-        String[] produced0 = {"cellar"};
-        GameAction gameAction0 = triggerPhrasesLoadedBasic(triggerPhrases0);
-        subjectsLoaded(gameAction0, subjects0);
-        consumedLoaded(gameAction0, consumed0);
-        producedLoaded(gameAction0, produced0);
-        String[] triggerPhrases1 = {"chop", "cut", "cutDown"};
-        String[] subjects1 = {"tree", "axe"};
-        String[] consumed1 = {"tree"};
-        String[] produced1 = {"log"};
-        GameAction gameAction1 = triggerPhrasesLoadedBasic(triggerPhrases1);
-        subjectsLoaded(gameAction1, subjects1);
-        consumedLoaded(gameAction1, consumed1);
-        producedLoaded(gameAction1, produced1);
-        String[] triggerPhrases2 = {"drink"};
-        String[] subjects2 = {"potion"};
-        String[] consumed2 = {"potion"};
-        String[] produced2 = {"health"};
-        GameAction gameAction2 = triggerPhrasesLoadedBasic(triggerPhrases2);
-        subjectsLoaded(gameAction2, subjects2);
-        consumedLoaded(gameAction2, consumed2);
-        producedLoaded(gameAction2, produced2);
-        String[] triggerPhrases3 = {"fight", "hit", "attack"};
-        String[] subjects3 = {"elf"};
-        String[] consumed3 = {"health"};
-        GameAction gameAction3 = triggerPhrasesLoadedBasic(triggerPhrases3);
-        subjectsLoaded(gameAction3, subjects3);
-        consumedLoaded(gameAction3, consumed3);
-    }
-
-    private GameAction triggerPhrasesLoadedBasic(String[] triggerPhrases) {
-        GameAction gameAction = null;
-        for (int i = 0; i < triggerPhrases.length; i++) {
-            String phrase = triggerPhrases[i].toLowerCase();
-            assertNotNull(this.basicGameState.getPossibleActions(phrase));
-            HashSet<GameAction> actions = this.basicGameState.getPossibleActions(phrase);
-            assertEquals(1, actions.size());
-            if (i == 0) {
-                gameAction = (GameAction) actions.toArray()[0];
-            } else {
-                GameAction a = (GameAction) actions.toArray()[0];
-                assertSame(gameAction, a);
-            }
+    void testLoadExtendedActionsFile() {
+        for (int i = 0; i < this.extendedActionsHelper.getActionsCount(); i++) {
+            String[] triggers = this.extendedActionsHelper.getActionAttribute(i, "triggers");
+            GameAction action = this.testTriggersLoadedAndGetAction(triggers);
+            String[] subjects = this.extendedActionsHelper.getActionAttribute(i, "subjects");
+            this.testSubjectsLoaded(action, subjects);
+            String[] consumed = this.extendedActionsHelper.getActionAttribute(i, "consumed");
+            this.testConsumedLoaded(action, consumed);
+            String[] produced = this.extendedActionsHelper.getActionAttribute(i, "produced");
+            this.testProducedLoaded(action, produced);
+            String[] narration = this.extendedActionsHelper.getActionAttribute(i, "narration");
+            this.testNarrationLoaded(action, narration);
         }
-        assertNotNull(gameAction);
-        return gameAction;
     }
 
-    private void subjectsLoaded(GameAction gameAction, String[] subjects) {
+    private GameAction testTriggersLoadedAndGetAction(String[] triggers) {
+        assertTrue(triggers.length >= 1);
+        GameAction firstActionMatchedWithFirstTrigger = (GameAction) this.extendedGameState.getPossibleActions(triggers[0]).toArray()[0];
+        for (String trigger : triggers) {
+            HashSet<GameAction> possibleActions = this.extendedGameState.getPossibleActions(trigger);
+            assertNotNull(possibleActions);
+            assertEquals(1, possibleActions.size());
+            GameAction actionMatched = (GameAction) possibleActions.toArray()[0];
+            assertEquals(firstActionMatchedWithFirstTrigger, actionMatched);
+        }
+        return firstActionMatchedWithFirstTrigger;
+    }
+
+    private void testSubjectsLoaded(GameAction gameAction, String[] subjects) {
+        assertTrue(subjects.length >= 1);
         for (String subject : subjects) {
             assertTrue(gameAction.isSubjectEntityName(subject));
         }
     }
 
-    private void consumedLoaded(GameAction gameAction, String[] consumed) {
+    private void testConsumedLoaded(GameAction gameAction, String[] consumed) {
         for (String c : consumed) {
             assertTrue(gameAction.isConsumedEntityName(c));
         }
     }
 
-    private void producedLoaded(GameAction gameAction, String[] produced) {
+    private void testProducedLoaded(GameAction gameAction, String[] produced) {
         for (String p : produced) {
             assertTrue(gameAction.isProducedEntityName(p));
         }
     }
 
-    @Test
-    void testLoadExtendedActionsFile() {
-        assertNotNull(this.extendedGameState.getPossibleActions("cut down"));
-        assertNull(this.extendedGameState.getPossibleActions("cutDown"));
-        GameAction payAction = (GameAction) this.extendedGameState.getPossibleActions("pay").toArray()[0];
-        String[] subjects0 = {"elf", "coin"};
-        subjectsLoaded(payAction, subjects0);
-        String[] consumed0 = {"coin"};
-        consumedLoaded(payAction, consumed0);
-        String[] produced0 = {"shovel"};
-        producedLoaded(payAction, produced0);
-        GameAction blowAction = (GameAction) this.extendedGameState.getPossibleActions("blow").toArray()[0];
-        String[] subjects1 = {"horn"};
-        subjectsLoaded(blowAction, subjects1);
-        String[] produced1 = {"lumberjack"};
-        producedLoaded(blowAction, produced1);
-        GameAction bridgeAction = (GameAction) this.extendedGameState.getPossibleActions("bridge").toArray()[0];
-        String[] subjects2 = {"log", "river"};
-        subjectsLoaded(bridgeAction, subjects2);
-        String[] consumed2 = {"log"};
-        consumedLoaded(bridgeAction, consumed2);
-        String[] produced2 = {"clearing"};
-        producedLoaded(bridgeAction, produced2);
-        GameAction digAction = (GameAction) this.extendedGameState.getPossibleActions("dig").toArray()[0];
-        String[] subjects3 = {"ground", "shovel"};
-        subjectsLoaded(digAction, subjects3);
-        String[] consumed3 = {"ground"};
-        consumedLoaded(digAction, consumed3);
-        String[] produced3 = {"hole", "gold"};
-        producedLoaded(digAction, produced3);
+    private void testNarrationLoaded(GameAction gameAction, String[] narration) {
+        assertEquals(1, narration.length);
+        assertEquals(narration[0], gameAction.getNarration());
     }
-
 
 }

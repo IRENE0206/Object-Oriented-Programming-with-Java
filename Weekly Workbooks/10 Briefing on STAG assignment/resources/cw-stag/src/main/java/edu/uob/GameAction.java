@@ -89,7 +89,11 @@ public class GameAction {
         if (!this.producedEntityNames.isEmpty()) {
             this.produceEntities(gameState);
         }
-        return this.getNarration() + "\n" + playerHealthRunOut;
+        if (playerHealthRunOut.isEmpty()) {
+            return this.getNarration();
+        } else {
+            return this.getNarration() + "\n" + playerHealthRunOut;
+        }
     }
 
     private String consumeEntities(GameState gameState) {
@@ -126,7 +130,7 @@ public class GameAction {
             Location entityLocation = gameState.getEntityByName(entityName).getCurrentLocation();
             if (entityLocation == null && this.isArtefactInOtherPlayerInv(entityName, gameState)) {
                 return false;
-            } else if (entityLocation != this.triggeredLocation) {
+            } else if (entityLocation != null && entityLocation != this.triggeredLocation) {
                 return false;
             }
         }

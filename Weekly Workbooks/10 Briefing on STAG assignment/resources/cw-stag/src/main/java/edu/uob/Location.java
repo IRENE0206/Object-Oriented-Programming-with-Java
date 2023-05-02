@@ -169,10 +169,6 @@ public class Location extends GameEntity {
         return this.characters.get(characterName);
     }
 
-    public int getPathsNumber() {
-        return this.locations.size();
-    }
-
     public String observedByCurrentPlayer(String currentPlayerName) {
         // prints names and descriptions of entities in the current location
         StringBuilder information = new StringBuilder("<Current location>:\n");

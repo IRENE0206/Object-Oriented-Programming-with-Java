@@ -112,7 +112,7 @@ public class CommandParser {
     }
 
     private void findTriggerPhrases() {
-        for (String triggerPhrase : this.gameState.getActions().keySet()) {
+        for (String triggerPhrase : this.gameState.getTriggerPhrases()) {
             // action triggers can have spaces
             if (triggerPhrase.contains(" ")) {
                 this.findTriggerPhraseWithSpace(triggerPhrase);

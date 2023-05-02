@@ -2,11 +2,12 @@ package edu.uob;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 public class GameState {
     // a "special" location that is the starting point for an adventure
     private Location startLocation;
-    // a container for all of the entities that have no initial location in the game
+    // a container for all entities that have no initial location in the game
     private Location storeroom;
     private final HashMap<String, Location> locations;
 
@@ -103,8 +104,8 @@ public class GameState {
         return this.actions.get(triggerPhrase.toLowerCase());
     }
 
-    public HashMap<String, HashSet<GameAction>> getActions() {
-        return this.actions;
+    public Set<String> getTriggerPhrases() {
+        return this.actions.keySet();
     }
 
     public GameEntity getEntityByName(String entityName) {
@@ -133,12 +134,6 @@ public class GameState {
             return;
         }
         this.entities.put(furniture.getName(), furniture);
-    }
-
-    public void printAllEntities() {
-        for (String s : this.entities.keySet()) {
-            System.out.println(s);
-        }
     }
 
     public String checkIfCurrentPlayerHealthRunOut() {
