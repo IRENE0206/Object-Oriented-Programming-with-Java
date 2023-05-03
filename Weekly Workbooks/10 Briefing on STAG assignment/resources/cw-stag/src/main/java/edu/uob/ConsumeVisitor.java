@@ -9,44 +9,38 @@ public class ConsumeVisitor extends EntityVisitor {
     // it is removed and moved to the storeroom
     // if an entity (artefact/furniture/character) is NOT in the player's current location,
     // it is still removed and moved to the storeroom
-
-    public ConsumeVisitor(Location triggeredLocation, GameState gameState) {
-        super(triggeredLocation, gameState);
+    public ConsumeVisitor(Location triggeredLocation, Location storeroom) {
+        super(triggeredLocation, storeroom);
     }
 
     @Override
     public void actOnEntity(GameEntity gameEntity) {
-        gameEntity.getActedUpon(this);
+        if (gameEntity != null) {
+            gameEntity.getActedUpon(this);
+        }
     }
 
     @Override
     public void actOnEntity(Artefact artefact) {
-        if (artefact == null) {
-            return;
+        if (artefact != null) {
+            // if an artefact is in the player's inventory,
+            // it is removed and moved to the storeroom
+            artefact.addToLocation(this.getStoreroom());
         }
-        artefact.removeFromCurrentLocation();
-        // if an artefact is in the player's inventory,
-        // it is removed and moved to the storeroom
-        artefact.setCurrentOwner(null);
-        artefact.addToLocation(this.getGameState().getStoreroom());
     }
 
     @Override
     public void actOnEntity(Furniture furniture) {
-        if (furniture == null) {
-            return;
+        if (furniture != null) {
+            furniture.addToLocation(this.getStoreroom());
         }
-        furniture.removeFromCurrentLocation();
-        furniture.addToLocation(this.getGameState().getStoreroom());
     }
 
     @Override
     public void actOnEntity(Character character) {
-        if (character == null) {
-            return;
+        if (character != null) {
+            character.addToLocation(this.getStoreroom());
         }
-        character.removeFromCurrentLocation();
-        character.addToLocation(this.getGameState().getStoreroom());
     }
 
     // Consumed locations are not moved to the storeroom

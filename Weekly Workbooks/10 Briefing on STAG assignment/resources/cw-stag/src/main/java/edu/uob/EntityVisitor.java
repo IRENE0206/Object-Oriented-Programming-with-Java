@@ -2,15 +2,15 @@ package edu.uob;
 
 public abstract class EntityVisitor {
     private final Location triggeredLocation;
-    private final GameState gameState;
+    private final Location storeroom;
 
-    public EntityVisitor(Location triggeredLocation, GameState gameState) {
+    public EntityVisitor(Location triggeredLocation, Location storeroom) {
         this.triggeredLocation = triggeredLocation;
-        this.gameState = gameState;
+        this.storeroom = storeroom;
     }
 
-    public GameState getGameState() {
-        return this.gameState;
+    public Location getStoreroom() {
+        return this.storeroom;
     }
 
     public Location getTriggeredLocation() {

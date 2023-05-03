@@ -1,6 +1,7 @@
 package edu.uob;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 // represents the user in the game
@@ -25,11 +26,15 @@ public class Player extends GameEntity {
 
     @Override
     public void addToLocation(Location location) {
-        if (location == null) {
-            return;
-        }
         this.removeFromCurrentLocation();
-        location.addEntity(this);
+        if (location != null) {
+            location.addEntity(this);
+        }
+    }
+
+    @Override
+    public void addToGameState(GameState gameState) {
+        gameState.addEntity(this);
     }
 
     @Override
@@ -46,24 +51,30 @@ public class Player extends GameEntity {
         artefact.setCurrentOwner(this);
     }
 
-    public Artefact getArtefactByName(String artefactName) {
-        return this.artefacts.get(artefactName);
+    public boolean doesNotHaveArtefact(String artefactName) {
+        return !this.artefacts.containsKey(artefactName);
     }
 
-    public Set<String> getArtefactNames() {
-        return this.artefacts.keySet();
+    public String showInventoryContents() {
+        StringBuilder information = new StringBuilder("All the artefacts currently being carried by ");
+        information.append(this.getName()).append(":\n");
+        for (Artefact artefact : this.artefacts.values()) {
+            information.append(artefact.getDescription()).append("\n");
+        }
+        return information.toString();
     }
 
     public void dropArtefact(String artefactName) {
         Artefact artefact = this.artefacts.get(artefactName);
-        if (artefact == null) {
-            return;
+        if (artefact != null) {
+            artefact.addToLocation(this.getCurrentLocation());
         }
         // puts down an artefact from player's inventory
-        this.artefacts.remove(artefactName);
-        artefact.setCurrentOwner(null);
         // places it into the current location
-        this.getCurrentLocation().addEntity(artefact);
+    }
+
+    public void removeArtefact(String artefactName) {
+        this.artefacts.remove(artefactName);
     }
 
     public int getHealth() {
@@ -82,25 +93,22 @@ public class Player extends GameEntity {
         }
     }
 
-    private void restoreHealth() {
-        this.health = 3;
-    }
-
-    public String checkHealthRunOut(Location startLocation) {
+    public String dieIfHealthRunOut(Location startLocation) {
         if (this.health != 0) {
             return "";
         }
         // When a player's health runs out (i.e. when it becomes zero)
         // they should lose all items in their inventory
-        for (String artefactName : this.artefacts.keySet()) {
+        Set<String> artefactNames = new HashSet<>(this.artefacts.keySet());
+        for (String artefactName : artefactNames) {
             // (which are dropped in the location where they ran out of health)
             this.dropArtefact(artefactName);
         }
         // The player should then be transported to the start location of the game and
         this.addToLocation(startLocation);
         // their health level restored to full (i.e. 3)
-        this.restoreHealth();
-        return this.getName() + " died and lost all items, must return to the start of the game\n";
+        this.health = 3;
+        return this.getName() + " died and lost all items, returned to the start of the game\n";
     }
 
 }

@@ -17,7 +17,15 @@ public class Furniture extends GameEntity {
 
     @Override
     public void addToLocation(Location location) {
-        location.addEntity(this);
+        this.removeFromCurrentLocation();
+        if (location != null) {
+            location.addEntity(this);
+        }
+    }
+
+    @Override
+    public void addToGameState(GameState gameState) {
+        gameState.addEntity(this);
     }
 
     @Override

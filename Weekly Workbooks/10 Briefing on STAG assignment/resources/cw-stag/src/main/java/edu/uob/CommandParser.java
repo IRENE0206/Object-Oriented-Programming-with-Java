@@ -39,32 +39,35 @@ public class CommandParser {
         }
         this.setCurrentPlayer();
         this.findBuiltinKeywords();
+        if (this.basicCommandKeywordsFound.size() > 1) {
+            return "Invalid syntax: more than one builtin command keywords";
+        }
         this.findTriggerPhrases();
         this.findEntityNames();
+
         String singleBuiltinKeywordMentioned = getTheOnlyBasicCommandKeywordMentioned();
-        boolean noTriggerPhrasesFound = this.triggerPhrasesFound.isEmpty();
+        boolean findTriggerWords = !this.triggerPhrasesFound.isEmpty();
         int entityNamesCount = this.entityNamesFound.size();
-        /*
-         System.out.println(singleBuiltinKeywordMentioned);
-         System.out.println(noTriggerPhrasesFound);
-         System.out.println(entityNamesCount);
-        */
-        if (singleBuiltinKeywordMentioned != null && noTriggerPhrasesFound && entityNamesCount <= 1) {
+        if (singleBuiltinKeywordMentioned != null && entityNamesCount > 1) {
+            return "Invalid syntax: builtin command cannot contain more than one entity name";
+        } else if (singleBuiltinKeywordMentioned != null && findTriggerWords) {
+            return "Invalid syntax: builtin command cannot contain trigger words and vice versa";
+        } else if (singleBuiltinKeywordMentioned != null) {
             return chooseBasicCommand(singleBuiltinKeywordMentioned);
-        } else if (singleBuiltinKeywordMentioned == null && !noTriggerPhrasesFound && entityNamesCount >= 1) {
-            return chooseAction();
+        } else if (findTriggerWords && entityNamesCount == 0) {
+            return "Invalid syntax: an action command must contain at least one subject";
         }
-        return "Invalid syntax";
+        return chooseAction();
     }
 
     private String reformatCommand() {
         // incoming command messages begin with the username of the player issuing that command
         String[] strings = this.rawCommandInLowerCase.split(":", 2);
-        if (strings.length != 2) {
+        if (strings.length < 2) {
             return "Wrong format of incoming command message";
         }
         // everything before the first : is the player's name
-        this.currentPlayerName = strings[0].trim().replaceAll("\\s+", " ");
+        this.currentPlayerName = strings[0];
         if (this.isInvalidPlayerName(this.currentPlayerName)) {
             return "Wrong format of player's name";
         }
@@ -145,27 +148,19 @@ public class CommandParser {
     }
 
     private String getTheOnlyBasicCommandKeywordMentioned() {
-        if (this.basicCommandKeywordsFound.size() != 1) {
+        if (this.basicCommandKeywordsFound.size() == 0) {
             return null;
         }
         return this.basicCommandKeywordsFound.get(0);
-    }
-
-    private String getTheEntityForBuiltinCommandFound() {
-        if (this.entityNamesFound.size() != 1) {
-            return null;
-        }
-        return this.entityNamesFound.get(0);
     }
 
     // Game Actions
     private String chooseAction() {
         Set<GameAction> allValidActionsMatched = new HashSet<>();
         for (String triggerPhrase : this.triggerPhrasesFound) {
-            // System.out.println(triggerPhrase);
+            System.out.println(triggerPhrase);
             allValidActionsMatched.addAll(this.matchWithTriggerPhrase(triggerPhrase));
         }
-        // System.out.println("I mean " + allValidActionsMatched.size());
         GameAction singlePerformableAction = this.getSinglePerformableAction(allValidActionsMatched);
         if (singlePerformableAction == null) {
             return "Invalid command: fail to match a single performable action";
@@ -183,9 +178,9 @@ public class CommandParser {
     private Set<GameAction> matchWithTriggerPhrase(String triggerPhrase) {
         Set<GameAction> allValidActionsMatchedWithGivenTriggerPhrase = new HashSet<>();
         for (GameAction gameAction : this.gameState.getPossibleActions(triggerPhrase)) {
-            // System.out.println(this.gameState.getPossibleActions(triggerPhrase).size());
+            System.out.println(this.gameState.getPossibleActions(triggerPhrase).size());
             if (this.matchWithAction(gameAction)) {
-                // System.out.println("YES");
+                System.out.println("Match ! YES");
                 allValidActionsMatchedWithGivenTriggerPhrase.add(gameAction);
                 // System.out.println(allValidActionsMatchedWithGivenTriggerPhrase.size());
             }
@@ -195,9 +190,9 @@ public class CommandParser {
 
     private boolean matchWithAction(GameAction gameAction) {
         gameAction.setTriggeredLocation(this.playerLocation);
-        return gameAction.isGivenValidTriggerPhrases(this.triggerPhrasesFound) &&
-                gameAction.isGivenValidEntityNames(this.entityNamesFound) &&
-                gameAction.isPerformable(this.gameState);
+        return gameAction.isGivenValidTriggerPhrases(this.triggerPhrasesFound)
+                && gameAction.isGivenValidEntityNames(this.entityNamesFound)
+                && gameAction.isPerformable(this.gameState);
     }
 
     // Basic Commands
@@ -221,7 +216,7 @@ public class CommandParser {
             return this.getArtefactCommand(entityNameFound);
         } else if (commandKeyword.equalsIgnoreCase(this.basicCommandKeywords.get(3))) {
             return this.dropArtefactCommand(entityNameFound);
-        } else if (commandKeyword.equalsIgnoreCase(this.basicCommandKeywords.get(4))){
+        } else if (commandKeyword.equalsIgnoreCase(this.basicCommandKeywords.get(4))) {
             return this.goToLocationCommand(entityNameFound);
         }
         return "Invalid syntax for " + commandKeyword;
@@ -231,16 +226,15 @@ public class CommandParser {
         if (this.entityNamesFound.size() == 0) {
             return chooseBuiltinCommandWithNoEntity(commandKeyword);
         }
-        String gameEntityName = getTheEntityForBuiltinCommandFound();
-        if (gameEntityName == null || entityNameComeBeforeBuiltinKeyword(gameEntityName, commandKeyword)) {
-            return "Invalid syntax for " + commandKeyword;
+        String gameEntityName = this.entityNamesFound.get(0);
+        if (entityNameComeBeforeBuiltinKeyword(gameEntityName, commandKeyword)) {
+            return "Invalid syntax: " + gameEntityName + " should not come before " + commandKeyword;
         }
-        return chooseBuiltinCommandWithOneEntity(commandKeyword, gameEntityName);
+        return chooseBuiltinCommandWithOneEntity(commandKeyword, this.entityNamesFound.get(0));
     }
 
     private String inventoryCommand() {
-        return "All the artefacts currently being carried by " + this.currentPlayerName + ":\n" +
-                String.join(",", this.currentPlayer.getArtefactNames());
+        return this.currentPlayer.showInventoryContents();
     }
 
     private String getArtefactCommand(String gameEntityName) {
@@ -248,20 +242,19 @@ public class CommandParser {
         Artefact artefact = this.playerLocation.getArtefactByName(gameEntityName);
         if (artefact != null) {
             this.currentPlayer.pickUpArtefact(artefact);
-            return this.currentPlayerName + " picks up " + gameEntityName +
-                    " from the " + locationName + " and adds it into inventory";
+            return this.currentPlayerName + " picked up " + gameEntityName
+                    + " from the " + locationName + " and added it into inventory";
         }
         return "Cannot pick up " + gameEntityName + " from " + locationName;
     }
 
     private String dropArtefactCommand(String gameEntityName) {
-        Artefact artefact = this.currentPlayer.getArtefactByName(gameEntityName);
-        if (artefact == null) {
+        if (this.currentPlayer.doesNotHaveArtefact(gameEntityName)) {
             return "There is no " + gameEntityName + " in " + this.currentPlayerName +"'s inventory";
         }
         this.currentPlayer.dropArtefact(gameEntityName);
-        return this.currentPlayerName + "puts down " + gameEntityName +
-                "from inventory and places it into " + this.playerLocation.getName();
+        return this.currentPlayerName + "puts down " + gameEntityName
+                + "from inventory and places it into " + this.playerLocation.getName();
     }
 
     private String goToLocationCommand(String gameEntityName) {
@@ -271,7 +264,7 @@ public class CommandParser {
             return "There is no path to " + gameEntityName + " from " + currentLocationName;
         }
         this.currentPlayer.addToLocation(destination);
-        return this.currentPlayerName + " moves from " + currentLocationName + " to " + gameEntityName;
+        return destination.observedByCurrentPlayer(this.currentPlayerName);
     }
 
     private String lookCommand() {

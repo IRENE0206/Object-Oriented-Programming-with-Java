@@ -137,4 +137,56 @@
         <narration>You blow the horn and as if by magic, a lumberjack appears !</narration>
     </action>
 
+    <action>
+        <triggers>
+            <keyphrase>shut down</keyphrase>
+            <keyphrase>close</keyphrase>
+            <keyphrase>lock</keyphrase>
+        </triggers>
+        <subjects>
+            <entity>trapdoor</entity>
+        </subjects>
+        <consumed>
+            <entity>cellar</entity>
+        </consumed>
+        <produced>
+        </produced>
+        <narration>You lock the door to the cellar</narration>
+    </action>
+
+    <action>
+        <triggers>
+            <keyphrase>kill</keyphrase>
+        </triggers>
+        <subjects>
+            <entity>elf</entity>
+            <entity>cellar</entity>
+        </subjects>
+        <consumed>
+            <entity>elf</entity>
+            <entity>health</entity>
+        </consumed>
+        <produced>
+        </produced>
+        <narration>You kill the elf with the axe and lose some health in the fight</narration>
+    </action>
+
+    <action>
+        <triggers>
+            <keyphrase>kill</keyphrase>
+            <keyphrase>bury</keyphrase>
+        </triggers>
+        <subjects>
+            <entity>lumberjack</entity>
+            <entity>hole</entity>
+            <entity>shovel</entity>
+        </subjects>
+        <consumed>
+            <entity>lumberjack</entity>
+            <entity>hole</entity>
+        </consumed>
+        <produced>
+        </produced>
+        <narration>You kill the lumberjack with the shovel and bury his body in the hole you dig</narration>
+    </action>
 </actions>

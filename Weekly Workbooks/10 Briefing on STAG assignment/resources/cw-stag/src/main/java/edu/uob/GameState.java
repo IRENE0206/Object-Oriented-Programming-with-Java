@@ -29,11 +29,9 @@ public class GameState {
     }
 
     public void setStartLocation(Location l) {
-        if (l == null) {
-            return;
+        if (l != null) {
+            this.startLocation = l;
         }
-        this.startLocation = l;
-        this.entities.put(l.getName(), l);
     }
 
     public Location getStartLocation() {
@@ -53,11 +51,9 @@ public class GameState {
     // an action places them into another location within the game
     // there will be no paths to/from it
     public void setStoreroom(Location l) {
-        if (l == null) {
-            return;
+        if (l != null) {
+            this.storeroom = l;
         }
-        this.storeroom = l;
-        this.entities.put(l.getName(), l);
     }
 
     public Location getStoreroom() {
@@ -65,11 +61,9 @@ public class GameState {
     }
 
     public void addLocation(Location l) {
-        if (l == null) {
-            return;
+        if (l != null) {
+            this.locations.put(l.getName(), l);
         }
-        this.locations.put(l.getName(), l);
-        this.entities.put(l.getName(), l);
     }
 
     public Location getLocationByName(String locationName) {
@@ -115,28 +109,35 @@ public class GameState {
         return this.entities.get(entityName.toLowerCase());
     }
 
+    public void addEntity(GameEntity gameEntity) {
+        gameEntity.addToGameState(this);
+    }
+
     public void addEntity(Character character) {
-        if (character == null) {
-            return;
+        if (character != null) {
+            this.entities.put(character.getName(), character);
         }
-        this.entities.put(character.getName(), character);
     }
 
     public void addEntity(Artefact artefact) {
-        if (artefact == null) {
-            return;
+        if (artefact != null) {
+            this.entities.put(artefact.getName(), artefact);
         }
-        this.entities.put(artefact.getName(), artefact);
     }
 
     public void addEntity(Furniture furniture) {
-        if (furniture == null) {
-            return;
+        if (furniture != null) {
+            this.entities.put(furniture.getName(), furniture);
         }
-        this.entities.put(furniture.getName(), furniture);
+    }
+
+    public void addEntity(Location location) {
+        if (location != null) {
+            this.entities.put(location.getName(), location);
+        }
     }
 
     public String checkIfCurrentPlayerHealthRunOut() {
-        return this.currentPlayer.checkHealthRunOut(this.startLocation);
+        return this.currentPlayer.dieIfHealthRunOut(this.startLocation);
     }
 }

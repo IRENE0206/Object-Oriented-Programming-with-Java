@@ -100,7 +100,7 @@ public final class GameServer {
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()))) {
             System.out.println("Connection established");
             String incomingCommand = reader.readLine();
-            if(incomingCommand != null) {
+            if (incomingCommand != null) {
                 System.out.println("Received message from " + incomingCommand);
                 String result = handleCommand(incomingCommand);
                 writer.write(result);

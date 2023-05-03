@@ -47,11 +47,12 @@ public class EntitiesLoader {
                 // the start location can be called anything we like,
                 // however it will always be the first location that appears in the "entities" file.
                 this.gameState.setStartLocation(l);
-            } else if (l.getName().equalsIgnoreCase("storeroom")){
+            } else if (l.getName().equalsIgnoreCase("storeroom")) {
                 this.gameState.setStoreroom(l);
             } else {
                 this.gameState.addLocation(l);
             }
+            this.gameState.addEntity(l);
         }
         // paths subgraph will always appear after the locations
         ArrayList<Edge> paths = sections.get(1).getEdges();
@@ -62,15 +63,9 @@ public class EntitiesLoader {
         for (Edge path : paths) {
             Node fromNode = path.getSource().getNode();
             String fromName = getEntityName(fromNode);
-            if (fromName.isEmpty()) {
-                continue;
-            }
             Location fromLocation = this.gameState.getLocationByName(fromName);
             Node toNode = path.getTarget().getNode();
             String toName = getEntityName(toNode);
-            if (toName.isEmpty()) {
-                continue;
-            }
             Location toLocation = this.gameState.getLocationByName(toName);
             fromLocation.addEntity(toLocation);
         }
@@ -84,18 +79,17 @@ public class EntitiesLoader {
             if (entityName.isEmpty()) {
                 continue;
             }
+            GameEntity gameEntity = null;
             if (entityType.equalsIgnoreCase("characters")) {
-                Character character = new Character(entityName, entityDescription);
-                location.addEntity(character);
-                this.gameState.addEntity(character);
+                gameEntity = new Character(entityName, entityDescription);
             } else if (entityType.equalsIgnoreCase("artefacts")) {
-                Artefact artefact = new Artefact(entityName, entityDescription);
-                location.addEntity(artefact);
-                this.gameState.addEntity(artefact);
+                gameEntity = new Artefact(entityName, entityDescription);
             } else if (entityType.equalsIgnoreCase("furniture")) {
-                Furniture furniture = new Furniture(entityName, entityDescription);
-                location.addEntity(furniture);
-                this.gameState.addEntity(furniture);
+                gameEntity = new Furniture(entityName, entityDescription);
+            }
+            if (gameEntity != null) {
+                location.addEntity(gameEntity);
+                this.gameState.addEntity(gameEntity);
             }
         }
     }

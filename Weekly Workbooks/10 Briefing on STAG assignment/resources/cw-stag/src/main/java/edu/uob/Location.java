@@ -21,6 +21,7 @@ public class Location extends GameEntity {
         this.characters = new HashMap<>();
         this.locations = new HashMap<>();
         this.players = new HashMap<>();
+        this.setCurrentLocation(this);
     }
 
     @Override
@@ -35,48 +36,37 @@ public class Location extends GameEntity {
     }
 
     @Override
+    public void addToGameState(GameState gameState) {
+        gameState.addEntity(this);
+    }
+
+    @Override
     public void getActedUpon(EntityVisitor entityVisitor) {
         entityVisitor.actOnEntity(this);
     }
 
     public void removeEntity(Artefact artefact) {
         if (artefact != null) {
-            this.removeArtefact(artefact.getName());
+            this.artefacts.remove(artefact.getName());
         }
     }
 
-    private void removeArtefact(String artefactName) {
-        this.artefacts.remove(artefactName);
-    }
-
-    public void removeEntity(Furniture furniture) {
-        if (furniture != null) {
-            this.removeFurniture(furniture.getName());
+    public void removeEntity(Furniture furnitureToRemove) {
+        if (furnitureToRemove != null) {
+            this.furniture.remove(furnitureToRemove.getName());
         }
-    }
-
-    private void removeFurniture(String furnitureName) {
-        this.furniture.remove(furnitureName);
     }
 
     public void removeEntity(Character character) {
         if (character != null) {
-            this.removeCharacter(character.getName());
+            this.characters.remove(character.getName());
         }
-    }
-
-    private void removeCharacter(String characterName) {
-        this.characters.remove(characterName);
     }
 
     public void removeEntity(Location location) {
         if (location != null) {
-            this.removePathToLocation(location.getName());
+            this.locations.remove(location.getName());
         }
-    }
-
-    private void removePathToLocation(String locationName) {
-        this.locations.remove(locationName);
     }
 
     public void removeEntity(Player player) {
@@ -86,42 +76,30 @@ public class Location extends GameEntity {
     }
 
     public void addEntity(GameEntity gameEntity) {
-        gameEntity.addToLocation(this);
+        if (gameEntity != null) {
+            gameEntity.addToLocation(this);
+        }
     }
 
     public void addEntity(Artefact artefact) {
         if (artefact != null) {
-            this.addArtefact(artefact);
+            this.artefacts.put(artefact.getName(), artefact);
             artefact.setCurrentLocation(this);
         }
     }
 
-    private void addArtefact(Artefact artefact) {
-        if (artefact != null) {
-            this.artefacts.put(artefact.getName(), artefact);
+    public void addEntity(Furniture furnitureToAdd) {
+        if (furnitureToAdd != null) {
+            this.furniture.put(furnitureToAdd.getName(), furnitureToAdd);
+            furnitureToAdd.setCurrentLocation(this);
         }
-    }
-
-    public void addEntity(Furniture furniture) {
-        if (furniture != null) {
-            this.addFurniture(furniture);
-            furniture.setCurrentLocation(this);
-        }
-    }
-
-    private void addFurniture(Furniture furniture) {
-        this.furniture.put(furniture.getName(), furniture);
     }
 
     public void addEntity(Character character) {
         if (character != null) {
-            this.addCharacter(character);
+            this.characters.put(character.getName(), character);
             character.setCurrentLocation(this);
         }
-    }
-
-    private void addCharacter(Character character) {
-        this.characters.put(character.getName(), character);
     }
 
     public void addEntity(Location location) {
@@ -139,18 +117,6 @@ public class Location extends GameEntity {
             this.players.put(player.getName(), player);
             player.setCurrentLocation(this);
         }
-    }
-
-    public boolean hasArtefact(String artefactName) {
-        return this.artefacts.containsKey(artefactName);
-    }
-
-    public boolean hasFurniture(String furnitureName) {
-        return this.furniture.containsKey(furnitureName);
-    }
-
-    public boolean hasCharacter(String characterName) {
-        return this.characters.containsKey(characterName);
     }
 
     public Location getDestinationByName(String destinationName) {
@@ -171,34 +137,36 @@ public class Location extends GameEntity {
 
     public String observedByCurrentPlayer(String currentPlayerName) {
         // prints names and descriptions of entities in the current location
-        StringBuilder information = new StringBuilder("<Current location>:\n");
-        information.append(this.getName()).append(": ")
-                .append(this.getDescription()).append("\n").append("<Artefacts>:\n");
+        StringBuilder information = new StringBuilder(" * current location * \n");
+        information.append(this.getName()).append(": ").append(this.getDescription()).append("\n");
+        information.append(" * artefacts * \n");
         for (String artefactName : this.artefacts.keySet()) {
             information.append(artefactName).append(": ")
                     .append(this.getArtefactByName(artefactName).getDescription()).append("\n");
         }
-        information.append("<Furniture>:\n");
+        information.append(" * furniture * \n");
         for (String furnitureName : this.furniture.keySet()) {
             information.append(furnitureName).append(": ")
                     .append(this.getFurnitureByName(furnitureName).getDescription()).append("\n");
         }
-        information.append("<Characters>:\n");
+        information.append(" * characters * \n");
         for (String characterName : this.characters.keySet()) {
             information.append(characterName).append(": ")
                     .append(this.getCharacterByName(characterName).getDescription()).append("\n");
         }
         // lists paths to other locations
-        information.append("<Paths to>:\n");
+        information.append(" * paths to * \n");
         for (String locationName : this.locations.keySet()) {
             information.append(locationName).append(" ");
         }
         information.append("\n");
         // include other players in your description of a location when a look command is issued by a user
-        information.append("<Other players>:\n");
-        for (String playerName : this.players.keySet()) {
-            if (!playerName.equalsIgnoreCase(currentPlayerName)) {
-                information.append(playerName).append("\n");
+        if (this.players.size() > 1) {
+            information.append(" * Other players here * \n");
+            for (String playerName : this.players.keySet()) {
+                if (!playerName.equalsIgnoreCase(currentPlayerName)) {
+                    information.append(playerName).append("\n");
+                }
             }
         }
         return information.toString();

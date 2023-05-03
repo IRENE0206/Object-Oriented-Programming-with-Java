@@ -10,10 +10,10 @@ import java.nio.file.Paths;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static edu.uob.ExtendedEntitiesHelper.*;
 
 public class LoadEntitiesTests {
     private GameState extendedGameState;
-    private ExtendedEntitiesHelper extendedEntitiesHelper;
 
     @BeforeEach
     void setUp() {
@@ -28,51 +28,52 @@ public class LoadEntitiesTests {
         } catch (ParseException parseException) {
             fail("ParseException was thrown when attempting to read " + fileName);
         }
-        this.extendedEntitiesHelper = new ExtendedEntitiesHelper();
     }
 
     @Test
     void testLoadExtendedEntitiesFile() {
         Location storeroom = this.extendedGameState.getStoreroom();
         assertNotNull(storeroom);
-        Set<String> allLocationNames = this.extendedEntitiesHelper.getLocationNames();
+        Set<String> allLocationNames = getLocationNames();
         for (String locationName : allLocationNames) {
             Location location = this.extendedGameState.getLocationByName(locationName);
-            assertNotNull(location);
-            assertEquals(location, this.extendedGameState.getEntityByName(locationName));
+            assertNotNull(location, location + " should not be null");
+            assertEquals(location, this.extendedGameState.getEntityByName(locationName), "Should be the same location " + location);
             if (locationName.equals("storeroom")) {
-                assertEquals(location, storeroom);
+                assertEquals(location, storeroom, location + "should be storeroom");
             } else {
-                assertNull(location.getDestinationByName(locationName));
+                assertNull(location.getDestinationByName(locationName), location + " should have paths to " + locationName);
             }
             if (locationName.equals("cabin")) {
-                assertEquals(location, this.extendedGameState.getStartLocation());
+                assertEquals(location, this.extendedGameState.getStartLocation(), "Should be the same location " + location);
             }
             this.testEntityLoaded(location, locationName);
-            Set<String> possibleDestinations = this.extendedEntitiesHelper.getPossiblePathFromLocation(locationName);
-            this.testHasPathTo(location, possibleDestinations, allLocationNames);
+            Set<String> possibleDestinations = getPossiblePathFromLocation(locationName);
+            if (possibleDestinations != null) {
+                this.testHasPathTo(location, possibleDestinations, allLocationNames);
+            }
         }
     }
 
     private void testEntityLoaded(Location location, String locationName) {
         String[] informationType = {"artefacts", "furniture", "characters"};
         for (int i = 0; i < informationType.length; i++) {
-            String[] entityNames = this.extendedEntitiesHelper.getEntityNamesInLocation(locationName, informationType[i]);
+            Set<String> entityNames = getEntityNamesInLocation(locationName, informationType[i]);
             for (String entityName : entityNames) {
                 GameEntity entity = this.extendedGameState.getEntityByName(entityName);
-                assertEquals(location, entity.getCurrentLocation());
+                assertEquals(location, entity.getCurrentLocation(), "Should be the same location as " + location);
                 if (i == 0) {
                     Artefact artefact = location.getArtefactByName(entityName);
-                    assertNotNull(artefact);
-                    assertEquals(entity, artefact);
+                    assertNotNull(artefact, artefact + " should not be null");
+                    assertEquals(entity, artefact, entity + " should be the same as " + artefact);
                 } else if (i == 1) {
                     Furniture furniture = location.getFurnitureByName(entityName);
-                    assertNotNull(furniture);
-                    assertEquals(entity, furniture);
+                    assertNotNull(furniture, furniture + " should not be null");
+                    assertEquals(entity, furniture, furniture + " should be the same as " + entity);
                 } else {
                     Character character = location.getCharacterByName(entityName);
-                    assertNotNull(character);
-                    assertEquals(entity, character);
+                    assertNotNull(character, character + " should not be null");
+                    assertEquals(entity, character, character + " should be the same as " + entity);
                 }
             }
         }
@@ -82,10 +83,10 @@ public class LoadEntitiesTests {
         for (String locationName : allLocations) {
             Location destination = location.getDestinationByName(locationName);
             if (possibleDestinations.contains(locationName)) {
-                assertNotNull(destination);
-                assertEquals(destination, this.extendedGameState.getLocationByName(locationName));
+                assertNotNull(destination, destination + " should not be null");
+                assertEquals(destination, this.extendedGameState.getLocationByName(locationName), "Should be the same location " + destination);
             } else {
-                assertNull(destination);
+                assertNull(destination, location + " should not have path to " + locationName);
             }
         }
     }

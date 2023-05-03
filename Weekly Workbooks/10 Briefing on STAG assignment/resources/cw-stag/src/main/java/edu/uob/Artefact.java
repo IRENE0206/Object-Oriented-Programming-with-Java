@@ -21,9 +21,18 @@ public class Artefact extends GameEntity {
     @Override
     public void addToLocation(Location location) {
         this.removeFromCurrentLocation();
+        if (this.currentOwner != null) {
+            this.currentOwner.removeArtefact(this.getName());
+            this.setCurrentOwner(null);
+        }
         if (location != null) {
             location.addEntity(this);
         }
+    }
+
+    @Override
+    public void addToGameState(GameState gameState) {
+        gameState.addEntity(this);
     }
 
     @Override
@@ -35,10 +44,6 @@ public class Artefact extends GameEntity {
 
     public void setCurrentOwner(Player player) {
         this.currentOwner = player;
-    }
-
-    public Player getCurrentOwner() {
-        return this.currentOwner;
     }
 
 }

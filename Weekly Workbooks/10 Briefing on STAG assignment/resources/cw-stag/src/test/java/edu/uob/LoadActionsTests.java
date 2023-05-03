@@ -9,12 +9,13 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static edu.uob.ExtendedActionsHelper.*;
 
 public class LoadActionsTests {
     private GameState extendedGameState;
-    private ExtendedActionsHelper extendedActionsHelper;
 
     @BeforeEach
     void setUp() {
@@ -31,60 +32,73 @@ public class LoadActionsTests {
         } catch (SAXException saxException) {
             fail("SAXException was thrown when attempting to read " + fileName);
         }
-        this.extendedActionsHelper = new ExtendedActionsHelper();
     }
 
     @Test
     void testLoadExtendedActionsFile() {
-        for (int i = 0; i < this.extendedActionsHelper.getActionsCount(); i++) {
-            String[] triggers = this.extendedActionsHelper.getActionAttribute(i, "triggers");
+        int actionCount = getActionsCount();
+        for (int i = 0; i < actionCount; i++) {
+            Set<String> triggers = getActionTriggers(i);
+            if (i == actionCount - 2) {
+                assertEquals(1, triggers.size(), "The second last action only has one trigger 'kill'");
+                continue;
+            }
+            if (i == actionCount - 1) {
+                assertTrue(triggers.size() > 1 && triggers.remove("kill"), "The last action added has 'kill' as one of its two triggers");
+                HashSet<GameAction> possibleActions = this.extendedGameState.getPossibleActions("kill");
+                assertEquals(2, possibleActions.size(), "There should be two actions defined with 'kill' as one of their triggers");
+            }
             GameAction action = this.testTriggersLoadedAndGetAction(triggers);
-            String[] subjects = this.extendedActionsHelper.getActionAttribute(i, "subjects");
+            Set<String> subjects = getActionSubjects(i);
             this.testSubjectsLoaded(action, subjects);
-            String[] consumed = this.extendedActionsHelper.getActionAttribute(i, "consumed");
+            Set<String> consumed = getActionConsumed(i);
             this.testConsumedLoaded(action, consumed);
-            String[] produced = this.extendedActionsHelper.getActionAttribute(i, "produced");
+            Set<String> produced = getActionProduced(i);
             this.testProducedLoaded(action, produced);
-            String[] narration = this.extendedActionsHelper.getActionAttribute(i, "narration");
+            String narration = getActionNarration(i);
             this.testNarrationLoaded(action, narration);
         }
+
     }
 
-    private GameAction testTriggersLoadedAndGetAction(String[] triggers) {
-        assertTrue(triggers.length >= 1);
-        GameAction firstActionMatchedWithFirstTrigger = (GameAction) this.extendedGameState.getPossibleActions(triggers[0]).toArray()[0];
+    private GameAction testTriggersLoadedAndGetAction(Set<String> triggers) {
+        assertTrue(triggers.size() >= 1, "Triggers cannot be empty");
+        GameAction firstActionMatchedWithFirstTrigger = null;
         for (String trigger : triggers) {
             HashSet<GameAction> possibleActions = this.extendedGameState.getPossibleActions(trigger);
-            assertNotNull(possibleActions);
-            assertEquals(1, possibleActions.size());
+            assertNotNull(possibleActions, "Each trigger should match with at least one action");
+            assertEquals(1, possibleActions.size(), "Apart from the last two actions added, each trigger matches with one action");
             GameAction actionMatched = (GameAction) possibleActions.toArray()[0];
-            assertEquals(firstActionMatchedWithFirstTrigger, actionMatched);
+            if (firstActionMatchedWithFirstTrigger == null) {
+                firstActionMatchedWithFirstTrigger = actionMatched;
+            } else {
+                assertEquals(firstActionMatchedWithFirstTrigger, actionMatched, "Given triggers should match with the same action");
+            }
         }
         return firstActionMatchedWithFirstTrigger;
     }
 
-    private void testSubjectsLoaded(GameAction gameAction, String[] subjects) {
-        assertTrue(subjects.length >= 1);
+    private void testSubjectsLoaded(GameAction gameAction, Set<String> subjects) {
+        assertTrue(subjects.size() >= 1, "Each action should have at least one subject");
         for (String subject : subjects) {
-            assertTrue(gameAction.isSubjectEntityName(subject));
+            assertTrue(gameAction.isSubjectEntityName(subject), subject + " should be loaded into the action");
         }
     }
 
-    private void testConsumedLoaded(GameAction gameAction, String[] consumed) {
+    private void testConsumedLoaded(GameAction gameAction, Set<String> consumed) {
         for (String c : consumed) {
-            assertTrue(gameAction.isConsumedEntityName(c));
+            assertTrue(gameAction.isConsumedEntityName(c), c + " should be loaded into the action");
         }
     }
 
-    private void testProducedLoaded(GameAction gameAction, String[] produced) {
+    private void testProducedLoaded(GameAction gameAction, Set<String> produced) {
         for (String p : produced) {
-            assertTrue(gameAction.isProducedEntityName(p));
+            assertTrue(gameAction.isProducedEntityName(p), p + " should be loaded into the action");
         }
     }
 
-    private void testNarrationLoaded(GameAction gameAction, String[] narration) {
-        assertEquals(1, narration.length);
-        assertEquals(narration[0], gameAction.getNarration());
+    private void testNarrationLoaded(GameAction gameAction, String narration) {
+        assertEquals(narration, gameAction.getNarration(), "Narration should be loaded into the action");
     }
 
 }

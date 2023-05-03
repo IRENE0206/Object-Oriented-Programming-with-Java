@@ -5,41 +5,45 @@ package edu.uob;
 // The entity should NOT automatically appear in a players inventory
 public class ProduceVisitor extends EntityVisitor {
 
-    public ProduceVisitor(Location triggeredLocation, GameState gameState) {
-        super(triggeredLocation, gameState);
+    public ProduceVisitor(Location triggeredLocation, Location storeroom) {
+        super(triggeredLocation, storeroom);
     }
 
     @Override
     public void actOnEntity(GameEntity gameEntity) {
-        if (gameEntity == null) {
-            return;
+        if (gameEntity != null) {
+            gameEntity.getActedUpon(this);
         }
-        gameEntity.getActedUpon(this);
     }
 
     @Override
     public void actOnEntity(Artefact artefact) {
-        removeFromCurrentLocationToTriggeredLocation(artefact);
+        if (artefact != null) {
+            artefact.addToLocation(this.getTriggeredLocation());
+        }
     }
 
     @Override
     public void actOnEntity(Furniture furniture) {
-        removeFromCurrentLocationToTriggeredLocation(furniture);
+        if (furniture != null) {
+            furniture.addToLocation(this.getTriggeredLocation());
+        }
     }
 
     @Override
     public void actOnEntity(Character character) {
-        removeFromCurrentLocationToTriggeredLocation(character);
+        if (character != null) {
+            character.addToLocation(this.getTriggeredLocation());
+        }
     }
 
     // For produced locations, a new (one-way) path is added from the current location to the "produced" location
     @Override
     public void actOnEntity(Location location) {
         Location triggeredLocation = this.getTriggeredLocation();
-        if (triggeredLocation == null) {
-            return;
+        if (triggeredLocation != null) {
+            triggeredLocation.addEntity(location);
         }
-        triggeredLocation.addEntity(location);
     }
 
     @Override
@@ -48,14 +52,4 @@ public class ProduceVisitor extends EntityVisitor {
             player.increaseHealth();
         }
     }
-
-    private void removeFromCurrentLocationToTriggeredLocation(GameEntity gameEntity) {
-        if (gameEntity == null) {
-            return;
-        }
-        gameEntity.removeFromCurrentLocation();
-        gameEntity.addToLocation(this.getTriggeredLocation());
-    }
-
-
 }

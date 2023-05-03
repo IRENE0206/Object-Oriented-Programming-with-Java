@@ -2,26 +2,25 @@ package edu.uob;
 
 public abstract class GameEntity
 {
-    // entity names cannot contain spaces
-    // entity names defined in the configuration files will be unique
-    //  there should only be a single instance of each entity within the game
+    /**
+     * entity names cannot contain spaces
+     * entity names will be unique
+     * there should only be a single instance of each entity within the game
+     */
     private final String name;
     private final String description;
     private Location currentLocation;
 
-    public GameEntity(String name, String description)
-    {
+    public GameEntity(String name, String description) {
         this.name = name;
         this.description = description;
     }
 
-    public String getName()
-    {
+    public String getName() {
         return this.name;
     }
 
-    public String getDescription()
-    {
+    public String getDescription() {
         return this.description;
     }
 
@@ -36,6 +35,8 @@ public abstract class GameEntity
     public abstract void removeFromCurrentLocation();
 
     public abstract void addToLocation(Location location);
+
+    public abstract void addToGameState(GameState gameState);
 
     public abstract void getActedUpon(EntityVisitor entityVisitor);
 }

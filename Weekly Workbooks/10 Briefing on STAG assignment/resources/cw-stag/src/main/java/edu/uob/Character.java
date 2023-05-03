@@ -11,15 +11,21 @@ public class Character extends GameEntity {
         Location currentLocation = this.getCurrentLocation();
         if (currentLocation != null) {
             currentLocation.removeEntity(this);
+            this.setCurrentLocation(null);
         }
     }
 
     @Override
     public void addToLocation(Location location) {
-        if (location == null) {
-            return;
+        this.removeFromCurrentLocation();
+        if (location != null) {
+            location.addEntity(this);
         }
-        location.addEntity(this);
+    }
+
+    @Override
+    public void addToGameState(GameState gameState) {
+        gameState.addEntity(this);
     }
 
     @Override
