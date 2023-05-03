@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.nio.file.Paths;
-import java.io.IOException;
 import java.time.Duration;
 
 class ExampleSTAGTests {
@@ -48,7 +47,6 @@ class ExampleSTAGTests {
       sendCommandToServer("simon: get potion");
       response = sendCommandToServer("simon: inv");
       response = response.toLowerCase();
-      System.out.println(response);
       assertTrue(response.contains("potion"), "Did not see the potion in the inventory after an attempt was made to get it");
       response = sendCommandToServer("simon: look");
       response = response.toLowerCase();

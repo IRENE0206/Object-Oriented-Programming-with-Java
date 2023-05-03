@@ -1,7 +1,14 @@
 package edu.uob;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
+/**
+ * Parse incoming commands.
+ */
 public class CommandParser {
     private final List<String> basicCommandKeywords;
     private final List<String> basicCommandKeywordsFound;
@@ -15,7 +22,6 @@ public class CommandParser {
     private final GameState gameState;
 
     public CommandParser(GameState gameState, String command) {
-        // All commands (including entity names, locations, built in commands and action triggers) are case-insensitive
         this.rawCommandInLowerCase = command.toLowerCase();
         this.gameState = gameState;
         this.basicCommandKeywordsFound = new ArrayList<>();
@@ -158,7 +164,6 @@ public class CommandParser {
     private String chooseAction() {
         Set<GameAction> allValidActionsMatched = new HashSet<>();
         for (String triggerPhrase : this.triggerPhrasesFound) {
-            System.out.println(triggerPhrase);
             allValidActionsMatched.addAll(this.matchWithTriggerPhrase(triggerPhrase));
         }
         GameAction singlePerformableAction = this.getSinglePerformableAction(allValidActionsMatched);
@@ -178,11 +183,8 @@ public class CommandParser {
     private Set<GameAction> matchWithTriggerPhrase(String triggerPhrase) {
         Set<GameAction> allValidActionsMatchedWithGivenTriggerPhrase = new HashSet<>();
         for (GameAction gameAction : this.gameState.getPossibleActions(triggerPhrase)) {
-            System.out.println(this.gameState.getPossibleActions(triggerPhrase).size());
             if (this.matchWithAction(gameAction)) {
-                System.out.println("Match ! YES");
                 allValidActionsMatchedWithGivenTriggerPhrase.add(gameAction);
-                // System.out.println(allValidActionsMatchedWithGivenTriggerPhrase.size());
             }
         }
         return allValidActionsMatchedWithGivenTriggerPhrase;
@@ -250,7 +252,7 @@ public class CommandParser {
 
     private String dropArtefactCommand(String gameEntityName) {
         if (this.currentPlayer.doesNotHaveArtefact(gameEntityName)) {
-            return "There is no " + gameEntityName + " in " + this.currentPlayerName +"'s inventory";
+            return "There is no " + gameEntityName + " in " + this.currentPlayerName + "'s inventory";
         }
         this.currentPlayer.dropArtefact(gameEntityName);
         return this.currentPlayerName + "puts down " + gameEntityName

@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 public final class GameServer {
 
     private static final char END_OF_TRANSMISSION = 4;
-    GameState gameState;
+    private final GameState gameState;
 
     public static void main(String[] args) throws IOException {
         File entitiesFile = Paths.get("config" + File.separator + "basic-entities.dot").toAbsolutePath().toFile();
@@ -38,14 +38,14 @@ public final class GameServer {
         EntitiesLoader entitiesLoader = new EntitiesLoader(gameState, entitiesFile);
         try {
             entitiesLoader.loadEntities();
-        } catch (FileNotFoundException | ParseException e) {
-            throw new RuntimeException(e);
+        } catch (ParseException | IOException e) {
+            System.out.println("Failed to load " + entitiesFile);
         }
         ActionsLoader actionsLoader = new ActionsLoader(gameState, actionsFile);
         try {
             actionsLoader.loadActions();
         } catch (ParserConfigurationException | IOException | SAXException e) {
-            throw new RuntimeException(e);
+            System.out.println("Failed to load " + actionsFile);
         }
     }
 
@@ -96,8 +96,8 @@ public final class GameServer {
     */
     private void blockingHandleConnection(ServerSocket serverSocket) throws IOException {
         try (Socket s = serverSocket.accept();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()))) {
+             BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
+             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()))) {
             System.out.println("Connection established");
             String incomingCommand = reader.readLine();
             if (incomingCommand != null) {

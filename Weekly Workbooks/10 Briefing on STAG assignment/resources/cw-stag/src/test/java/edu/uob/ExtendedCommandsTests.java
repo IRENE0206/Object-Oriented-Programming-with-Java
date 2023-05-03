@@ -83,7 +83,8 @@ public class ExtendedCommandsTests {
         command = playerName + "unlock trapdoor with " + key;
         response = this.sendCommandToServer(command);
         testPerformAction(0, playerName);
-        assertTrue(response.contains(getActionNarration(0)), "action narration should be presented");
+        String narrationError = "action narration should be presented";
+        assertTrue(response.contains(getActionNarration(0)), narrationError);
 
         String cellar = "cellar";
         command = playerName + goTo + cellar;
@@ -99,7 +100,7 @@ public class ExtendedCommandsTests {
         command = playerName + "attack " + elf;
         response = this.sendCommandToServer(command);
         testPerformAction(3, playerName);
-        assertTrue(response.contains(getActionNarration(3)), "action narration should be presented");
+        assertTrue(response.contains(getActionNarration(3)), narrationError);
         String health = "health";
         command = playerName + get + health;
         response = this.sendCommandToServer(command);
@@ -110,7 +111,7 @@ public class ExtendedCommandsTests {
         command = playerName + " pay " + coin;
         response = this.sendCommandToServer(command);
         testPerformAction(4, playerName);
-        assertTrue(response.contains(getActionNarration(4)), "action narration should be presented");
+        assertTrue(response.contains(getActionNarration(4)), narrationError);
         String shovel = "shovel";
         command = playerName + get + shovel + " and " + coin;
         this.sendCommandToServer(command);
@@ -128,7 +129,7 @@ public class ExtendedCommandsTests {
         command = playerName + "drink " + potion;
         response = this.sendCommandToServer(command);
         testPerformAction(2, playerName);
-        assertTrue(response.contains(getActionNarration(2)), "action narration should be presented");
+        assertTrue(response.contains(getActionNarration(2)), narrationError);
         command = playerName + health;
         response = this.sendCommandToServer(command);
         assertEquals("3", response, playerName + "'s health should be increased by 1");
@@ -146,9 +147,8 @@ public class ExtendedCommandsTests {
         assertTrue(response.contains(getDescriptionOfEntity(elf)), elf + " should still be in cellar");
         command = playerName + "kill " + elf;
         response = this.sendCommandToServer(command);
-        // System.out.println(response);
         testPerformAction(9, playerName);
-        assertTrue(response.contains(getActionNarration(9)), "action narration should be presented");
+        assertTrue(response.contains(getActionNarration(9)), narrationError);
         command = playerName + look;
         response = this.sendCommandToServer(command);
         assertFalse(response.contains(getDescriptionOfEntity(elf)), elf + " should have been removed from " + cellar);
@@ -175,7 +175,7 @@ public class ExtendedCommandsTests {
         command = playerName + "shut down " + trapdoor;
         response = this.sendCommandToServer(command);
         testPerformAction(8, playerName);
-        assertTrue(response.contains(getActionNarration(8)), "action narration should be presented");
+        assertTrue(response.contains(getActionNarration(8)), narrationError);
         command = playerName + look;
         response = this.sendCommandToServer(command);
         assertTrue(response.contains(getDescriptionOfEntity(trapdoor)), trapdoor + " should not be consumed");
@@ -186,7 +186,7 @@ public class ExtendedCommandsTests {
         command = playerName + "use the " + axe + " to chop the tree";
         response = this.sendCommandToServer(command);
         testPerformAction(1, playerName);
-        assertTrue(response.contains(getActionNarration(1)), "action narration should be presented");
+        assertTrue(response.contains(getActionNarration(1)), narrationError);
         String log = "log";
         command = playerName + get + log;
         this.sendCommandToServer(command);
@@ -213,7 +213,7 @@ public class ExtendedCommandsTests {
         command = playerName + blow + horn;
         response = this.sendCommandToServer(command);
         testPerformAction(7, playerName);
-        assertTrue(response.contains(getActionNarration(7)), "action narration should be presented");
+        assertTrue(response.contains(getActionNarration(7)), narrationError);
         command = playerName + look;
         response = this.sendCommandToServer(command);
         assertTrue(response.contains(getDescriptionOfEntity(lumberjack)), lumberjack + " should be produced");
@@ -222,7 +222,7 @@ public class ExtendedCommandsTests {
         command = playerName + "bridge " + log;
         response = this.sendCommandToServer(command);
         testPerformAction(5, playerName);
-        assertTrue(response.contains(getActionNarration(5)), "action narration should be presented");
+        assertTrue(response.contains(getActionNarration(5)), narrationError);
 
         command = playerName + goTo + clearing;
         this.sendCommandToServer(command);
@@ -233,14 +233,14 @@ public class ExtendedCommandsTests {
         command = playerName + "dig with " + shovel;
         response = this.sendCommandToServer(command);
         testPerformAction(6, playerName);
-        assertTrue(response.contains(getActionNarration(6)), "action narration should be presented");
+        assertTrue(response.contains(getActionNarration(6)), narrationError);
         command = playerName + "bury " + lumberjack + " in the " + hole;
         response = this.sendCommandToServer(command);
         assertFalse(response.contains(getActionNarration(10)), lumberjack + " isn't here so cannot be buried");
         command = playerName + blow + horn;
         response = this.sendCommandToServer(command);
         testPerformAction(7, playerName);
-        assertTrue(response.contains(getActionNarration(7)), "action narration should be presented");
+        assertTrue(response.contains(getActionNarration(7)), narrationError);
         command = playerName + "kill";
         response = this.sendCommandToServer(command);
         assertFalse(response.contains(getActionNarration(10)), "cannot kill without a subject specified");
@@ -250,7 +250,7 @@ public class ExtendedCommandsTests {
         command = playerName + "kill " + lumberjack + " with the " + shovel + " and bury him in the " + hole;
         response = this.sendCommandToServer(command);
         testPerformAction(10, playerName);
-        assertTrue(response.contains(getActionNarration(10)), "action narration should be presented");
+        assertTrue(response.contains(getActionNarration(10)), narrationError);
         command = playerName + look;
         response = this.sendCommandToServer(command);
         assertFalse(response.contains(getDescriptionOfEntity(hole)), hole + " should have been consumed");
@@ -267,7 +267,6 @@ public class ExtendedCommandsTests {
                 continue;
             }
             String description = getDescriptionOfEntity(consumed);
-            // System.out.println(response0);
             assertFalse(response0.contains(description), consumed + " should have been consumed");
             assertFalse(response1.contains(description), consumed + " should have been consumed");
             if (isLocationName(consumed)) {

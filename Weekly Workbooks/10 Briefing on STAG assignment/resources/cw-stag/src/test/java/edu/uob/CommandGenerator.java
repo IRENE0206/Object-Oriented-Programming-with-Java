@@ -4,18 +4,20 @@ import java.util.*;
 import static edu.uob.ExtendedActionsHelper.*;
 import static edu.uob.ExtendedEntitiesHelper.*;
 
-public class CommandGenerator {
+public final class CommandGenerator {
 
     private static String validCharactersForPlayerName;
     private static final String[] builtinCommands = {"inventory", "inv", "get", "drop", "goto", "look", "health"};
 
     private static Set<String> reservedWords;
     private static Set<String> decorateWords;
+    private static final Random random;
 
     static {
         setValidCharactersForPlayerName();
         setReservedWords();
         setDecorateWords();
+        random = new Random();
     }
 
     private static void setValidCharactersForPlayerName() {
@@ -31,7 +33,6 @@ public class CommandGenerator {
     }
 
     public static String generateRandomPlayerName(String name) {
-        Random random = new Random();
         int randomNameLength = random.nextInt(1, 11);
         StringBuilder stringBuilder = new StringBuilder(name);
         for (int i = 0; i < randomNameLength; i++) {
@@ -55,7 +56,6 @@ public class CommandGenerator {
     private static String randomizeString(List<String> stringToRandomize) {
         String charsToInsert = " `~!@#$%^&*()-_+={}[]|\":;'<,>.?/\\";
         StringBuilder stringBuilder = new StringBuilder();
-        Random random = new Random();
         for (String part : stringToRandomize) {
             stringBuilder.append(" ");
             stringBuilder.append(charsToInsert.charAt(random.nextInt(charsToInsert.length())));
@@ -82,7 +82,6 @@ public class CommandGenerator {
 
     // Decorated Commands
     private static void insertDecorateWord(List<String> words) {
-        Random random = new Random();
         int randomNum = random.nextInt(5);
         for (int i = 0; i < randomNum; i++) {
             int decorateWordIndex = random.nextInt(decorateWords.size());
@@ -93,7 +92,6 @@ public class CommandGenerator {
     }
 
     private static void insertReservedWord(List<String> words) {
-        Random random = new Random();
         int randomNum = random.nextInt(1, 5);
         for (int i = 0; i < randomNum; i++) {
             int reservedWordIndex = random.nextInt(reservedWords.size());
@@ -128,7 +126,6 @@ public class CommandGenerator {
     public static String generateValidActionCommand(String playerName, int actionIndex) {
         Set<String> triggers = getActionTriggers(actionIndex);
         Set<String> subjects = getActionSubjects(actionIndex);
-        Random random = new Random();
         List<String> selected = new ArrayList<>();
         int triggerCount = 0;
         int subjectCount = 0;
@@ -170,7 +167,6 @@ public class CommandGenerator {
     }
 
     private static String chooseInventoryOrInvRandomly() {
-        Random random = new Random();
         if (random.nextBoolean()) {
             return builtinCommands[0];
         }

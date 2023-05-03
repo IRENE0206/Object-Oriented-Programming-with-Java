@@ -1,7 +1,6 @@
 package edu.uob;
 
-public abstract class GameEntity
-{
+public abstract class GameEntity {
     /**
      * entity names cannot contain spaces
      * entity names will be unique

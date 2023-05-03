@@ -2,11 +2,12 @@ package edu.uob;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 // represents the user in the game
 public class Player extends GameEntity {
-    private final HashMap<String, Artefact> artefacts;
+    private final Map<String, Artefact> artefacts;
     private int health;
 
     public Player(String name, String description) {

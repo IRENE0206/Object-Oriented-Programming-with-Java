@@ -8,7 +8,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,7 +44,7 @@ public class LoadActionsTests {
             }
             if (i == actionCount - 1) {
                 assertTrue(triggers.size() > 1 && triggers.remove("kill"), "The last action added has 'kill' as one of its two triggers");
-                HashSet<GameAction> possibleActions = this.extendedGameState.getPossibleActions("kill");
+                Set<GameAction> possibleActions = this.extendedGameState.getPossibleActions("kill");
                 assertEquals(2, possibleActions.size(), "There should be two actions defined with 'kill' as one of their triggers");
             }
             GameAction action = this.testTriggersLoadedAndGetAction(triggers);
@@ -65,7 +64,7 @@ public class LoadActionsTests {
         assertTrue(triggers.size() >= 1, "Triggers cannot be empty");
         GameAction firstActionMatchedWithFirstTrigger = null;
         for (String trigger : triggers) {
-            HashSet<GameAction> possibleActions = this.extendedGameState.getPossibleActions(trigger);
+            Set<GameAction> possibleActions = this.extendedGameState.getPossibleActions(trigger);
             assertNotNull(possibleActions, "Each trigger should match with at least one action");
             assertEquals(1, possibleActions.size(), "Apart from the last two actions added, each trigger matches with one action");
             GameAction actionMatched = (GameAction) possibleActions.toArray()[0];

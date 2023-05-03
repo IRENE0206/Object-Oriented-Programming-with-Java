@@ -1,18 +1,19 @@
 package edu.uob;
 
 import java.util.HashMap;
+import java.util.Map;
 
 // Rooms or places within the game
 public class Location extends GameEntity {
     // Artefacts that are currently present in a location
-    private final HashMap<String, Artefact> artefacts;
+    private final Map<String, Artefact> artefacts;
     // Furniture that belongs within a location
-    private final HashMap<String, Furniture> furniture;
+    private final Map<String, Furniture> furniture;
     // Characters that are currently at a location
-    private final HashMap<String, Character> characters;
+    private final Map<String, Character> characters;
     // Paths to other locations
-    private final HashMap<String, Location> locations;
-    private final HashMap<String, Player> players;
+    private final Map<String, Location> locations;
+    private final Map<String, Player> players;
 
     public Location(String name, String description) {
         super(name, description);
@@ -141,18 +142,18 @@ public class Location extends GameEntity {
         information.append(this.getName()).append(": ").append(this.getDescription()).append("\n");
         information.append(" * artefacts * \n");
         for (String artefactName : this.artefacts.keySet()) {
-            information.append(artefactName).append(": ")
-                    .append(this.getArtefactByName(artefactName).getDescription()).append("\n");
+            information.append(artefactName).append(": ").
+                    append(this.getArtefactByName(artefactName).getDescription()).append("\n");
         }
         information.append(" * furniture * \n");
         for (String furnitureName : this.furniture.keySet()) {
-            information.append(furnitureName).append(": ")
-                    .append(this.getFurnitureByName(furnitureName).getDescription()).append("\n");
+            information.append(furnitureName).append(": ").
+                    append(this.getFurnitureByName(furnitureName).getDescription()).append("\n");
         }
         information.append(" * characters * \n");
         for (String characterName : this.characters.keySet()) {
-            information.append(characterName).append(": ")
-                    .append(this.getCharacterByName(characterName).getDescription()).append("\n");
+            information.append(characterName).append(": ").
+                    append(this.getCharacterByName(characterName).getDescription()).append("\n");
         }
         // lists paths to other locations
         information.append(" * paths to * \n");

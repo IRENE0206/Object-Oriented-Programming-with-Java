@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Set;
 
@@ -27,17 +28,20 @@ public class LoadEntitiesTests {
             fail("FileNotFoundException was thrown when attempting to read " + fileName);
         } catch (ParseException parseException) {
             fail("ParseException was thrown when attempting to read " + fileName);
+        } catch (IOException ioException) {
+            fail("IOException was thrown when attempting to read " + fileName);
         }
     }
 
     @Test
     void testLoadExtendedEntitiesFile() {
         Location storeroom = this.extendedGameState.getStoreroom();
+        String shouldNotBeNull = " should not be null";
         assertNotNull(storeroom);
         Set<String> allLocationNames = getLocationNames();
         for (String locationName : allLocationNames) {
             Location location = this.extendedGameState.getLocationByName(locationName);
-            assertNotNull(location, location + " should not be null");
+            assertNotNull(location, location + shouldNotBeNull);
             assertEquals(location, this.extendedGameState.getEntityByName(locationName), "Should be the same location " + location);
             if (locationName.equals("storeroom")) {
                 assertEquals(location, storeroom, location + "should be storeroom");
@@ -60,19 +64,20 @@ public class LoadEntitiesTests {
         for (int i = 0; i < informationType.length; i++) {
             Set<String> entityNames = getEntityNamesInLocation(locationName, informationType[i]);
             for (String entityName : entityNames) {
+                String shouldNotBeNull = " should not be null";
                 GameEntity entity = this.extendedGameState.getEntityByName(entityName);
                 assertEquals(location, entity.getCurrentLocation(), "Should be the same location as " + location);
                 if (i == 0) {
                     Artefact artefact = location.getArtefactByName(entityName);
-                    assertNotNull(artefact, artefact + " should not be null");
+                    assertNotNull(artefact, artefact + shouldNotBeNull);
                     assertEquals(entity, artefact, entity + " should be the same as " + artefact);
                 } else if (i == 1) {
                     Furniture furniture = location.getFurnitureByName(entityName);
-                    assertNotNull(furniture, furniture + " should not be null");
+                    assertNotNull(furniture, furniture + shouldNotBeNull);
                     assertEquals(entity, furniture, furniture + " should be the same as " + entity);
                 } else {
                     Character character = location.getCharacterByName(entityName);
-                    assertNotNull(character, character + " should not be null");
+                    assertNotNull(character, character + shouldNotBeNull);
                     assertEquals(entity, character, character + " should be the same as " + entity);
                 }
             }

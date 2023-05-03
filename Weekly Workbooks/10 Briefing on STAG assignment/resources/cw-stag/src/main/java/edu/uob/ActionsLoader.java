@@ -11,7 +11,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 
-public class ActionsLoader {
+public final class ActionsLoader {
     private final GameState gameState;
     private final File actionsFile;
 
@@ -19,6 +19,7 @@ public class ActionsLoader {
         this.gameState = gameState;
         this.actionsFile = actionsFile;
     }
+
     // the tags (e.g. <subjects> ) will always all be lower case
     // entity names and action triggers are case-insensitive (so could be UPPER lower or MiXeD)
     public void loadActions() throws ParserConfigurationException, IOException, SAXException {
@@ -52,7 +53,7 @@ public class ActionsLoader {
                 gameAction.addProducedEntityName(stringToAdd);
             } else if (attributeName.equalsIgnoreCase("triggers")) {
                 gameAction.addTriggerPhrases(stringToAdd);
-                this.gameState.addAction(stringToAdd, gameAction);
+                this.gameState.addAction(stringToAdd.toLowerCase(), gameAction);
             }
         }
     }

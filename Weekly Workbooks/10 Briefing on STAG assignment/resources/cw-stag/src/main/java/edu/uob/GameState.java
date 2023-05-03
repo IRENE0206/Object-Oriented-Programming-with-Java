@@ -2,6 +2,7 @@ package edu.uob;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class GameState {
@@ -9,17 +10,17 @@ public class GameState {
     private Location startLocation;
     // a container for all entities that have no initial location in the game
     private Location storeroom;
-    private final HashMap<String, Location> locations;
+    private final Map<String, Location> locations;
 
     // action trigger keyPhrases are NOT unique
     // trigger phrases cannot (and will not) contain the names of entities
-    private final HashMap<String, HashSet<GameAction>> actions;
-    private final HashMap<String, Player> players;
+    private final Map<String, Set<GameAction>> actions;
+    private final Map<String, Player> players;
 
     private Player currentPlayer;
     // entity names defined in the configuration files will be unique
     // there should only be a single instance of each entity within the game
-    private final HashMap<String, GameEntity> entities;
+    private final Map<String, GameEntity> entities;
 
     public GameState() {
         this.players = new HashMap<>();
@@ -84,17 +85,16 @@ public class GameState {
     }
 
     public void addAction(String triggerPhrase, GameAction gameAction) {
-        triggerPhrase = triggerPhrase.toLowerCase();
         if (this.actions.get(triggerPhrase) != null) {
             this.actions.get(triggerPhrase).add(gameAction);
         } else {
-            HashSet<GameAction> gameActions = new HashSet<>();
+            Set<GameAction> gameActions = new HashSet<>();
             gameActions.add(gameAction);
             this.actions.put(triggerPhrase, gameActions);
         }
     }
 
-    public HashSet<GameAction> getPossibleActions(String triggerPhrase) {
+    public Set<GameAction> getPossibleActions(String triggerPhrase) {
         return this.actions.get(triggerPhrase.toLowerCase());
     }
 

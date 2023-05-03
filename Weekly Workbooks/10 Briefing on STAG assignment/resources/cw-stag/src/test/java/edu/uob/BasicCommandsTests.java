@@ -94,23 +94,22 @@ public class BasicCommandsTests {
     private void testGetAndDrop(String playerName, Set<String> entityNames, boolean isArtefact, boolean isLocation) {
         for (String entityName : entityNames) {
             String command = validGetCommand(playerName, entityName);
-            // System.out.println(command);
             this.sendCommandToServer(command);
             String lookResponse = this.sendCommandToServer(validLookCommand(playerName));
             String invResponse = this.sendCommandToServer(validInvCommand(playerName));
             String description = getDescriptionOfEntity(entityName);
+            String cannotBePicked = " cannot be picked";
             if (isArtefact) {
                 testInvalidDropCommand(playerName, entityName);
                 assertFalse(lookResponse.contains(description), entityName + " should be picked by " + playerName);
                 assertTrue(invResponse.contains(description), entityName + " should be picked by " + playerName);
                 testInvalidInvCommand(playerName, entityName);
             } else if (isLocation) {
-                assertFalse(invResponse.contains(description), entityName + " cannot be picked");
-                assertTrue(lookResponse.toLowerCase().contains(entityName), entityName + " cannot be picked");
+                assertFalse(invResponse.contains(description), entityName + cannotBePicked);
+                assertTrue(lookResponse.toLowerCase().contains(entityName), entityName + cannotBePicked);
             } else {
-                assertFalse(invResponse.contains(description), entityName + " cannot be picked");
-                // System.out.println(lookResponse);
-                assertTrue(lookResponse.contains(description), entityName + " cannot be picked");
+                assertFalse(invResponse.contains(description), entityName + cannotBePicked);
+                assertTrue(lookResponse.contains(description), entityName + cannotBePicked);
             }
             this.sendCommandToServer(validDropCommand(playerName, entityName));
             lookResponse = this.sendCommandToServer(validLookCommand(playerName));
@@ -128,9 +127,7 @@ public class BasicCommandsTests {
 
     private void testInvalidInvCommand(String playerName, String entityName) {
         String command = invalidInvCommand(playerName);
-        // System.out.println(command);
         String response = sendCommandToServer(command);
-        // System.out.println("InvalidInvCommand" + response);
         assertFalse(response.contains(getDescriptionOfEntity(entityName)), "invalid 'inv' command");
         command = playerName + ": " + entityName + " inv";
         response = sendCommandToServer(command);
@@ -143,19 +140,15 @@ public class BasicCommandsTests {
 
     private void testInvalidLookCommand(String playerName, String locationName) {
         String command = invalidLookCommand(playerName);
-        // System.out.println(command);
         String response = sendCommandToServer(command);
-        // System.out.println("InvalidLookCommand" + response);
         assertFalse(response.contains(getDescriptionOfEntity(locationName)), "invalid look command");
     }
 
     private void testInvalidGetCommand(String playerName, String entityName) {
         String command = invalidGetCommand(playerName, entityName);
         sendCommandToServer(command);
-        // System.out.println(command);
         command = validInvCommand(playerName);
         String response = sendCommandToServer(command);
-        // System.out.println("InvalidGetCommand" + response);
         assertFalse(response.contains(getDescriptionOfEntity(entityName)), "invalid get command");
         command = playerName + ": " + entityName + " get";
         sendCommandToServer(command);
@@ -167,9 +160,7 @@ public class BasicCommandsTests {
 
     private void testInvalidGotoCommand(String playerName, String locationName) {
         String command = invalidGotoCommand(playerName, locationName);
-        // System.out.println(command);
         String response = sendCommandToServer(command);
-        // System.out.println("InvalidGotoCommand" + response);
         assertFalse(response.contains(getDescriptionOfEntity(locationName)), "invalid goto command");
         command = playerName + ": " + locationName + " goto";
         response = sendCommandToServer(command);
@@ -178,11 +169,9 @@ public class BasicCommandsTests {
 
     private void testInvalidDropCommand(String playerName, String entityName) {
         String command = invalidDropCommand(playerName, entityName);
-        // System.out.println(command);
         sendCommandToServer(command);
         command = validLookCommand(playerName);
         String response = sendCommandToServer(command);
-        // System.out.println("InvalidDropCommand" + response);
         assertFalse(response.contains(getDescriptionOfEntity(entityName)), "invalid drop command");
         command = playerName + ": " + entityName + " drop";
         sendCommandToServer(command);

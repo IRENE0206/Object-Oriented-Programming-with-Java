@@ -6,7 +6,7 @@ import java.util.Set;
 
 public class GameAction {
     // One or more possible trigger phrases (*ANY* of which can be used to initiate the action)
-    private final HashSet<String> triggerPhrases;
+    private final Set<String> triggerPhrases;
 
     /**
      * One or more* subject entities
@@ -14,21 +14,21 @@ public class GameAction {
      * in the inventory of the player invoking the action OR in the room/location where the action is being *performed*
      * subjects of an action can be locations, characters or furniture
      */
-    private final HashSet<String> subjectEntityNames;
+    private final Set<String> subjectEntityNames;
 
     /**
      * optional, all removed by the action
      * removed from its current location (which could be *any* location within the game)
      * moved into the storeroom location
      */
-    private final HashSet<String> consumedEntityNames;
+    private final Set<String> consumedEntityNames;
 
     /**
      * optional, all created by the action
      * moved from its current location (which might be in the storeroom)
      * to the location in which the action is triggered.
      */
-    private final HashSet<String> producedEntityNames;
+    private final Set<String> producedEntityNames;
 
     private String narration;
     private Location triggeredLocation;
@@ -152,7 +152,6 @@ public class GameAction {
                 subjectEntitiesCount += 1;
             } else {
                 // if a command includes an entity that is not a subject, then it is extraneous
-                System.out.println(entityName);
                 return false;
             }
         }
@@ -166,7 +165,6 @@ public class GameAction {
                 return false;
             }
         }
-        System.out.println("Yes");
         return true;
     }
 }

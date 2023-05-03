@@ -2,10 +2,10 @@ package edu.uob;
 
 import java.util.*;
 
-public class ExtendedEntitiesHelper {
-    private static final HashMap<String, HashMap<String, HashSet<String>>> locations;
-    private static final HashMap<String, String> descriptions;
-    private static final HashMap<String, HashSet<String>> paths;
+public final class ExtendedEntitiesHelper {
+    private static final Map<String, Map<String, HashSet<String>>> locations;
+    private static final Map<String, String> descriptions;
+    private static final Map<String, Set<String>> paths;
 
     static {
         locations = new HashMap<>();
@@ -85,7 +85,7 @@ public class ExtendedEntitiesHelper {
         return paths.get(locationName);
     }
 
-    public static HashSet<String> getEntityNamesInLocation(String locationName, String entityType) {
+    public static Set<String> getEntityNamesInLocation(String locationName, String entityType) {
         return locations.get(locationName).get(entityType);
     }
 

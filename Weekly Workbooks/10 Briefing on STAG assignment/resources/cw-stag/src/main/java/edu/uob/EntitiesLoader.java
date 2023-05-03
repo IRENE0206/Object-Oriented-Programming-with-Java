@@ -7,13 +7,13 @@ import com.alexmerz.graphviz.objects.Graph;
 import com.alexmerz.graphviz.objects.Node;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.ArrayList;
+import java.io.IOException;
+import java.util.List;
 
 // all entity files used during marking are in a valid format
 // entity names defined in the configuration files will be unique
-public class EntitiesLoader {
+public final class EntitiesLoader {
     private final GameState gameState;
     private final File entitiesFile;
 
@@ -22,13 +22,14 @@ public class EntitiesLoader {
         this.entitiesFile = entitiesFile;
     }
 
-    public void loadEntities() throws FileNotFoundException, ParseException {
+    public void loadEntities() throws IOException, ParseException {
         Parser parser = new Parser();
         FileReader reader = new FileReader(this.entitiesFile);
         parser.parse(reader);
+        reader.close();
         Graph wholeDocument = parser.getGraphs().get(0);
-        ArrayList<Graph> sections = wholeDocument.getSubgraphs();
-        ArrayList<Graph> locations = sections.get(0).getSubgraphs();
+        List<Graph> sections = wholeDocument.getSubgraphs();
+        List<Graph> locations = sections.get(0).getSubgraphs();
         // locations subgraph will always be first in the entities file
         for (int i = 0; i < locations.size(); i++) {
             Graph location = locations.get(i);
@@ -39,7 +40,7 @@ public class EntitiesLoader {
                 continue;
             }
             Location l = new Location(locationName, locationDescription);
-            ArrayList<Graph> locationSubGraphs = location.getSubgraphs();
+            List<Graph> locationSubGraphs = location.getSubgraphs();
             for (Graph locationSubGraph : locationSubGraphs) {
                 putSubjectsIntoLocation(locationSubGraph, l);
             }
@@ -55,11 +56,11 @@ public class EntitiesLoader {
             this.gameState.addEntity(l);
         }
         // paths subgraph will always appear after the locations
-        ArrayList<Edge> paths = sections.get(1).getEdges();
+        List<Edge> paths = sections.get(1).getEdges();
         addPaths(paths);
     }
 
-    private void addPaths(ArrayList<Edge> paths) {
+    private void addPaths(List<Edge> paths) {
         for (Edge path : paths) {
             Node fromNode = path.getSource().getNode();
             String fromName = getEntityName(fromNode);

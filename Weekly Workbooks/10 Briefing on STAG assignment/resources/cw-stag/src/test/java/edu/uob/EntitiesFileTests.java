@@ -1,6 +1,8 @@
 package edu.uob;
 
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -23,6 +25,7 @@ final class EntitiesFileTests {
           Parser parser = new Parser();
           FileReader reader = new FileReader("config" + File.separator + "extended-entities.dot");
           parser.parse(reader);
+          reader.close();
           Graph wholeDocument = parser.getGraphs().get(0);
           ArrayList<Graph> sections = wholeDocument.getSubgraphs();
 
@@ -48,6 +51,8 @@ final class EntitiesFileTests {
           fail("FileNotFoundException was thrown when attempting to read basic entities file");
       } catch (ParseException pe) {
           fail("ParseException was thrown when attempting to read basic entities file");
+      } catch (IOException e) {
+          fail("IOException was thrown when attempting to read basic entities file");
       }
   }
 
