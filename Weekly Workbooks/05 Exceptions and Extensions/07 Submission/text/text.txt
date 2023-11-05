@@ -1,0 +1,22 @@
+Remember that this assignment WILL be assessed and the mark will count towards your grade for this unit.
+In order to submit your code, go to "Assessment, submission and feedback" section on Blackboard page for this unit.
+It is **ESSENTIAL** that you make sure your code compiles and runs using the `mvnw` command before you submit it
+(otherwise we will not be able to run it to mark it !).
+
+Make sure that your code does not contain anything specific to your computer (e.g. absolute file paths, operating system specific code etc).
+Before submitting your code, we advise your to test your project on a computer _other than the one it was developed on_ (e.g. a lab machine).
+Clear out all temporary files and then ensure the code compiles and runs correctly using Maven. We will apply a penalty mark if we cannot run your code
+"out of the box" - we can't spend time fixing everyones projects before we mark them !
+
+It is VERY important that you do NOT change the name or parameters of any of the classes and methods that you have been given.
+Scripts will be used to automatically run your code to make sure it operates correctly -
+if you change them, we won't be able to mark your code !
+It is **ESSENTIAL** that you check your code still passes the original skeleton test script - if this does not pass these basic tests
+then it is likely your code not not pass any of the other test scripts.
+
+Remember to include your entire project structure when you submit your code, with all the files and folder
+(including both your `main` source folder as well as the `test` folder containing your test scripts)
+
+Note that you should not have made any permanent changes to the `OXOView`, `OXOGame` or `OXOPlayer` classes.
+These will get replaced during the marking process, so you shouldn't be relying on any code
+that you have added to them !

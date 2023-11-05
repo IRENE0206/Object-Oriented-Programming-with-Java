@@ -1,0 +1,8 @@
+The first program that you write in _most_ languages is "Hello World". Take a look at the slides and video above that describe "Hello World" in Java.
+Once you understand the description of the code, create a new project in IntelliJ and then add a new Java Class called `HelloWorld` to the `src` folder
+(by right-clicking on the `src` folder in the project view and selecting `New > Java Class`).
+Now add some code to your class by copy-and-pasting the code from the above slide into your new Java Class (make sure you save it !).
+Finally run the code you have added by clicking on the `Run` top-bar menu and selecting `Run...`.
+After you have selected your main class (there should only be one to choose from !), there will be a short delay as IntelliJ compiles and runs your code.
+If everything is successful you should see something like the screenshot below.
+Make sure your code compiles and runs correctly before moving on to the next task in this workbook.

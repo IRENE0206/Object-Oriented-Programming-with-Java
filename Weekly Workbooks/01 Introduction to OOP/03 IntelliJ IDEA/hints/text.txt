@@ -1,0 +1,1 @@
+Note: In the videos we illustrate the installation and project creation process with a particular version of Java. You may have different versions of Java installed on your computer - just pick the most recent version (version 17 is typical, but anything 11 or greater is fine !)

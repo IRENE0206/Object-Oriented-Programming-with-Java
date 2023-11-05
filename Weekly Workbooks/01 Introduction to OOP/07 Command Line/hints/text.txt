@@ -1,0 +1,7 @@
+If when attempting to compile your code, you get a warning about version 17 source code,
+you will probably need to update the `POM.xml` file in the project folder.
+Run `java -version` on the command line to find out which version of Java you have installed
+on your operating system. The template project was created assuming you have Java version 17
+installed on your computer, if your version number differs, update the `maven.compiler.source`
+and `maven.compiler.target` lines of the `POM.xml` file with your Java version number
+(then try compiling again !)

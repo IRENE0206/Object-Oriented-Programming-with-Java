@@ -1,0 +1,6 @@
+Rather than you having to create a new project each time we start a workbook or assignment,
+we will often provide you with an existing Maven template project (in order to help you get started).
+These templates will contain all of the rules and dependencies required to build a project. One of the main benefits is that these projects can be imported directly into Intellij (or any other IDE for that matter). This will save us a lot of time installing required libraries and setting up the build environment.
+
+For the next couple of workbooks, we will be using the <a href="IntelliJ Template/" target="_blank">shapes</a> template project.
+You should copy the entire `cw-shapes` directory into your work folder (wherever you want to keep your code for this unit). In order to open an existing project in IntelliJ, simply click on the `Open` button on the IntelliJ startup screen (shown below) and pick the `cw-shapes` folder using the file dialog. When you have opened the project once, IntelliJ will remember it and show it in the list of recent projects.

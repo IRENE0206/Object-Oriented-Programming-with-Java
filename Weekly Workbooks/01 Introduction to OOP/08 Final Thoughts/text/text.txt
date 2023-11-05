@@ -1,0 +1,5 @@
+This has been a relatively short and straight-forward workbook.
+The main was to get you settled in before we start digger deeper into Java and OOP.
+Make sure you finish all the practical activities in this workbook - you are going to
+need to be able to use all of the tools and techniques in order to actually build
+software in Java.
