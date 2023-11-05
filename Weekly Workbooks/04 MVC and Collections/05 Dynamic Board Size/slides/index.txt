@@ -1,2 +1,0 @@
-Generics-Encapsulation.pdf 3 4
-MVC-collections.pdf 11 14
